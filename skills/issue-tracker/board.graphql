@@ -1,0 +1,58 @@
+# Every item on the CLHbid Delivery board, with the fields the standard queries need.
+# One query, many filters: run it with `gh api graphql --paginate` and select with `--jq`.
+# See SKILL.md beside this file for the recipes.
+query ($endCursor: String) {
+  organization(login: "clhbid") {
+    projectV2(number: 4) {
+      items(first: 100, after: $endCursor) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          id
+          status: fieldValueByName(name: "Status") {
+            ... on ProjectV2ItemFieldSingleSelectValue {
+              name
+            }
+          }
+          cycle: fieldValueByName(name: "Cycle") {
+            ... on ProjectV2ItemFieldIterationValue {
+              title
+              startDate
+              duration
+            }
+          }
+          content {
+            ... on Issue {
+              number
+              title
+              url
+              state
+              repository {
+                name
+              }
+              assignees(first: 1) {
+                totalCount
+              }
+              subIssues(first: 1) {
+                totalCount
+              }
+              parent {
+                number
+              }
+              issueDependenciesSummary {
+                blockedBy
+              }
+              labels(first: 20) {
+                nodes {
+                  name
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
