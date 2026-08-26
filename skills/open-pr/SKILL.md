@@ -42,13 +42,23 @@ git diff --stat "origin/<defaultBranch>...HEAD"
 
 Parse the issue number from the branch name. Branch names follow the pattern `{issue_number}-{description}` (e.g., `54-return-to-after-login` -> issue #54).
 
+**A number alone does not identify an issue.** Issue numbers are per-repository, and the issue is
+not always in the repo you are opening the PR from — a change in one repo often implements an issue
+tracked in another. Resolve the repo before fetching, defaulting to the current one:
+
 ```bash
 # Get current branch name
 git branch --show-current
 
+# Default to this repo; override when the issue lives elsewhere
+ISSUE_REPO="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+
 # Fetch issue details
-gh issue view <issue_number> --json title,body,url
+gh issue view <issue_number> --repo "$ISSUE_REPO" --json title,body,url
 ```
+
+If the fetched issue doesn't match the work in the diff, you have resolved the wrong repo — ask
+rather than writing a PR body against someone else's issue.
 
 Extract the issue title and body for context.
 
@@ -128,6 +138,10 @@ Example: `54: Return to after login`
 Closes #<issue_number>
 ```
 
+**Qualify the reference when the issue is in another repo** — `Closes owner/repo#N`. Note that a
+cross-repo keyword links the two but does **not** close the issue on merge, so say so in the body
+and close it by hand.
+
 ## Step 5a: Create New PR
 
 Push the branch and open the PR ready for review:
@@ -136,8 +150,8 @@ Push the branch and open the PR ready for review:
 # Push branch to remote
 git push -u origin HEAD
 
-# Create the PR
-gh pr create --title "<issue_number>: <issue_title>" --body "$(cat <<'EOF'
+# Create the PR, against the base resolved in Step 1b
+gh pr create --base "<base>" --title "<issue_number>: <issue_title>" --body "$(cat <<'EOF'
 ## Description
 - <1-2 bullets: what/why>
 
@@ -147,6 +161,10 @@ gh pr create --title "<issue_number>: <issue_title>" --body "$(cat <<'EOF'
 ## How to Test
 1. <2-4 steps max>
 
+## Deployment Notes
+1. OPTIONAL: delete this section entirely if there are no special steps or risks
+2. Flag any tasks that must be done before or after merging
+
 ## Related Issues
 Closes #<issue_number>
 EOF
@@ -155,6 +173,10 @@ EOF
 # Ask a human to look at it
 gh pr edit --add-reviewer <maintainer>
 ```
+
+**`--base` is not optional.** Without it `gh` targets the repo's default branch, so a slice
+stacked on a previous one would show its parent's changes in the diff too — the opposite of the
+clean review Step 3b's stacking advice is trying to produce.
 
 ## Step 5b: Update Existing PR
 

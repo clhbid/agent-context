@@ -11,15 +11,19 @@ clhbid repo. Use the `gh` CLI for all operations.
 
 ## Conventions
 
-- **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
+- **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line
+  bodies. This does not apply an issue form — see
+  [Templates apply a category, never a state](#templates-apply-a-category-never-a-state) for what
+  you then owe.
 - **Read an issue**: `gh issue view <number> --comments` for human-readable output. To filter with
   `jq`, drop `--comments` and ask for the fields instead — `--jq` requires `--json` and errors out
   otherwise: `gh issue view <number> --json number,title,body,labels --jq '{number, title, labels: [.labels[].name]}'`
 - **List issues**: `gh issue list --state open --json number,title,body,labels --jq '[.[] | {number, title, labels: [.labels[].name]}]'`
 - **Comment on an issue**: `gh issue comment <number> --body "..."`
 - **Set state**: a project field, not a label — see [Status](#status).
-- **Close**: `gh issue close <number> --comment "..."`. Use `--reason not-planned` for work that
-  will never be done; that reason is the record, so there is no `wontfix` label.
+- **Close**: `gh issue close <number> --comment "..."`. Use `--reason "not planned"` for work that
+  will never be done; that reason is the record, so there is no `wontfix` label. The value is two
+  words — `not-planned` is rejected.
 
 Infer the repo from `git remote -v` — `gh` does this automatically when run inside a clone.
 
@@ -72,12 +76,19 @@ gh api graphql -f query='
 
 # the item id for an issue (an issue may sit on several projects — take project 4)
 gh api graphql -f query='
-  query($repo: String!, $num: Int!) {
-    repository(owner: "clhbid", name: $repo) { issue(number: $num) {
+  query($owner: String!, $repo: String!, $num: Int!) {
+    repository(owner: $owner, name: $repo) { issue(number: $num) {
       projectItems(first: 10) { nodes { id project { number } } } } } }' \
-  -f repo=clhbid.com -F num=<number> \
+  -f owner="$(gh repo view --json owner --jq .owner.login)" \
+  -f repo="$(gh repo view --json name --jq .name)" \
+  -F num=<number> \
   --jq '.data.repository.issue.projectItems.nodes[] | select(.project.number == 4) | .id'
 ```
+
+**Take the repo from the checkout, never a literal.** The board spans every clhbid repo and issue
+numbers are per-repo, so a pinned `repo=` resolves the wrong issue somewhere else — usually a
+`NOT_FOUND`, but a number that exists in both repos returns a real item id for the wrong issue, and
+`item-edit` accepts it.
 
 Then:
 
@@ -100,7 +111,7 @@ it.
 | `needs-info`              | Waiting on input | We asked a question and cannot proceed until it's answered                              |
 | `ready-for-agent`         | Ready for Agent  | Fully specified and sliced; An agent brief has been added, and an agent can complete it |
 | `ready-for-human`         | Ready for Human  | Needs a person                                                                          |
-| `wontfix`                 | —                | Close with `--reason not-planned`; the reason is the record                             |
+| `wontfix`                 | —                | Close with `--reason "not planned"`; the reason is the record                           |
 
 When a skill says "apply the AFK-ready triage label", set `Status` to the value in this table.
 
@@ -206,13 +217,19 @@ Any other label is decoration — read it if you like, but nothing keys off it.
 
 ## Templates apply a category, never a state
 
-Issue forms come from the org defaults in `clhbid/.github` under `.github/ISSUE_TEMPLATE/`. **Use
-them** — `gh issue create` without a template skips the fields the forms collect, and a triager
-then has to ask for what the form would have captured.
+Issue forms come from the org defaults in `clhbid/.github` under `.github/ISSUE_TEMPLATE/`. **A
+person filing an issue should use one** — they collect fields a triager otherwise has to ask for.
 
 A form applies exactly one **category** label (`bug` or `enhancement`) and **no state**. Category
 says what kind of thing an issue is; `Status` says where it has got to. They are independent, and
 nothing about the category implies a state.
+
+**`gh issue create` does not apply a form**, and it is the normal path here — an agent has no
+browser to fill one in. Creating directly is fine; it means you owe what the form would have done:
+
+- Apply exactly one category label, and no state.
+- Write the body the form would have collected, not a bare title and a sentence.
+- Confirm the auto-add put it on the board.
 
 A new issue is auto-added to the board and lands on `Backlog`, the triage inbox. That bucket is
 supposed to fill up; see **Triage empties `Backlog`** under [Status](#status) for what moves an
