@@ -50,7 +50,8 @@ debt.
 **Prefer `Ready for Agent`.** It applies only when both halves of its row hold — fully specified
 _and_ already sliced. When choices must be made before the work can be specified at all, that is
 `Waiting on input`: a question to answer, not work to schedule. Only set `Ready for Human` when no
-further work can be done without human assistance or judgement.
+further work can be done without human assistance or judgement. Refer to the `/afk-loop` skill
+for details on dispatching work to an agent.
 
 **Claiming is an assignee write.** `gh issue edit <n> --add-assignee @me` is the atomic first
 write that stops two agents taking the same issue; setting `Status` to `In progress` follows it.

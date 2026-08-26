@@ -62,17 +62,6 @@ The person dispatching is the last human to look before an agent spends a run, s
 that doesn't say what changes in behaviour, how you would know it's done, and what must _not_
 change.
 
-That last one does the most work. clhbid.com#2118 asked for the dead `register()` auth path to be
-deleted. A live route helper, also called `register`, powers the "Register To Bid" CTA — and the
-dead code navigated to it, so the two sat directly adjacent. The brief said so:
-
-> ⚠️ **Do NOT remove the `register` route helper.** [...] It is unrelated to the auth hook's
-> `register()` despite the shared name.
-
-The agent removed the dead path and left the CTA standing. Without that paragraph, removing both
-was the reasonable reading. When a brief doesn't warn about the thing next to the work that shares
-its name, send it back to `/triage` instead of dispatching it.
-
 To dispatch:
 
 1. Open the issue on GitHub — the 🤖 Frontier view lists what is dispatchable.
@@ -104,12 +93,6 @@ per-repo. Read the pull request against it, then act:
 A pull request in none of the three states — ready for review but empty, or draft with no
 explanation — is an agent defect rather than something to review. clhbid.com#2254 is the worked
 example: no changes, no acceptance criteria addressed, review requested anyway.
-
-**A closed issue still sitting on an unfinished status is a miss**, not a state a run can end in —
-the `Item closed` workflow should have moved it to `Done`. No view catches these: 📥 Triage only
-shows top-level `Backlog`, so a closed issue on `In progress`, `Waiting on input`, either Ready
-status, or any sub-issue stays invisible. Use the status/state mismatch recipe in the
-`issue-tracker` skill; clhbid.com#2286 should run it on a schedule.
 
 ## When a run goes wrong
 
