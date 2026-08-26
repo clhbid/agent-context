@@ -10,7 +10,7 @@ disable-model-invocation: true
 > `needs-info` / `ready-for-agent` label vocabulary. Both have been retired: cycles are now
 > iterations of the `Cycle` field and state is the `Status` field, both on the CLHbid Delivery
 > project. The `issue-tracker` skill is authoritative where the two disagree. Retargeting this one
-> is tracked separately — do not treat the milestone mechanics below as current.
+> is tracked in clhbid.com#2312 — do not treat the milestone mechanics below as current.
 
 The recurring business update _is_ the milestone — there is no separate report artefact.
 Three milestones are live at any time:
