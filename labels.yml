@@ -1,0 +1,33 @@
+# The label vocabulary shared across clhbid repos.
+#
+# Labels never carry state — state is the `Status` field on the CLHbid Delivery
+# project. See the `issue-tracker` skill. Only what carries meaning is listed:
+# a category, and the wayfinder ticket types.
+
+- name: bug
+  color: "d73a4a"
+  description: Something isn't working
+
+- name: enhancement
+  color: "A2EEEF"
+  description: New feature or request
+
+- name: wayfinder:map
+  color: "5319E7"
+  description: Index issue for a wayfinder plan too large for one session
+
+- name: wayfinder:research
+  color: "0052CC"
+  description: "AFK ticket: read docs/APIs/local resources to surface a fact a decision waits on"
+
+- name: wayfinder:prototype
+  color: "FEF2C0"
+  description: "HITL ticket: build a cheap concrete artifact to react to"
+
+- name: wayfinder:grilling
+  color: "B60205"
+  description: "HITL ticket: one-question-at-a-time interview to sharpen a decision"
+
+- name: wayfinder:task
+  color: "C2E0C6"
+  description: Manual work that must happen before a decision can be made

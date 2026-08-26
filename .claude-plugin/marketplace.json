@@ -1,0 +1,17 @@
+{
+  "name": "clhbid",
+  "owner": {
+    "name": "CLHbid",
+    "url": "https://github.com/clhbid"
+  },
+  "description": "Shared agent context for clhbid repos, as an installable Claude Code plugin.",
+  "plugins": [
+    {
+      "name": "agent-context",
+      "source": "./",
+      "description": "Tracker conventions, the AFK loop, the cycle ritual and the pull request template that every clhbid repo shares.",
+      "category": "engineering",
+      "keywords": ["clhbid", "issue-tracker", "github-projects", "afk-agents"]
+    }
+  ]
+}
