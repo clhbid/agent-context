@@ -29,12 +29,6 @@ npx skills list                    # what's installed, and from where
 "No project skills to update" and exits successfully, having changed nothing. `--yes` skips the
 scope prompt, which a container has no way to answer.
 
-It also works as a Claude Code plugin marketplace:
-
-```
-/plugin marketplace add clhbid/agent-context
-```
-
 ## What's in it
 
 | Skill | What it covers |
