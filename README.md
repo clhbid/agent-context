@@ -20,15 +20,14 @@ needs a token.
 Later:
 
 ```bash
-npx skills update          # pull the latest
-npx skills list            # what's installed, and from where
+npx skills update --global --yes   # pull the latest
+npx skills list                    # what's installed, and from where
 ```
 
-It also works as a Claude Code plugin marketplace:
-
-```
-/plugin marketplace add clhbid/agent-context
-```
+**`--global` is not optional on `update`.** The skills were installed with `--global`, and a bare
+`npx skills update` only considers *project* skills — from a directory with none it prints
+"No project skills to update" and exits successfully, having changed nothing. `--yes` skips the
+scope prompt, which a container has no way to answer.
 
 ## What's in it
 
@@ -63,8 +62,9 @@ flowing and we maintain only our own.
 
 ## Changing a skill
 
-Edit it here, open a pull request, and merge. Consumers pick it up on the next `npx skills update`
-or the next container build — there is no sync step and no CI check, because nothing is copied.
+Edit it here, open a pull request, and merge. Consumers pick it up on the next
+`npx skills update --global --yes` or the next container build — there is no sync step and no CI
+check, because nothing is copied.
 
 Skill bugs are filed as `enhancement` issues and flow through the same board as everything else.
 Edit skills with `/writing-for-agents`.
