@@ -138,9 +138,9 @@ Example: `54: Return to after login`
 Closes #<issue_number>
 ```
 
-**Qualify the reference when the issue is in another repo** — `Closes owner/repo#N`. Note that a
-cross-repo keyword links the two but does **not** close the issue on merge, so say so in the body
-and close it by hand.
+**Qualify the reference when the issue is in another repo** — `Closes owner/repo#N`. The qualified
+form does close the issue on merge, the same as a same-repo reference; a bare `#N` silently means
+this repo's issue N, which is a different issue or none at all.
 
 ## Step 5a: Create New PR
 
