@@ -164,10 +164,41 @@ gh api graphql --paginate -F query=@"$BOARD_QUERY" --jq '
 # Status/state mismatch — the Item closed workflow missing one. Healthy result is empty
 ... | select((.content.state == "CLOSED" and .status.name != "Done")
           or (.content.state == "OPEN"   and .status.name == "Done"))
+
+# Worked off-cycle — work that never got credited to the cycle it happened in
+... | select((.content.state == "CLOSED"
+              and .content.closedAt >= env.CYCLE_START and .content.closedAt < env.CYCLE_END
+              and (.cycle.title // "") != env.CYCLE_TITLE)
+          or (.content.state == "OPEN" and .status.name == "In progress" and .cycle == null))
+
+# Stale closed items — auto-archive missed these. Healthy result is empty
+... | select(.content.state == "CLOSED" and .isArchived == false
+             and (.content.closedAt | fromdateiso8601) < (now - 1814400))
+
+# Stale issues — actionable work untouched for three weeks
+... | select(.content.state == "OPEN"
+             and (.status.name | IN("Backlog", "Ready for Agent", "Ready for Human"))
+             and (.content.updatedAt | fromdateiso8601) < (now - 1814400))
+
+# ...of which newly stale — add this clause to keep the ones not yet stale when the cycle began
+             and (.content.updatedAt | fromdateiso8601)
+                 >= ((env.CYCLE_START | strptime("%Y-%m-%d") | mktime) - 1814400)
 ```
 
 `...` stands in for the full command above. `--paginate` applies `--jq` per page, so filtering and
 listing work as written; counting needs a pipe (`| wc -l`).
+
+**Three weeks is 1814400 seconds**, and it is the definition of _stale_ — an item is stale on the
+board, not in someone's judgement. The cycle recipes read `CYCLE_TITLE`, `CYCLE_START` and
+`CYCLE_END` from the environment; set them from the iteration's `title`, `startDate` and
+`startDate + duration`. `CYCLE_END` is **exclusive** — an iteration ends the day before the meeting
+that closes it, so a cycle titled `14 Aug → 28 Aug` has `CYCLE_START=2026-08-14` and
+`CYCLE_END=2026-08-28`.
+
+**Newly stale is derived, never stored.** It compares one `updatedAt` against two thresholds: stale
+against today, and not-yet-stale against `CYCLE_START`. There is no baseline to snapshot at the end
+of a cycle. Anchoring it to `CYCLE_END` instead would ask which items went stale between today and
+today, and return nothing.
 
 **These recipes are canonical**, and no API returns a view's contents — so a view can never be
 queried directly, only mirrored. `yarn board:sync` will assert each view's filter against this
