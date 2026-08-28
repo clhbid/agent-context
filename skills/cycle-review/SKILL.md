@@ -63,12 +63,17 @@ and take a go-ahead, like every other mutation.
    **This stays out of the notes** — the auto-archive workflow missing a few items is not a decision
    the meeting makes.
 2. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
-   closing cycle's window. Set `Cycle` immediately on everything it returns: **closed** work is
-   credited to the cycle it was completed in, **`In progress`** work with no cycle is credited to
-   the cycle now opening. This is bookkeeping, not triage — no meeting decision, no `Decision:`
-   line. The backfilled work then shows up in the draft like any other mid-cycle addition:
-   completed items as extra `➕ Added mid-cycle, done` rows in **Last Cycle**, in-progress items as
-   entries already in **Committed This Cycle**.
+   closing cycle's window and set `Cycle` immediately on everything it returns. This is
+   bookkeeping, not triage — no meeting decision, no `Decision:` line — and the backfilled work
+   then shows up in the draft like any other mid-cycle addition:
+   - **Closed** work is credited to the cycle it was completed in, and appears as an extra
+     `➕ Added mid-cycle, done` row in **Last Cycle**.
+   - **`In progress`** work with no cycle was already being worked before this meeting opened
+     anything, so it was picked up **during the closing cycle** without ever being committed to it.
+     Credit it to the cycle now opening — unfinished work belongs to the cycle that will finish it
+     — and record it in **both** places: an `➕ Added mid-cycle, not done` row in **Last Cycle**,
+     whose reason says it carries into the current cycle, and an entry already in **Committed This
+     Cycle**. A row in one place only reads as work that appeared from nowhere.
 3. **Read the board.** Project items, the `Cycle` configuration, and the prior Status Updates.
 4. **Draft Last Cycle.** Restate the closing cycle's goal, then table every issue that was
    committed to it, with `Result` and `Reason` columns **left blank for the meeting to fill in**.
@@ -123,8 +128,8 @@ syntax**. The round trip reliably mangles them: `#` comes back escaped as `\#`, 
 into bold paragraphs, bare domains arrive auto-linked. Read the sections and the decisions through
 the damage rather than failing on it.
 
-1. **Last Cycle** — its table and decision become the **closing** Status Update's content, the
-   backfilled `➕ Added mid-cycle, done` rows included. Their `Cycle` was written in branch A;
+1. **Last Cycle** — its table and decision become the **closing** Status Update's content, both
+   kinds of backfilled `➕ Added mid-cycle` row included. Their `Cycle` was written in branch A;
    there is nothing left to write here.
 2. **Sweep, then post.** Before the closing Status Update goes out, **no open item may still carry
    the closing cycle** (`cycle:@previous is:open` on the board). Reassign every straggler with
@@ -211,6 +216,7 @@ cover the range of states the skill needs to handle — not real work, not real 
 | repo3#55 Internal tooling cleanup | ❌ Slipped → current cycle | Overcommitted — Initiative A ran two days over                      |
 | repo2#215 Small fix               | ➕ Added mid-cycle, done   | Flagged as urgent partway through the cycle; nothing else displaced |
 | repo3#61 Small fix                | ➕ Added mid-cycle, done   | Closed 22 Aug, no `Cycle` set — credited automatically while preparing this cycle's notes |
+| repo2#230 Feature work in flight  | ➕ Added mid-cycle, not done | Picked up mid-cycle with no `Cycle` set — credited automatically while preparing this cycle's notes; carries into the current cycle |
 
 **Decision:** repo2#210 and repo3#55 both carry into the current cycle as-is, no rework needed.
 
@@ -301,7 +307,7 @@ _List every issue committed to this cycle and note why it made the cut._
 - **repo1#20** — Pulled out of Stale Issues review; blocks another team's reporting and should
   have been triaged weeks ago.
 - **repo2#230** — Found already `In progress` with no `Cycle` during prep; credited to this cycle
-  automatically, no action needed.
+  automatically, no action needed. Listed in Last Cycle as added mid-cycle and unfinished.
 
 ### Parking Lot (Next)
 
