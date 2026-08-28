@@ -118,6 +118,25 @@ When a skill says "apply the AFK-ready triage label", set `Status` to the value 
 `In progress` and `Done` have no counterpart in the skills' vocabulary — they carry the rest of the
 lifecycle and are in the full table under [Status](#status).
 
+## Business and delivery
+
+**Decomposition is a delivery concern.** Work is broken into sub-issues so it can be tracked,
+sliced and reviewed one pull request at a time — see
+[Decomposing work before Ready for Agent](#decomposing-work-before-ready-for-agent). The business
+does not track work at that grain: a **top-level issue is the unit of business work**, and its
+children are how that work gets done.
+
+The board carries both audiences as views — **📋 Delivery board** is everything, **💼 Business** is
+`no:parent-issue`. The same split governs anything read outside the board:
+
+- **Reporting to the business** — cycle notes, Status Updates, anything the business reads — is
+  top-level only. Add `and .content.parent == null` to any recipe below to get its business view,
+  as the **Planning view** recipe does.
+- **Dispatching and doing the work** reads the leaves, because that is where a branch and a pull
+  request attach. The **Agent frontier** recipe is the example: it excludes anything with children.
+
+This is also why [`Cycle`](#cycles) is set on top-level issues only.
+
 ## Querying the board
 
 Issue search cannot read project fields: `status:"In progress"` is not a qualifier and matches

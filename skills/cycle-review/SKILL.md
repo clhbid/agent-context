@@ -22,6 +22,14 @@ the `issue-tracker` skill** — this skill names the recipes it needs and never 
 two cannot drift. The project spans repositories, so every issue reference in the notes and in the
 Status Updates is `<repo>#<number>`; a bare number is ambiguous and resolves wrong.
 
+**The notes are a business document, so they carry top-level work only.** Sub-issues are how
+delivery slices and reviews the work; the business reads the parent. Every list in the notes — Last
+Cycle, New Issue Triage, Stale Issues, Waiting on Input, Committed This Cycle, Parking Lot — and
+both Status Updates filter to `.content.parent == null`, matching the board's **💼 Business** view.
+See **Business and delivery** in the `issue-tracker` skill. The one thing that must not be lost to
+the filter is a **question**: when the issue blocking on business input is a sub-issue, list its
+parent as the item and name the child, so branch B knows which issue the answer lands on.
+
 ## Cycle roles
 
 Three roles, resolved from the `Cycle` field's `configuration` by date, never by array order or by
@@ -63,9 +71,11 @@ and take a go-ahead, like every other mutation.
    **This stays out of the notes** — the auto-archive workflow missing a few items is not a decision
    the meeting makes.
 2. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
-   closing cycle's window and set `Cycle` immediately on everything it returns. This is
-   bookkeeping, not triage — no meeting decision, no `Decision:` line — and the backfilled work
-   then shows up in the draft like any other mid-cycle addition:
+   closing cycle's window, keep the top-level results, and set `Cycle` immediately on each one. A
+   sub-issue it returns needs no write and no row — it inherits its parent's cycle, so a child with
+   no `Cycle` is planned, not missed. This is bookkeeping, not triage — no meeting decision, no
+   `Decision:` line — and the backfilled work then shows up in the draft like any other mid-cycle
+   addition:
    - **Closed** work is credited to the cycle it was completed in, and appears as an extra
      `➕ Added mid-cycle, done` row in **Last Cycle**.
    - **`In progress`** work with no cycle was already being worked before this meeting opened
