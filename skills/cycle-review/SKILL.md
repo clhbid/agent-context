@@ -7,9 +7,9 @@ disable-model-invocation: true
 # Cycle Review
 
 The cycle review is a **round trip through a document**. This skill drafts Markdown meeting notes,
-Mark pastes them into a Google Doc, the meeting edits the doc, Mark pastes the edited Markdown
-back, and this skill turns the decisions into tracker writes. The skill never touches the Doc — no
-Drive access exists yet.
+the project manager pastes them into a Google Doc, the meeting edits the doc, the project manager
+pastes the edited Markdown back, and this skill turns the decisions into tracker writes. The skill
+never touches the Doc — no Drive access exists yet.
 
 The Doc is the meeting's working surface, not the record. **The record is two Project Status
 Updates** posted straight to the board: a **closing** update carrying the outcome of the cycle just
@@ -59,9 +59,9 @@ change what the tables say. _Automatic_ means no meeting decides them — they s
 and take a go-ahead, like every other mutation.
 
 1. **Housekeeping.** Run the `issue-tracker` **stale closed items** recipe. Archive every result
-   with `archiveProjectV2Item` and report what you archived to Mark in conversation. **This stays
-   out of the notes** — the auto-archive workflow missing a few items is not a decision the meeting
-   makes.
+   with `archiveProjectV2Item` and report what you archived to the project manager in conversation.
+   **This stays out of the notes** — the auto-archive workflow missing a few items is not a decision
+   the meeting makes.
 2. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
    closing cycle's window. Set `Cycle` immediately on everything it returns: **closed** work is
    credited to the cycle it was completed in, **`In progress`** work with no cycle is credited to
@@ -105,8 +105,8 @@ and take a go-ahead, like every other mutation.
    for the team — they exist for the meeting, not for the tracker. **Next Actions** is present but
    empty, showing the owner-first shape. **Next Cycle Review** is templated with the date, time and
    location of the recurring slot.
-8. **Present the draft in the conversation and stop.** It is a draft until Mark returns it edited.
-   Write it nowhere.
+8. **Present the draft in the conversation and stop.** It is a draft until the project manager
+   returns it edited. Write it nowhere.
 
 **Every section is worked one decision at a time.** That is why each triage line, each
 `Waiting on input` question and each stale candidate carries its own `Decision:` rather than a
@@ -157,10 +157,11 @@ the damage rather than failing on it.
    produces no tracker write.
 8. **Committed This Cycle** and **Parking Lot** — set `Cycle` on each top-level issue, skipping
    anything the branch A backfill already credited.
-9. **Next Actions** — decide by **what the line describes, not who owns it**. `MARK:` covers both
-   tracker work he delegates to you and follow-ups he does himself, so the owner tells you nothing.
-   Execute the tracker actions — cycle and status changes, closures, the new-issue draft, the
-   Status Update posts, the cycle end-date change. Leave person-to-person follow-ups alone.
+9. **Next Actions** — decide by **what the line describes, not who owns it**. The project
+   manager's own lines cover both tracker work they delegate to you and follow-ups they handle
+   themselves, so the owner tells you nothing. Execute the tracker actions — cycle and status
+   changes, closures, the new-issue draft, the Status Update posts, the cycle end-date change.
+   Leave person-to-person follow-ups alone.
 10. **Post both Status Updates** with `createProjectV2StatusUpdate` — closing (Last Cycle's
     outcome) and opening (the committed list, with Significant Dates in the narrative) — and read
     each back.
