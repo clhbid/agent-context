@@ -21,9 +21,14 @@ clhbid repo. Use the `gh` CLI for all operations.
 - **List issues**: `gh issue list --state open --json number,title,body,labels --jq '[.[] | {number, title, labels: [.labels[].name]}]'`
 - **Comment on an issue**: `gh issue comment <number> --body "..."`
 - **Set state**: a project field, not a label — see [Status](#status).
-- **Close**: `gh issue close <number> --comment "..."`. Use `--reason "not planned"` for work that
-  will never be done; that reason is the record, so there is no `wontfix` label. The value is two
-  words — `not-planned` is rejected.
+- **Close**: `gh issue close <number> --comment "..."`. Use `--reason "not planned"` for anything
+  we are not delivering, abandoned and deferred alike; that reason is the record, so there is no
+  `wontfix` label. The value is two words — `not-planned` is rejected. Reserve `completed` for work
+  that shipped: cycle reporting counts closed issues as delivery, so a deferral closed as
+  `completed` credits the next cycle with work nobody did.
+- **Fix a close reason**: `gh issue edit` cannot set one. Use
+  `gh api --method PATCH repos/{owner}/{repo}/issues/{n} -f state=closed -f state_reason=not_planned`
+  — underscored here, where the CLI wants two words.
 
 Infer the repo from `git remote -v` — `gh` does this automatically when run inside a clone.
 
@@ -51,6 +56,9 @@ deliberately deferred goes back to `Backlog` and is reconsidered next time — s
 means "already dealt with", and a full inbox is the normal state rather than a backlog of triage
 debt.
 
+**An empty `Waiting on input` is a healthy state**, not a query to debug: nothing is blocked on the
+business.
+
 **Prefer `Ready for Agent`.** It applies only when both halves of its row hold — fully specified
 _and_ already sliced. When choices must be made before the work can be specified at all, that is
 `Waiting on input`: a question to answer, not work to schedule. Only set `Ready for Human` when no
@@ -63,6 +71,12 @@ write that stops two agents taking the same issue; setting `Status` to `In progr
 **An issue that is not on the board has no state** and is invisible to every query below. Auto-add
 workflows put newly-opened issues on the board; after creating one, give the workflow a moment and
 then confirm it landed, adding anything that was missed.
+
+**Adding one issue adds its whole tree.** Adding a parent pulls in every descendant, across
+repository boundaries and including repos nobody had in scope. So
+[planning being top-level only](#business-and-delivery) does not make the board top-level only —
+most of it is children, and they arrive with `Cycle` unset. Any group-by-`Cycle` view therefore
+carries a large **No Cycle** bucket of children whose parents are planned.
 
 ### Setting Status
 
@@ -149,14 +163,12 @@ skill was installed. Resolve it once per session and reuse it:
 ```bash
 for p in ~/.claude/skills/issue-tracker/board.graphql \
          ~/.agents/skills/issue-tracker/board.graphql \
-         .claude/skills/issue-tracker/board.graphql \
-         docs/agents/board.graphql; do
+         .claude/skills/issue-tracker/board.graphql; do
   [ -f "$p" ] && BOARD_QUERY="$p" && break
 done
 ```
 
-The last entry is a `clhbid.com` checkout that still carries its own copy. If none of them exists,
-say so rather than guessing — every recipe below needs it.
+If none of them exists, say so rather than guessing — every recipe below needs it.
 
 ```bash
 # Agent frontier — ready, leaf, unblocked, unclaimed
@@ -252,6 +264,23 @@ date rather than by index — nothing guarantees the array's order.
 `Cycle` is set on top-level issues only; children inherit their parent's by definition, so a
 sub-issue with no `Cycle` is planned, not missed.
 
+**`iterations` holds exactly two** — the running cycle and next — and next is the **parking lot**,
+where deferred work is put. Keep it at two: a third is a plan someone has to maintain by hand,
+which is what the parking lot exists to avoid.
+
+## Deferring work
+
+Deferring is a decision to record. Its form follows when the work comes back:
+
+- **Next cycle** — set `Cycle` to next, the parking lot. The issue stays open and the board carries
+  it.
+- **A later date** — comment with the decision, the owner, and when it returns, then close with
+  `--reason "not planned"`. The owner sets the calendar reminder; nothing in GitHub will raise it
+  for them.
+- **Unknown** — leave it in [`Backlog`](#status) for triage to reconsider.
+
+**Reopen rather than refile** when it comes back, so the thread stays the history.
+
 ## Labels
 
 Labels never carry state. Two matter:
@@ -344,13 +373,26 @@ Used by `/wayfinder`. The **map** is a single issue with **child** issues as tic
 - **Claim**: `gh issue edit <n> --add-assignee @me` — the session's first write.
 - **Resolve**: `gh issue comment <n> --body "<answer>"`, then `gh issue close <n>`, then append a context pointer (gist + link) to the map's Decisions-so-far.
 
-## Two traps
+## Traps
 
 **A wrong filter looks correct.** GitHub ignores an unknown qualifier rather than erroring. It can
 fail in either direction — a typo may return everything, while `status:"In progress"` in issue
 search returns nothing — so a result count proves nothing on its own. Check a new filter against a
 query whose answer you already know.
 
+**REST lies about parentage.** Nothing over REST will tell you an issue's parent:
+`gh issue view --json parent` errors outright, and
+`gh api repos/{owner}/{repo}/issues/{n} --jq .parent.number` returns `null` for a parented issue
+exactly as it does for a top-level one. GraphQL's `Issue.parent` answers truthfully — it is what
+[`board.graphql`](board.graphql) selects — and the only other direction is downwards, listing a
+candidate parent's `sub_issues`. Checking issue by issue costs a request per candidate and will be
+skipped under pressure, so **put `no:parent-issue` (or `.content.parent == null`) in the query
+itself**. Anything relying on someone remembering to check drifts back into reporting sub-issues to
+the business.
+
 **A read-back can be stale.** The project API is eventually consistent. Verify every write by
 read-back, but treat a mismatch straight after a write as unconfirmed rather than failed — re-check
 after a delay, and never re-issue the write on the strength of one disagreeing read.
+`issueDependenciesSummary.blockedBy` lags the same way — it read `0` immediately after a blocker was
+linked and `1` shortly after — so the **Agent frontier** recipe run straight after a write can hand
+out an issue that is already blocked.
