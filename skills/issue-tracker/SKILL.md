@@ -15,11 +15,9 @@ clhbid repo. Use the `gh` CLI for all operations.
   bodies. This does not apply an issue form — see
   [Templates apply a category, never a state](#templates-apply-a-category-never-a-state) for what
   you then owe.
-- **Read an issue**: `gh issue view <number> --comments` for human-readable output. To filter with
-  `jq`, drop `--comments` and ask for the fields instead — `--jq` requires `--json` and errors out
-  otherwise: `gh issue view <number> --json number,title,body,labels --jq '{number, title, labels: [.labels[].name]}'`
-- **List issues**: `gh issue list --state open --json number,title,body,labels --jq '[.[] | {number, title, labels: [.labels[].name]}]'`
-- **Comment on an issue**: `gh issue comment <number> --body "..."`
+- **Read, list, comment**: `gh issue view <number> --comments`, `gh issue list`,
+  `gh issue comment <number> --body "..."`. `--jq` requires `--json`, so filtering a read means
+  dropping `--comments` and naming the fields: `gh issue view <number> --json number,title,labels --jq ...`
 - **Set state**: a project field, not a label — see [Status](#status).
 - **Close**: an issue closes as `completed`, `not planned` or `duplicate`. The reason is the
   record, so pick the one that matches and say why in a closing comment.
@@ -45,8 +43,6 @@ clhbid repo. Use the `gh` CLI for all operations.
   `gh api --method PATCH repos/{owner}/{repo}/issues/{n} -f state=closed -f state_reason=not_planned`
   To record a duplicate after the fact, reopen and re-close:
   `gh issue reopen <number> && gh issue close <number> --duplicate-of <other-number>`.
-
-Infer the repo from `git remote -v` — `gh` does this automatically when run inside a clone.
 
 ## Status
 
@@ -75,11 +71,10 @@ debt.
 **An empty `Waiting on input` is a healthy state**, not a query to debug: nothing is blocked on the
 business.
 
-**Prefer `Ready for Agent`.** It applies only when both halves of its row hold — fully specified
-_and_ already sliced. When choices must be made before the work can be specified at all, that is
-`Waiting on input`: a question to answer, not work to schedule. Only set `Ready for Human` when no
-further work can be done without human assistance or judgement. Refer to the `/afk-loop` skill
-for details on dispatching work to an agent.
+**Prefer `Ready for Agent`**, which needs both halves of its row — fully specified _and_ already
+sliced. Work that cannot be specified until someone decides something is `Waiting on input`: a
+question to answer, not work to schedule. `Ready for Human` is for what no agent can finish.
+`/afk-loop` covers dispatching.
 
 **Claiming is an assignee write.** `gh issue edit <n> --add-assignee @me` is the atomic first
 write that stops two agents taking the same issue; setting `Status` to `In progress` follows it.
@@ -131,22 +126,19 @@ Read the value back afterwards — a wrong option id is accepted silently.
 
 ## Triage roles
 
-The skills speak in terms of five canonical triage roles. In this org a role is a **`Status` value
-on the CLHbid Delivery project**, not a label — see [Status](#status) above for how to read and set
-it.
+The skills speak in terms of five canonical triage roles. Here a role is a **`Status` value**, not
+a label — [Status](#status) has what each one means.
 
-| Role in mattpocock/skills | Status here      | Meaning                                                                                 |
-| ------------------------- | ---------------- | --------------------------------------------------------------------------------------- |
-| `needs-triage`            | Backlog          | Not yet triaged — the inbox                                                             |
-| `needs-info`              | Waiting on input | We asked a question and cannot proceed until it's answered                              |
-| `ready-for-agent`         | Ready for Agent  | Fully specified and sliced; An agent brief has been added, and an agent can complete it |
-| `ready-for-human`         | Ready for Human  | Needs a person                                                                          |
-| `wontfix`                 | —                | Close with `--reason "not planned"`; the reason is the record                           |
+| Role in mattpocock/skills | Status here                         |
+| ------------------------- | ----------------------------------- |
+| `needs-triage`            | Backlog                             |
+| `needs-info`              | Waiting on input                    |
+| `ready-for-agent`         | Ready for Agent                     |
+| `ready-for-human`         | Ready for Human                     |
+| `wontfix`                 | close with `--reason "not planned"` |
 
 When a skill says "apply the AFK-ready triage label", set `Status` to the value in this table.
-
-`In progress` and `Done` have no counterpart in the skills' vocabulary — they carry the rest of the
-lifecycle and are in the full table under [Status](#status).
+`In progress` and `Done` have no counterpart in that vocabulary.
 
 ## Business and delivery
 
@@ -164,8 +156,6 @@ The board carries both audiences as views — **📋 Delivery board** is everyth
   as the **Planning view** recipe does.
 - **Dispatching and doing the work** reads the leaves, because that is where a branch and a pull
   request attach. The **Agent frontier** recipe is the example: it excludes anything with children.
-
-This is also why [`Cycle`](#cycles) is set on top-level issues only.
 
 ## Querying the board
 
@@ -261,11 +251,9 @@ table — it is not built yet:
 | 6   | ⏳ Waiting        | `status:"Waiting on input"`                        | mirrors the needs-business-input recipe   |
 | 8   | 📥 Triage         | `status:Backlog no:parent-issue`                   | the inbox, top-level only                 |
 
-`board:sync` checks **filters only**, and identifies each view by its **number** — the column above.
-Numbers are stable and are not reused after a delete, which is why 7 is missing. Matching on
-anything else breaks the audit: the filter is the value being compared, so it cannot also be the
-key, and a view's name, columns and tab position are ergonomic choices belonging to whoever uses
-it — treat a change to those as intent rather than drift.
+`board:sync` checks **filters only**, keyed by the view **number** above — stable, never reused
+after a delete, which is why 7 is missing. A view's name, columns and tab position belong to
+whoever uses it: a change there is intent, not drift.
 
 ## Cycles
 
@@ -305,8 +293,8 @@ Labels never carry state. Two matter:
 - **`enhancement`** — everything else: new features, and the tooling, config and refactor work we
   used to call chores.
 
-Issue templates apply exactly one of them. `/wayfinder` additionally uses `wayfinder:map` for a map
-issue and `wayfinder:research` / `prototype` / `grilling` / `task` for its tickets.
+Issue templates apply exactly one of them, and `/wayfinder` adds its own — see
+[Wayfinding operations](#wayfinding-operations).
 
 Any other label is decoration — read it if you like, but nothing keys off it.
 
@@ -316,19 +304,14 @@ Issue forms come from the org defaults in `clhbid/.github` under `.github/ISSUE_
 person filing an issue should use one** — they collect fields a triager otherwise has to ask for.
 
 A form applies exactly one **category** label (`bug` or `enhancement`) and **no state**. Category
-says what kind of thing an issue is; `Status` says where it has got to. They are independent, and
-nothing about the category implies a state.
+says what kind of thing an issue is; `Status` says where it has got to — nothing about the category
+implies a state.
 
 **`gh issue create` does not apply a form**, and it is the normal path here — an agent has no
 browser to fill one in. Creating directly is fine; it means you owe what the form would have done:
-
-- Apply exactly one category label, and no state.
-- Write the body the form would have collected, not a bare title and a sentence.
-- Confirm the auto-add put it on the board.
-
-A new issue is auto-added to the board and lands on `Backlog`, the triage inbox. That bucket is
-supposed to fill up; see **Triage empties `Backlog`** under [Status](#status) for what moves an
-issue out of it and what comes back.
+exactly one category label, no state, and the body the form would have collected rather than a bare
+title and a sentence. The issue then lands on `Backlog` — see [Status](#status) for confirming that
+and for what moves it on.
 
 ## Commit convention
 
@@ -359,24 +342,15 @@ no CI gate for this.
 
 ## Pull requests as a triage surface
 
-**PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_
-
-When set to `yes`, PRs run through the same states as issues, using the `gh pr` equivalents:
-
-- **Read a PR**: `gh pr view <number> --comments` and `gh pr diff <number>` for the diff.
-- **List external PRs for triage**: `gh pr list --state open --json number,title,body,labels,author,authorAssociation,comments` then keep only `authorAssociation` of `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, or `NONE` (drop `OWNER`/`MEMBER`/`COLLABORATOR`).
-- **Comment / close**: `gh pr comment`, `gh pr close`.
+**PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_ While it is `no`, external PRs are not triaged and no `gh pr` state handling applies.
 
 GitHub shares one number space across issues and PRs, so a bare `#42` may be either — resolve with
 `gh pr view 42` and fall back to `gh issue view 42`.
 
-## When a skill says "publish to the issue tracker"
+## When a skill says…
 
-Create a GitHub issue.
-
-## When a skill says "fetch the relevant ticket"
-
-Run `gh issue view <number> --comments`.
+- **"publish to the issue tracker"** — create a GitHub issue.
+- **"fetch the relevant ticket"** — `gh issue view <number> --comments`.
 
 ## Wayfinding operations
 
@@ -396,15 +370,12 @@ fail in either direction — a typo may return everything, while `status:"In pro
 search returns nothing — so a result count proves nothing on its own. Check a new filter against a
 query whose answer you already know.
 
-**REST lies about parentage.** Nothing over REST will tell you an issue's parent:
-`gh issue view --json parent` errors outright, and
-`gh api repos/{owner}/{repo}/issues/{n} --jq .parent.number` returns `null` for a parented issue
-exactly as it does for a top-level one. GraphQL's `Issue.parent` answers truthfully — it is what
-[`board.graphql`](board.graphql) selects — and the only other direction is downwards, listing a
-candidate parent's `sub_issues`. Checking issue by issue costs a request per candidate and will be
+**REST lies about parentage.** `gh issue view --json parent` errors outright, and
+`gh api repos/{owner}/{repo}/issues/{n} --jq .parent.number` returns `null` for a child exactly as
+for a top-level issue. GraphQL's `Issue.parent` answers truthfully, which is what
+[`board.graphql`](board.graphql) selects. Checking issue by issue costs a request each and gets
 skipped under pressure, so **put `no:parent-issue` (or `.content.parent == null`) in the query
-itself**. Anything relying on someone remembering to check drifts back into reporting sub-issues to
-the business.
+itself**.
 
 **A read-back can be stale.** The project API is eventually consistent. Verify every write by
 read-back, but treat a mismatch straight after a write as unconfirmed rather than failed — re-check
