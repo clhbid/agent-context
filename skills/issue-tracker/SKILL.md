@@ -21,14 +21,30 @@ clhbid repo. Use the `gh` CLI for all operations.
 - **List issues**: `gh issue list --state open --json number,title,body,labels --jq '[.[] | {number, title, labels: [.labels[].name]}]'`
 - **Comment on an issue**: `gh issue comment <number> --body "..."`
 - **Set state**: a project field, not a label — see [Status](#status).
-- **Close**: `gh issue close <number> --comment "..."`. Use `--reason "not planned"` for anything
-  we are not delivering, abandoned and deferred alike; that reason is the record, so there is no
-  `wontfix` label. The value is two words — `not-planned` is rejected. Reserve `completed` for work
-  that shipped: cycle reporting counts closed issues as delivery, so a deferral closed as
-  `completed` credits the next cycle with work nobody did.
-- **Fix a close reason**: `gh issue edit` cannot set one. Use
+- **Close**: an issue closes as `completed`, `not planned` or `duplicate`. The reason is the
+  record, so pick the one that matches and say why in a closing comment.
+
+  ```bash
+  # Completed — the work is done
+  gh issue close <number> --reason completed --comment "Shipped in #<pr>."
+
+  # Not planned — we are not delivering it, abandoned and deferred alike
+  gh issue close <number> --reason "not planned" --comment "Deferred to <date>; <owner> holds it."
+
+  # Duplicate — another issue carries the work
+  gh issue close <number> --duplicate-of <other-number> --comment "Tracked under #<other-number>."
+  ```
+
+  - `completed` is the default when `--reason` is omitted.
+  - `not planned` is two words — `not-planned` is rejected. It is the whole record for a deferral
+    or an abandonment; nothing else is needed.
+  - `--duplicate-of` sets the reason to `duplicate` and links the two issues, so the survivor's
+    thread becomes the history. Take the number of the issue that stays open.
+- **Fix a close reason**: `gh issue edit` cannot set one, and `gh issue close` no-ops on an
+  already-closed issue. For `completed` and `not planned`, PATCH it:
   `gh api --method PATCH repos/{owner}/{repo}/issues/{n} -f state=closed -f state_reason=not_planned`
-  — underscored here, where the CLI wants two words.
+  To record a duplicate after the fact, reopen and re-close:
+  `gh issue reopen <number> && gh issue close <number> --duplicate-of <other-number>`.
 
 Infer the repo from `git remote -v` — `gh` does this automatically when run inside a clone.
 
@@ -44,7 +60,7 @@ is in.
 | Ready for Agent  | Fully specified, sliced to one pull request, and carrying an agent brief                       |
 | Ready for Human  | Needs a person — judgement, external systems, manual verification, or a pull request to review |
 | In progress      | Claimed and being worked                                                                       |
-| Done             | Closed                                                                                         |
+| Done             | Closed, for any reason (`completed`, `not planned` and `duplicate`)                            |
 
 Everything else stays native and is never duplicated onto the board: **assignee** (who holds it),
 **linked pull requests** (what is in review), **sub-issues** (decomposition), **issue
