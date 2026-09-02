@@ -11,7 +11,6 @@ query ($endCursor: String) {
         }
         nodes {
           id
-          isArchived
           status: fieldValueByName(name: "Status") {
             ... on ProjectV2ItemFieldSingleSelectValue {
               name
