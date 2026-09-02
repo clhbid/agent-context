@@ -1,107 +1,130 @@
 ---
 name: cycle-review
-description: Run the fortnightly-ish cycle-review meeting round trip on the CLHbid Delivery board — prepare the meeting notes, process the edited notes back into cycles and statuses, or adjust a cycle's membership. User-invoked only.
+description: Run the fortnightly-ish cycle-review meeting round trip on the CLHbid Delivery board — publish the meeting notes discussion, process the returned notes back into cycles and statuses, or adjust a cycle's membership. User-invoked only.
 disable-model-invocation: true
 ---
 
 # Cycle Review
 
-The cycle review is a **round trip through a document**. This skill drafts Markdown meeting notes,
-the project manager pastes them into a Google Doc, the meeting edits the doc, the project manager
-pastes the edited Markdown back, and this skill turns the decisions into tracker writes. The skill
-never touches the Doc — no Drive access exists yet.
+The cycle review is a **round trip through a GitHub Discussion**. Branch A publishes the meeting
+notes as a Discussion, the meeting works through them, the project manager posts their decisions as
+a comment, and branch B turns those decisions into tracker writes.
 
-The Doc is the meeting's working surface, not the record. **The record is two Project Status
-Updates** posted straight to the board: a **closing** update carrying the outcome of the cycle just
-ended, and an **opening** update carrying the scope committed for the cycle just starting. They are
-posted in branch B and they are what anyone reads later to see what was planned versus delivered.
+**The Discussion is the record.** It is what anyone reads later to see what was planned versus
+delivered, and it is the baseline the next cycle's notes are diffed against. Notes live in
+`clhbid/clhbid.com` under the **Meetings** category — org discussions at
+`github.com/orgs/clhbid/discussions` are hosted by that repo. `gh` has no discussion command, so
+use `gh api graphql`: `createDiscussion`, `updateDiscussion`, and
+`repository { discussion(number:) }` to read one back.
+
+**The notes are not edited during the meeting.** The project manager posts a comment using the same
+headers, and branch B integrates it afterwards. That keeps the published body a clean record and
+the decisions attributable.
 
 A cycle is an iteration of the `Cycle` field; work state is the `Status` field. Both live on the
-CLHbid Delivery project. **Read the field mechanics, the `Status` values and every board query from
-the `issue-tracker` skill** — this skill names the recipes it needs and never restates them, so the
-two cannot drift. The project spans repositories, so every issue reference in the notes and in the
-Status Updates is `<repo>#<number>`; a bare number is ambiguous and resolves wrong.
+CLHbid Delivery project. **Read the field mechanics, the `Status` values, the reference convention
+and every board query from the `issue-tracker` skill** — this skill names the recipes it needs and
+never restates them, so the two cannot drift.
 
-**The notes are a business document, so they carry top-level work only.** Sub-issues are how
-delivery slices and reviews the work; the business reads the parent. Every list in the notes — Last
-Cycle, New Issue Triage, Stale Issues, Waiting on Input, Committed This Cycle, Parking Lot — and
-both Status Updates filter to `.content.parent == null`, matching the board's **💼 Business** view.
-See **Business and delivery** in the `issue-tracker` skill. The one thing that must not be lost to
-the filter is a **question**: when the issue blocking on business input is a sub-issue, list its
-parent as the item and name the child, so branch B knows which issue the answer lands on.
+**Everything branch A reports is the business view.** Every section of the notes, every number
+quoted beside one, and anything said in conversation about them filters to `no:parent-issue` — see
+**Business and delivery** in `issue-tracker`. The one thing that must not be lost to the filter is
+a **question**: when the issue blocking on business input is a sub-issue, list its parent as the
+item and name the child, so branch B knows which issue the answer lands on.
+
+**The notes are a business document.** No agent commentary — tooling state, recipe caveats and
+process notes go to the project manager in conversation or into your own TODO list.
+
+**Never emit a value with no source.** A meeting time, a location, a reason: it comes from an input
+or it is left empty. Copying one from the example below is how the 2026-09-01 notes announced a
+meeting time nobody had agreed, under a heading calling it confirmed.
 
 ## Cycle roles
 
-Three roles, resolved from the `Cycle` field's `configuration` by date, never by array order or by
+Roles are resolved from the `Cycle` field's `configuration` by date, never by array order or by
 reading a title:
 
-| Role    | Where it comes from                                                             |
-| ------- | ------------------------------------------------------------------------------- |
-| closing | the most recent entry in `completedIterations` — the cycle the meeting closes    |
-| current | the entry in `iterations` whose `startDate + duration` brackets today            |
-| next    | the earliest entry in `iterations` starting after current — the parking lot      |
+| Role    | Where it comes from                                                          |
+| ------- | ---------------------------------------------------------------------------- |
+| closing | the most recent entry in `completedIterations` — the cycle the meeting closes |
+| current | the entry in `iterations` whose `startDate + duration` brackets today         |
+| future  | the two entries in `iterations` starting after current                        |
 
-An iteration **ends the day before the meeting that closes it**. **First run: no prior cycle and no
-prior Status Update exist.** Say so in the notes rather than inventing a baseline to diff against.
+An iteration **ends the day before the meeting that closes it**. **If the roles cannot be resolved,
+stop and say so** — never invent an assignment.
 
 Every membership change is `gh project item-edit` against the `Cycle` field, on **top-level issues
 only** — children inherit their parent's cycle. Every state change is a `Status` value from the
 `issue-tracker` role map. The milestones API plays no part in this skill.
 
 **Confirm before every mutating step.** Show the proposed cycle and status values, closures, issue
-body edits, Status Update text and iteration-configuration diff, get an explicit go-ahead, then
-read the write back. A read-back that disagrees straight after a write is unconfirmed, not failed —
-re-check after a moment rather than re-issuing it.
+body edits, notes body and iteration-configuration diff, get an explicit go-ahead, then read the
+write back. A read-back that disagrees straight after a write is unconfirmed, not failed — re-check
+after a moment rather than re-issuing it.
 
 ## Invocation
 
 - **A. Prepare** — `/cycle-review prepare for the 2026-08-28 meeting, next one is 2026-09-11`
-- **B. Process notes** — `/cycle-review notes from the 2026-08-28 meeting:` + pasted Markdown
-- **C. Adjust** — `/cycle-review move repo1#120 into the current cycle; park repo1#125`
+- **B. Process notes** — `/cycle-review process the notes from discussion 2323`
+- **C. Adjust** — `/cycle-review move clhbid/clhbid.com#2325 into the current cycle; defer
+  clhbid/CLHbid-LiveAuction#922 to the next one`
 
 ## Branch A — Prepare the notes
 
-Branch A produces one Markdown document and writes nothing to the tracker except the two automatic
-bookkeeping steps below. **They run first**, before a line of the draft is written, because both
-change what the tables say. _Automatic_ means no meeting decides them — they still show their list
-and take a go-ahead, like every other mutation.
+Branch A publishes the notes discussion and writes to the tracker only in the bookkeeping steps
+below. **They run first**, before a line of the draft is written, because they change what the
+tables say. _Automatic_ means no meeting decides them — they still show their list and take a
+go-ahead, like every other mutation.
 
-1. **Housekeeping.** Run the `issue-tracker` **stale closed items** recipe. Archive every result
-   with `archiveProjectV2Item` and report what you archived to the project manager in conversation.
-   **This stays out of the notes** — the auto-archive workflow missing a few items is not a decision
-   the meeting makes.
-2. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
-   closing cycle's window, keep the top-level results, and set `Cycle` immediately on each one. A
-   sub-issue it returns needs no write and no row — it inherits its parent's cycle, so a child with
-   no `Cycle` is planned, not missed. This is bookkeeping, not triage — no meeting decision, no
-   `Decision:` line — and the backfilled work then shows up in the draft like any other mid-cycle
-   addition:
-   - **Closed** work is credited to the cycle it was completed in, and appears as an extra
-     `➕ Added mid-cycle, done` row in **Last Cycle**.
-   - **`In progress`** work with no cycle was already being worked before this meeting opened
-     anything, so it was picked up **during the closing cycle** without ever being committed to it.
-     Credit it to the cycle now opening — unfinished work belongs to the cycle that will finish it
-     — and record it in **both** places: an `➕ Added mid-cycle, not done` row in **Last Cycle**,
-     whose reason says it carries into the current cycle, and an entry already in **Committed This
+1. **Open the next cycle.** Three iterations must be live: current plus two future. If only two
+   are, add one. **This is a destructive configuration write** — follow the procedure in
+   `issue-tracker`, and fold every other pending change into the same write, because a second one
+   costs a second restore of the whole board.
+2. **Housekeeping.** Run the `issue-tracker` **stale closed items** recipe, archive every result
+   with `archiveProjectV2Item`, and report what you archived to the project manager in
+   conversation. **It stays out of the notes** — the business does not care which items the
+   auto-archive workflow missed.
+3. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
+   closing cycle's window and keep the top-level results. A sub-issue needs no write and no row —
+   it inherits its parent's cycle. This is bookkeeping, not triage: no meeting decision, no
+   `Decision` line.
+   - **Closed** work is credited to the cycle it was completed in — set `Cycle` — and appears as an
+     extra `➕ Added mid-cycle, done` row in **Last Cycle**.
+   - **`In progress`** work touched during the closing cycle was picked up without ever being
+     committed to it. Credit it to the cycle now opening — unfinished work belongs to the cycle
+     that will finish it — and record it in **both** places: an `➕ Added mid-cycle, not done` row
+     in **Last Cycle** whose reason says it carries forward, and an entry in **Committed This
      Cycle**. A row in one place only reads as work that appeared from nowhere.
-3. **Read the board.** Project items, the `Cycle` configuration, and the prior Status Updates.
-4. **Draft Last Cycle.** Restate the closing cycle's goal, then table every issue that was
-   committed to it, with `Result` and `Reason` columns **left blank for the meeting to fill in**.
-   Diff the membership against the **previous opening Status Update's** frozen scope so slippage
-   and mid-cycle additions are visible rather than silently absorbed.
-5. **Draft Current Cycle**, sections in this order, because each one feeds the next: the proposed
-   next-cycle end date (from the next meeting date, marked **proposed** — the iteration's dates are
-   not written at this step), **New Issue Triage** (every issue opened since the closing cycle
-   started, `Decision` blank), **Stale Issues** (step 6), **Waiting on Input** (every
-   `Status = Waiting on input` issue, listed **one at a time** with its own `Decision`, never
-   summarised as a count), **Significant Dates** (a blank prompt), then **Committed This Cycle**
-   and **Parking Lot** left empty apart from anything the backfill already credited.
+   - **Dormant** work — the **dormant** variant of the same recipe, untouched since before the
+     closing cycle began — gets **no write**. It has either stalled, which means the cycle was
+     over-committed, or it is blocked and nobody said so. List it as its own decision with its
+     status flagged **suspect**. Never auto-credit it, and never reset it to `Backlog`.
+4. **Read the board.** Project items, the `Cycle` configuration, and the previous cycle's notes
+   discussion.
+5. **Draft Last Cycle.** Restate the closing cycle's goal, then table every issue committed to it.
+   **`Result` is filled in** — closed is `✅ Done`, open is `❌ Slipped`. **`Reason` is blank**
+   unless the row slipped or was added mid-cycle, and it is filled **only from direct evidence**: a
+   closing pull request, a comment, sub-issue state. Leave it blank rather than inferring one. Diff
+   the membership against the previous cycle's notes so slippage and mid-cycle additions are
+   visible rather than silently absorbed.
+6. **Draft Next Cycle Review** — date, time and location together, from the invocation or empty. It
+   comes **before** Current Cycle because it sets when the cycle ends, and therefore how much fits
+   in it.
+7. **Draft Current Cycle**, sections in this order, because each one feeds the next: **New Issue
+   Triage** (every issue opened since the closing cycle started, `Decision` blank), **Stale
+   Issues** (next step), **Waiting on Input** (every `Status = Waiting on input` issue, listed
+   **one at a time** with its own `Decision`, never summarised as a count), **Significant Dates** (a
+   blank prompt), then **Committed This Cycle**, carrying anything the backfill already credited.
 
-   Each **Waiting on Input** line is a one-line summary of the question plus its link; the question
-   itself lives on the issue as a Triage Notes comment. **Confirm that comment exists before
-   listing the item.** If it doesn't, the question has never actually been put to anyone — say so
-   rather than reconstructing one from the title, because that gap means the `Status` is wrong.
-6. **Draft Stale Issues.** Run the `issue-tracker` **stale issues** recipe and report two numbers:
+   Report the count of items already `In progress` alongside Committed This Cycle. **We finish what
+   we start**: started work takes precedence, and new work should not be accepted into the cycle
+   while it is outstanding.
+
+   Each **Waiting on Input** row states the question and its decision. **The question must already
+   exist as a comment on the issue** — a plain comment stating it is enough; the _Triage Notes_
+   heading is a convention, not the test. If no comment asks it, that is an **error**: the question
+   has never been put to anyone, so say so rather than reconstructing one from the title.
+8. **Draft Stale Issues.** Run the `issue-tracker` **stale issues** recipe and report two numbers:
    the total stale, and how many went **newly stale** during the cycle just closing — that second
    number is derived from the same `updatedAt`, anchored to the closing cycle's `startDate`, not
    from a baseline anyone stored. Then do the reading:
@@ -113,263 +136,248 @@ and take a go-ahead, like every other mutation.
    - **Newly stale, worth a look** — anything that went stale this cycle and looks important on its
      own evidence: comment volume, a prior assignee, other issues referencing it. A judgement call,
      not a threshold.
-
-   Every item in all three groups carries its own blank `Decision:`, exactly like every other
-   review section.
-7. **Draft the closing sections.** **Out of Office** and **Significant Dates** are blank prompts
-   for the team — they exist for the meeting, not for the tracker. **Next Actions** is present but
-   empty, showing the owner-first shape. **Next Cycle Review** is templated with the date, time and
-   location of the recurring slot.
-8. **Present the draft in the conversation and stop.** It is a draft until the project manager
-   returns it edited. Write it nowhere.
+9. **Draft Future Work** — one sub-section per future cycle, headed by the iteration name, each
+   with its own table. Separate tables make the load committed to each cycle visible at a glance;
+   one wide table with a cycle column does not.
+10. **Draft the closing sections.** **Out of Office** is a blank prompt for the team. **Next
+    Actions** is present but empty, showing the owner-first shape.
+11. **Reconcile against the live board.** Every cycle section must agree with what the board
+    actually says. `clhbid/clhbid.com#2325` was committed to a cycle and missing from Committed
+    This Cycle because the two were written as separate steps with nothing comparing them.
+12. **Publish.** Create the Discussion, or update it if this cycle's notes already exist. **Branch A
+    is re-runnable**: run it again whenever the board changes and it revises the same discussion.
 
 **Every section is worked one decision at a time.** That is why each triage line, each
-`Waiting on input` question and each stale candidate carries its own `Decision:` rather than a
+`Waiting on input` question and each stale candidate carries its own `Decision` rather than a
 shared verdict at the end of a table — a section with one decision on it gets skimmed, and the
 items underneath get silently agreed to.
 
-See [The notes](#the-notes) for the shape, with every `Decision`, `Result`, `Reason` and
-**Next Actions** line blank in the draft and filled in on the way back.
+See [The notes](#the-notes) for the shape, with every `Decision`, `Reason` and **Next Actions** line
+blank in the draft and filled in on the way back.
 
 ## Branch B — Process the returned notes
 
-The notes arrive as Markdown pasted out of a Google Doc, so **parse for meaning, not for exact
-syntax**. The round trip reliably mangles them: `#` comes back escaped as `\#`, headers collapse
-into bold paragraphs, bare domains arrive auto-linked. Read the sections and the decisions through
-the damage rather than failing on it.
+Read the published body and the project manager's comment from the API by discussion number.
 
-1. **Last Cycle** — its table and decision become the **closing** Status Update's content, both
-   kinds of backfilled `➕ Added mid-cycle` row included. Their `Cycle` was written in branch A;
-   there is nothing left to write here.
-2. **Sweep, then post.** Before the closing Status Update goes out, **no open item may still carry
-   the closing cycle** (`cycle:@previous is:open` on the board). Reassign every straggler with
-   `gh project item-edit` — usually to current, or clear the field if the work was dropped. This
-   step is dull and sits in front of the interesting work, which is exactly the shape that invites
-   skipping it; an orphan left behind is invisible to every cycle-scoped view from then on.
+**Accept both reference forms.** The qualified `clhbid/<repo>#<number>` resolves as written. A bare
+`#<number>` resolves against `clhbid/clhbid.com`, the repo hosting the discussion — **say which
+issue you resolved it to** before acting on it, because that default is wrong as often as it is
+right.
+
+1. **Last Cycle** — the discussion is the record and the backfill already set every `Cycle` in
+   branch A. Nothing to write.
+2. **Sweep.** **No open item may still carry the closing cycle** (`cycle:@previous is:open` on the
+   board). Reassign every straggler with `gh project item-edit` — usually to current, or clear the
+   field if the work was dropped. This step is dull and sits in front of the interesting work,
+   which is exactly the shape that invites skipping it; an orphan left behind is invisible to every
+   cycle-scoped view from then on.
 3. **New Issue Triage** — apply each line: set `Cycle` and `Status` with `gh project item-edit`, or
    close the issue with `--reason "not planned"`.
 4. **Stale Issues** — apply each line: close candidates are closed `--reason "not planned"`; work
-   pulled into a cycle gets its `Cycle` set and joins the Committed / Parking Lot lists like
-   anything else triaged at this meeting; items merely flagged as worth watching get **no write at
-   all** — they are informational, and they resurface in next cycle's stale report on their own.
+   pulled into a cycle gets its `Cycle` set like anything else triaged at this meeting; items
+   merely flagged as worth watching get **no write at all** — they are informational, and they
+   resurface in next cycle's stale report on their own.
 5. **Waiting on Input** — for each answered question, record it on the issue in two places: reply
-   to the Triage Notes comment that asked it, prefixed
-   `> *Recorded from the <date> planning meeting.*`, and **fold the answer into the issue body** so
-   someone picking the work up cold has the whole spec. The comment is the audit trail; the body is
-   the spec. Never delete what was there. An item the meeting could not resolve is **left
-   untouched**, `Waiting on input` and all — it reappears in next cycle's notes by itself.
+   to the comment that asked it, prefixed `> *Recorded from the <date> planning meeting.*`, and
+   **fold the answer into the issue body** so someone picking the work up cold has the whole spec.
+   The comment is the audit trail; the body is the spec. Never delete what was there. An item the
+   meeting could not resolve is **left untouched**, `Waiting on input` and all — it reappears in
+   next cycle's notes by itself.
 
    Then route it off `Waiting on input`, and only when **every** question on the issue is answered:
    `Ready for Agent` **only if the updated body now reads as a complete brief an agent could work
    from cold** — this is the gate that keeps the AFK queue trustworthy; `Ready for Human` if it
    needs judgement, external access, a design decision or manual testing; `Backlog` if it is
    answered but still underspecified, said out loud rather than guessed at. An answer that raises a
-   **new** question has not unblocked anything: post the new question as a Triage Notes comment in
-   the same shape and leave the issue on `Waiting on input`.
-6. **Significant Dates** — folded into the **opening** Status Update's narrative. No per-issue
-   action.
-7. **Out of Office** — informational only. It is context for what the team could commit to; it
-   produces no tracker write.
-8. **Committed This Cycle** and **Parking Lot** — set `Cycle` on each top-level issue, skipping
-   anything the branch A backfill already credited.
-9. **Next Actions** — decide by **what the line describes, not who owns it**. The project
-   manager's own lines cover both tracker work they delegate to you and follow-ups they handle
-   themselves, so the owner tells you nothing. Execute the tracker actions — cycle and status
-   changes, closures, the new-issue draft, the Status Update posts, the cycle end-date change.
-   Leave person-to-person follow-ups alone.
-10. **Post both Status Updates** with `createProjectV2StatusUpdate` — closing (Last Cycle's
-    outcome) and opening (the committed list, with Significant Dates in the narrative) — and read
-    each back.
-11. **Apply the agreed next-cycle end date** to the `Cycle` field's `iterationConfiguration` via
-    `gh api graphql` on `updateProjectV2Field`. **That input replaces the entire iteration list in
-    one call** — there is no per-iteration patch. So: read the full list, change only the target
-    entry, show the diff, get confirmation, then write it back. Ad-hoc `gh` like every other write
-    in this skill; no script gets built for it.
-12. **Draft an issue** for work in the notes that matches nothing on the board — category label
+   **new** question has not unblocked anything: post the new question as a comment in the same
+   shape and leave the issue on `Waiting on input`.
+6. **Significant Dates** and **Out of Office** — informational. They are context for what the team
+   could commit to; they produce no tracker write.
+7. **Committed This Cycle** and each **Future Work** section — set `Cycle` on each top-level issue,
+   skipping anything the branch A backfill already credited.
+8. **Next Actions** — decide by **what the line describes, not who owns it**. The project manager's
+   own lines cover both tracker work they delegate to you and follow-ups they handle themselves, so
+   the owner tells you nothing. Execute the tracker actions — cycle and status changes, closures,
+   the new-issue draft. Leave person-to-person follow-ups alone.
+9. **Apply any agreed cycle date change** to the `Cycle` field's configuration. **The write is
+   destructive** — follow the procedure in `issue-tracker`. Branch A has usually already made this
+   cycle's one configuration write, so an agreed date should have gone in with it; a separate write
+   here costs a second restore of the whole board.
+10. **Draft an issue** for work in the notes that matches nothing on the board — category label
     only, no state, body drawn from the notes. It is new input, so it lands in `Backlog` like
     anything filed from a template.
-13. **Re-check for issues closed since the closing update posted.** Meeting-morning merges land
-    after the cut and would otherwise be credited to the wrong cycle.
+11. **Update the discussion** with the decisions integrated, then **re-check for issues closed
+    since the notes were published** — meeting-morning merges land after the cut and would
+    otherwise be credited to the wrong cycle.
 
 ## Branch C — Adjust
 
 Move membership with `gh project item-edit` on `Cycle`, or clear it when work is dropped, then note
-the change in the **next opening Status Update's** narrative. There is no second scope record to
-keep in step.
+the change in the next notes discussion.
 
 ## The notes
 
-Below is a **completed** set of notes — the input branch B receives, every `Decision` and
+Below is a **completed** set of notes — the input branch B receives, every `Decision`, `Reason` and
 **Next Actions** line filled in. It is also the target branch A drafts toward: the same headings,
-the same order, the same prompts, with the `Result` / `Reason` / `Decision` fields and the
-**Next Actions** list blank instead. Reproduce this shape.
+the same order, the same prompts, with those fields blank instead. Reproduce this shape.
 
 Notice the **Next Actions** register: outcomes in business language, owner first. Field names and
-`gh` syntax never appear there — the Doc is read by the team, and branch B recognises a tracker
-action by what it describes.
+`gh` syntax never appear there — the team reads this, and branch B recognises a tracker action by
+what it describes.
+
+_Illustrative example. The organisation, repositories, issue numbers and titles are invented, chosen
+to cover the range of states the skill has to handle. Nothing here is real work — and in
+particular, the meeting time and location below are **not** a template to copy from._
 
 ````markdown
-# Cycle Review — 2026-08-28 meeting
+# Cycle Review — 18 Mar 2026 meeting
 
-_Illustrative example. Issue numbers, repos, and titles below are generic placeholders chosen to
-cover the range of states the skill needs to handle — not real work, not real bugs._
+## Last Cycle: Checkout reliability & vendor migration (4 Mar → 17 Mar 2026)
 
-## Last Cycle: Cycle 12 (14 Aug → 28 Aug 2026)
+**Goal:** Stop checkout failing under load, and finish moving off the old payments vendor.
 
-**Goal:** Ship Initiative A and clear Maintenance Task B.
+| Issue | Title | Result | Reason |
+| ----- | ----- | ------ | ------ |
+| acme/site#412 | Retry failed payment captures instead of dropping them | ✅ Done | — |
+| acme/site#418 | Checkout times out when the vendor is slow to respond | ✅ Done | — |
+| acme/api#207 | Remove the legacy payments client | ✅ Done | — |
+| acme/infra#88 | Alert on checkout error rate rather than raw 5xx count | ✅ Done | — |
+| acme/site#421 | Migrate stored payment methods to the new vendor | ❌ Slipped → current cycle | 3 of 8 children done. The export ran, but the vendor's import API rate-limits at a rate that makes a single-pass migration impossible; needs a batched approach. |
+| acme/api#215 | Retire the vendor webhook shim | ❌ Slipped → current cycle | Blocked on acme/site#421 — the shim cannot go until stored methods have moved. |
+| acme/site#430 | Fix the currency rounding error on partial refunds | ➕ Added mid-cycle, done | Reported by finance mid-cycle and treated as urgent; nothing was displaced to fit it. |
+| acme/infra#91 | Rotate the credentials the old vendor had access to | ➕ Added mid-cycle, done | Closed during the cycle without ever being committed to it. |
+| acme/api#219 | Split the checkout handler so failures are isolated | ➕ Added mid-cycle, not done | Picked up mid-cycle without being committed; carries into the current cycle, where it is listed under Committed This Cycle. |
 
-| Issue                             | Result                     | Reason                                                              |
-| --------------------------------- | -------------------------- | ------------------------------------------------------------------- |
-| repo1#101 Initiative A, part 1    | ✅ Done                    | —                                                                   |
-| repo1#102 Initiative A, part 2    | ✅ Done                    | —                                                                   |
-| repo2#210 Maintenance Task B      | ❌ Slipped → current cycle | Blocked on an external dependency; fix landed 26 Aug, retrying now  |
-| repo3#55 Internal tooling cleanup | ❌ Slipped → current cycle | Overcommitted — Initiative A ran two days over                      |
-| repo2#215 Small fix               | ➕ Added mid-cycle, done   | Flagged as urgent partway through the cycle; nothing else displaced |
-| repo3#61 Small fix                | ➕ Added mid-cycle, done   | Closed 22 Aug, no `Cycle` set — credited automatically while preparing this cycle's notes |
-| repo2#230 Feature work in flight  | ➕ Added mid-cycle, not done | Picked up mid-cycle with no `Cycle` set — credited automatically while preparing this cycle's notes; carries into the current cycle |
-
-**Decision:** repo2#210 and repo3#55 both carry into the current cycle as-is, no rework needed.
-
-## Current Cycle: Cycle 13 (28 Aug → 11 Sep 2026)
-
-**Next cycle dates:** Agreed 11 Sep 2026 — 14 days, same length as the cycle just closed.
-
-### New Issue Triage
-
-_List every issue opened since the last cycle and record whether it's committed, parked, or
-closed._
-
-| Issue                                  | Decision                                                                         |
-| --------------------------------------- | -------------------------------------------------------------------------------- |
-| repo1#120 Small internal request       | ➡️ Committed — small, unblocks another team                                      |
-| repo1#121 Minor copy fix               | ➡️ Committed — trivial, bundled with #122                                        |
-| repo2#221 Inconsistent behavior report | ➡️ Committed — reported by more than one person this week                        |
-| repo3#60 Exploratory idea              | 🚫 Closed, not planned — no one has asked for this; revisit if it comes up again |
-| repo1#125 Nice-to-have UI polish       | ⏸ Parking lot — no urgency                                                       |
-
-### Stale Issues
-
-_Report the stale count and how many went newly stale this cycle. Propose close candidates that
-are old, underspecified, or duplicates. Flag any that still need doing and pull them into a
-cycle instead. Call out anything newly stale that looks important._
-
-**38 stale issues** across `Backlog` and `Ready for *` (untouched 3+ weeks); **6 newly stale**
-since the last cycle closed.
-
-**Close candidates**
-
-- **repo1#40** — "Investigate an older idea," open 6 months, no requirements beyond the title.
-  **Decision:** Closed, not planned — too vague to act on; revisit if someone writes it up
-  properly.
-
-- **repo2#45** — "Consider a future enhancement," open 4 months, duplicates repo2#48.
-  **Decision:** Closed, not planned — tracked under repo2#48 instead.
-
-- **repo3#12** — "Old internal cleanup idea," open 5 months, no activity, nothing references it.
-  **Decision:** Closed, not planned — no evidence anyone still wants this.
-
-**Needs a cycle, not a close**
-
-- **repo1#20** — Still genuinely needed (blocks another team's reporting), but has sat in
-  `Backlog` for 5 weeks without ever being triaged.
-  **Decision:** Pull into this cycle — see Committed This Cycle below.
-
-**Newly stale, worth a look**
-
-- **repo2#88** — Went stale this cycle. Real design discussion in the comments and looked close
-  to done before it went quiet — worth checking in on before it becomes a close candidate.
-
-### Waiting on Input
-
-_Go through each item one at a time and record a decision, even the ones nobody can resolve._
-
-- **repo1#90** — Product question A: option 1 or option 2?
-  **Decision:** Option 1 — matches how a related flow already works.
-
-- **repo2#95** — Which segment gets Feature X?
-  **Decision:** All of them, not just one subset.
-
-- **repo1#98** — A pricing-display question.
-  **Decision:** Not resolved — no one on the call had the definitive answer. Follow up with the
-  right team before next cycle; leave as `Waiting on input`.
-
-### Significant Dates
-
-_Flag any upcoming sales, trade shows, marketing campaigns, or other significant dates that might impact planning._
-
-- **04 Sep 2026:** The Humble River sale will be our first large sale using the new dynamic bidding system. Make sure development and QA teams are prepared for any issues that might arise.
-- **15 Sep 2026:** Quarterly marketing review meeting. Ensure all relevant teams have prepared their updates and reports.
-
-### Committed This Cycle
-
-_List every issue committed to this cycle and note why it made the cut._
-
-- **repo2#210** — Maintenance Task B. Carried over from last cycle; the blocking dependency is
-  now resolved.
-- **repo3#55** — Internal tooling cleanup. Carried over from last cycle; straightforward once it
-  wasn't competing with Initiative A for time.
-- **repo1#120** — Small internal request. Small enough to fit alongside the carry-over work, and
-  unblocks another team.
-- **repo1#121** — Minor copy fix. Trivial; bundled in alongside repo2#221 since they touch the
-  same area.
-- **repo2#221** — Inconsistent behavior report. Reported by more than one person this week — that
-  volume is what pushed it in ahead of repo1#125.
-- **repo1#20** — Pulled out of Stale Issues review; blocks another team's reporting and should
-  have been triaged weeks ago.
-- **repo2#230** — Found already `In progress` with no `Cycle` during prep; credited to this cycle
-  automatically, no action needed. Listed in Last Cycle as added mid-cycle and unfinished.
-
-### Parking Lot (Next)
-
-_List every issue deferred to the next cycle and note why it didn't make the cut._
-
-- **repo1#118** — A follow-up enhancement request, carried from last cycle's parking lot. Still
-  waiting on input from another team, so not committed again until that lands.
-- **repo1#125** — Nice-to-have UI polish. No urgency, and this cycle's capacity went to
-  repo2#221's higher report volume instead.
-
-## Out of Office
-
-_Flag any planned time off during the current or upcoming cycle so it's factored into future
-commitments._
-
-- **ALEX:** Out 2–4 Sep.
-- No other absences reported this cycle.
-
-## Next Actions
-
-_List each follow-up as **OWNER:** action, stated as the outcome — not the mechanics of how it
-gets done. Tracker writes default to Mark, delegated to the agent as needed; name the person when
-it's someone else's job._
-
-- **MARK:** Set cycles for the Committed / Parking lot items listed above.
-- **MARK:** Clear `Waiting on input` on repo1#90 and repo2#95, recording the answers, then move
-  them into the appropriate cycles.
-- **MARK:** Close repo3#60, repo1#40, repo2#45, and repo3#12 as not planned.
-- **MARK:** Draft the new issue mentioned above.
-- **MARK:** Post the closing and opening Status Updates per the summaries above.
-- **MARK:** Update the current cycle's end date (11 Sep 2026).
-- **MARK:** Follow up on repo1#98 pricing question with Jordan.
-- **ALEX:** Confirm the outstanding input on repo1#118 with the other team before next cycle.
-  Update the issue with your findings.
+**Decision:** Both slipped items carry into the current cycle as-is. The batching approach for
+acme/site#421 is agreed in principle — no rework of what has already migrated.
 
 ## Next Cycle Review
 
-_The confirmed date, time, and location for the next cycle-review meeting._
+_Agreed first, because it sets when the current cycle ends and therefore how much fits in it._
 
-**Date:** 11 Sep 2026
+**Date:** 1 Apr 2026
 **Time:** 10:00 AM MT
 **Location:** Video call — link in the calendar invite
+
+## Current Cycle: Search relevance (18 Mar → 31 Mar 2026)
+
+### New Issue Triage
+
+_Every issue opened since the last cycle, and where it landed._
+
+| Issue | Title | Status | Decision |
+| ----- | ----- | ------ | -------- |
+| acme/site#437 | Search returns nothing for hyphenated terms | `Backlog` | ➡️ This cycle — reported by three customers this week |
+| acme/site#441 | Add a "recently viewed" row to the listings page | `Backlog` | ⏸ Reporting refresh — no urgency, and it fits that theme better |
+| acme/api#224 | Document the search ranking fields | `Ready for Agent` | ➡️ This cycle — small, and unblocks acme/site#437 |
+| acme/infra#96 | Evaluate a managed search service | `Waiting on input` | ⏸ Apr 15 – Apr 28 — see Waiting on Input below |
+| acme/site#444 | Dark mode for the account pages | `Backlog` | 🚫 Closed, not planned — nobody has asked for it; reopen if that changes |
+
+### Stale Issues
+
+**58 stale business issues** across `Backlog` and `Ready for *`, untouched 3+ weeks; **7 newly
+stale** since this cycle opened. 54 of the 58 are `Backlog`.
+
+> Triage at this scale will not be fixed one issue at a time — acme/site#390 is the lever worth
+> pulling, and it is committed to this cycle and the next few.
+
+**Close candidates**
+
+| Issue | Title | Why it's a candidate | Decision |
+| ----- | ----- | -------------------- | -------- |
+| acme/site#102 | Investigate an idea for the landing page | Open 14 months. The issue template was never filled in — every section is still an empty comment. | ✅ Closed, not planned |
+| acme/api#61 | Consider caching the catalogue response | Open 9 months, empty body, no comments. The title is the entire specification. | ✅ Closed, not planned |
+| acme/api#77 | Cache catalogue responses at the edge | Duplicates acme/api#61, filed later with more detail. | ✅ Closed as duplicate of acme/api#61 |
+
+**Needs a cycle, not a close**
+
+| Issue | Title | Why | Decision |
+| ----- | ----- | --- | -------- |
+| acme/site#390 | Review and close the never-triaged backlog | `Ready for Human`. Genuinely needed — it is the only item that addresses the 58 above — but has sat untriaged for six weeks. | ➡️ This cycle, and the next few |
+
+**Newly stale, worth a look**
+
+| Issue | Title | Why it's worth a look | Decision |
+| ----- | ----- | --------------------- | -------- |
+| acme/infra#84 | Remove the old vendor's IAM roles | Went stale during the very cycle themed on the vendor migration. | ✅ Closed — the work was done and the issue was left open by accident |
+| acme/api#198 | Epic: schema consolidation | Real design discussion in the comments, and it looked close to agreement before it went quiet. | ➡️ Reporting refresh |
+
+### Waiting on Input
+
+| Issue | Question | Decision |
+| ----- | -------- | -------- |
+| acme/infra#96 | Is moving search to a managed service worth the cost, or do we keep running it ourselves? | Worth doing eventually, but not now — revisit once search relevance work has settled and we know the real query load. Deferred to Apr 15 – Apr 28. |
+| acme/site#433 | Which customer segments should see the new pricing display? | Not resolved — nobody on the call had the definitive answer. Left as `Waiting on input`; it will reappear in next cycle's notes on its own. |
+
+### Significant Dates
+
+_Upcoming events to plan releases around._
+
+| Date | Event | Note |
+| ---- | ----- | ---- |
+| Thu 26 Mar | Quarterly catalogue refresh | Highest-traffic day of the quarter. No deploys that day; the release goes out the following morning. |
+| Mon 6 Apr | Finance close for Q1 | Refund and rounding behaviour must not change during that week. |
+
+### Committed This Cycle
+
+| Issue | Title | Status |
+| ----- | ----- | ------ |
+| acme/site#421 | Migrate stored payment methods to the new vendor | `In progress` |
+| acme/api#219 | Split the checkout handler so failures are isolated | `In progress` |
+| acme/site#390 | Review and close the never-triaged backlog | `Ready for Human` |
+| acme/api#215 | Retire the vendor webhook shim | `Ready for Human` |
+| acme/api#224 | Document the search ranking fields | `Ready for Agent` |
+| acme/site#437 | Search returns nothing for hyphenated terms | `Backlog` |
+
+## Future Work
+
+_The two cycles after the current one. Committing work here now means it has a home when the current
+cycle closes, rather than being re-argued every fortnight._
+
+### Reporting refresh (1 Apr → 14 Apr 2026)
+
+| Issue | Title | Status |
+| ----- | ----- | ------ |
+| acme/api#198 | Epic: schema consolidation | `Backlog` |
+| acme/site#441 | Add a "recently viewed" row to the listings page | `Backlog` |
+
+The listings redesign is already designed and underway in a pull request. It sits beneath
+acme/site#441, along with acme/site#446 — "Sort recently viewed by last visit" — which was folded in
+as part of that work.
+
+### Apr 15 – Apr 28 2026
+
+_No theme agreed yet, so the cycle carries its dates as a placeholder until one is._
+
+| Issue | Title | Status |
+| ----- | ----- | ------ |
+| acme/infra#96 | Evaluate a managed search service | `Waiting on input` |
+
+## Out of Office
+
+- **ALEX:** Out 24–26 Mar.
+- No other absences reported for the current or upcoming cycles.
+
+## Next Actions
+
+_Each follow-up as **OWNER:** action, stated as the outcome rather than the mechanics. Tracker
+writes default to the project manager, delegated to the agent as needed; name the person when it is
+someone else's job._
+
+- **SAM:** Email the team proposing that Apr 15 – Apr 28 be spent clearing work that was already in
+  progress before cycles were introduced.
+- **SAM:** Create an issue for the 26 Mar catalogue refresh — nothing on the board covers it.
+- **ALEX:** Get a definitive answer on the pricing-display segments in acme/site#433 before the next
+  meeting, and record it on the issue.
 ````
 
 ## Known limitations
 
-- **Rescheduling has no mechanism.** Correcting a cycle date that has already been agreed and
-  already gone out in a Status Update is a different problem from setting the next cycle's date for
-  the first time, which branch B does directly. No convention exists for it. Work one out and
-  document it here the next time a cycle actually needs moving.
-- **The Doc round trip is manual.** Copy out, copy back. Giving the agent Drive access is a future
-  decision.
+- **Rescheduling has no convention.** Correcting a cycle date that has already been agreed and
+  published is a different problem from setting the next cycle's date for the first time, which
+  branch B does directly. The mechanism is the configuration write above; what is missing is who
+  decides and how it is recorded. Work one out and document it here the next time a cycle actually
+  needs moving.
 
 ## Iterating on the skill
 

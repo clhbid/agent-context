@@ -35,7 +35,7 @@ scope prompt, which a container has no way to answer.
 | --- | --- |
 | `issue-tracker` | Issues via `gh`, the `Status` field, the board query recipes, triage roles, cycles, labels, the commit convention, and how to decompose work |
 | `afk-loop` | Which work to hand to Copilot versus Claude Code, what makes a complete agent brief, reviewing what comes back, and what to do when a run goes wrong |
-| `cycle-review` | The recurring cycle-review meeting: drafting the notes, processing the edited notes back into `Cycle` and `Status`, and the two Status Updates that record it |
+| `cycle-review` | The recurring cycle-review meeting: publishing the notes as a GitHub Discussion, and processing the returned decisions back into `Cycle` and `Status` |
 | `open-pr` | Opening and updating a pull request, with the size backstop |
 
 `skills/issue-tracker/board.graphql` sits beside the skill that uses it: one query against the
