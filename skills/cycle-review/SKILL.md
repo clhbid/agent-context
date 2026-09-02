@@ -1,6 +1,6 @@
 ---
 name: cycle-review
-description: Run the fortnightly-ish cycle-review meeting round trip on the CLHbid Delivery board — publish the meeting notes discussion, process the returned notes back into cycles and statuses, or adjust a cycle's membership. User-invoked only.
+description: Run the fortnightly-ish cycle-review meeting round trip on the CLHbid Delivery board — publish the meeting notes discussion, process the returned notes back into cycles and statuses, or adjust a cycle's membership.
 disable-model-invocation: true
 ---
 
@@ -11,10 +11,13 @@ notes as a Discussion, the meeting works through them, the project manager posts
 a comment, and branch B turns those decisions into tracker writes.
 
 **The Discussion is the record.** It is what anyone reads later to see what was planned versus
-delivered, and it is the baseline the next cycle's notes are diffed against. Notes live in
-`clhbid/clhbid.com` under the **Meetings** category — org discussions at
-`github.com/orgs/clhbid/discussions` are hosted by that repo. `gh` has no discussion command, so
-use `gh api graphql`: `createDiscussion`, `updateDiscussion`, and
+delivered, and it is the baseline the next cycle's notes are diffed against. Notes go in the
+[**Meetings** category](https://github.com/orgs/clhbid/discussions/categories/meetings).
+
+**Every org-wide discussion is hosted by the `clhbid/clhbid.com` repository**, whatever
+`github.com/orgs/clhbid/discussions` implies — that is the repo the API reads and writes them
+through, and it is why a bare `#<number>` anywhere in the notes resolves against `clhbid.com`. `gh`
+has no discussion command, so use `gh api graphql`: `createDiscussion`, `updateDiscussion`, and
 `repository { discussion(number:) }` to read one back.
 
 **The notes are not edited during the meeting.** The project manager posts a comment using the same
@@ -34,10 +37,6 @@ item and name the child, so branch B knows which issue the answer lands on.
 
 **The notes are a business document.** No agent commentary — tooling state, recipe caveats and
 process notes go to the project manager in conversation or into your own TODO list.
-
-**Never emit a value with no source.** A meeting time, a location, a reason: it comes from an input
-or it is left empty. Copying one from the example below is how the 2026-09-01 notes announced a
-meeting time nobody had agreed, under a heading calling it confirmed.
 
 ## Cycle roles
 
@@ -80,10 +79,12 @@ go-ahead, like every other mutation.
    are, add one. **This is a destructive configuration write** — follow the procedure in
    `issue-tracker`, and fold every other pending change into the same write, because a second one
    costs a second restore of the whole board.
-2. **Housekeeping.** Run the `issue-tracker` **stale closed items** recipe, archive every result
-   with `archiveProjectV2Item`, and report what you archived to the project manager in
-   conversation. **It stays out of the notes** — the business does not care which items the
-   auto-archive workflow missed.
+2. **Housekeeping.** Run the `issue-tracker` **stale closed items** recipe. **It should be empty** —
+   `board:sync` archives everything closed before the last completed cycle began, nightly. A
+   non-empty result is therefore diagnostic rather than routine debris: check when the nightly job
+   last ran before treating it as broken, and raise a real failure with the project manager in
+   conversation. Archive by hand with `archiveProjectV2Item` only if the meeting cannot wait.
+   **Either way this stays out of the notes.**
 3. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
    closing cycle's window and keep the top-level results. A sub-issue needs no write and no row —
    it inherits its parent's cycle. This is bookkeeping, not triage: no meeting decision, no
@@ -226,8 +227,7 @@ Notice the **Next Actions** register: outcomes in business language, owner first
 what it describes.
 
 _Illustrative example. The organisation, repositories, issue numbers and titles are invented, chosen
-to cover the range of states the skill has to handle. Nothing here is real work — and in
-particular, the meeting time and location below are **not** a template to copy from._
+to cover the range of states the skill has to handle. Nothing here is real work._
 
 ````markdown
 # Cycle Review — 18 Mar 2026 meeting
@@ -275,7 +275,7 @@ _Every issue opened since the last cycle, and where it landed._
 
 ### Stale Issues
 
-**58 stale business issues** across `Backlog` and `Ready for *`, untouched 3+ weeks; **7 newly
+**58 stale business issues** across `Backlog` and `Ready for *`, untouched 8+ weeks; **7 newly
 stale** since this cycle opened. 54 of the 58 are `Backlog`.
 
 > Triage at this scale will not be fixed one issue at a time — acme/site#390 is the lever worth
