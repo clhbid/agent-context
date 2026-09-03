@@ -18,6 +18,13 @@ clhbid repo. Use the `gh` CLI for all operations.
 - **Read, list, comment**: `gh issue view <number> --comments`, `gh issue list`,
   `gh issue comment <number> --body "..."`. `--jq` requires `--json`, so filtering a read means
   dropping `--comments` and naming the fields: `gh issue view <number> --json number,title,labels --jq ...`
+- **Refer to an issue as `<org>/<repo>#<number>`**, in prose and in tables alike. GitHub renders
+  that form as a link with a hovercard and shortens it to `#<number>` when it is same-repo, so the
+  qualified form costs nothing to read. A **bare `#<number>` resolves against whichever repo hosts
+  the text it sits in** — in an org discussion that is `clhbid/clhbid.com`, not the repo you meant —
+  and links silently to the wrong issue. GitHub also shares one number space across issues and pull
+  requests, so resolve an unqualified reference with `gh pr view <n>`, falling back to
+  `gh issue view <n>`.
 - **Set state**: a project field, not a label — see [Status](#status).
 - **Close**: an issue closes as `completed`, `not planned` or `duplicate`. The reason is the
   record, so pick the one that matches and say why in a closing comment.
@@ -151,9 +158,9 @@ children are how that work gets done.
 The board carries both audiences as views — **📋 Delivery board** is everything, **💼 Business** is
 `no:parent-issue`. The same split governs anything read outside the board:
 
-- **Reporting to the business** — cycle notes, Status Updates, anything the business reads — is
-  top-level only. Add `and .content.parent == null` to any recipe below to get its business view,
-  as the **Planning view** recipe does.
+- **Reporting to the business** — cycle notes, and anything else the business reads — is top-level
+  only, counts included. Add `and .content.parent == null` to any recipe below to get its business
+  view, as the **Planning view** recipe does.
 - **Dispatching and doing the work** reads the leaves, because that is where a branch and a pull
   request attach. The **Agent frontier** recipe is the example: it excludes anything with children.
 
@@ -206,26 +213,35 @@ gh api graphql --paginate -F query=@"$BOARD_QUERY" --jq '
 ... | select((.content.state == "CLOSED"
               and .content.closedAt >= env.CYCLE_START and .content.closedAt < env.CYCLE_END
               and (.cycle.title // "") != env.CYCLE_TITLE)
-          or (.content.state == "OPEN" and .status.name == "In progress" and .cycle == null))
+          or (.content.state == "OPEN" and .status.name == "In progress" and .cycle == null
+              and .content.updatedAt >= env.CYCLE_START))
 
-# Stale closed items — auto-archive missed these. Healthy result is empty
-... | select(.content.state == "CLOSED" and .isArchived == false
-             and (.content.closedAt | fromdateiso8601) < (now - 1814400))
+# ...of which dormant — swap that last clause for uncycled In progress work nobody touched
+              and .content.updatedAt < env.CYCLE_START))
 
-# Stale issues — actionable work untouched for three weeks
+# Stale closed items — closed but never archived. Healthy result is empty
+... | select(.content.state == "CLOSED"
+             and (.content.closedAt | fromdateiso8601) < (now - 4838400))
+
+# Stale issues — actionable work untouched for eight weeks
 ... | select(.content.state == "OPEN"
              and (.status.name | IN("Backlog", "Ready for Agent", "Ready for Human"))
-             and (.content.updatedAt | fromdateiso8601) < (now - 1814400))
+             and (.content.updatedAt | fromdateiso8601) < (now - 4838400))
 
 # ...of which newly stale — add this clause to keep the ones not yet stale when the cycle began
              and (.content.updatedAt | fromdateiso8601)
-                 >= ((env.CYCLE_START | strptime("%Y-%m-%d") | mktime) - 1814400)
+                 >= ((env.CYCLE_START | strptime("%Y-%m-%d") | mktime) - 4838400)
 ```
 
 `...` stands in for the full command above. `--paginate` applies `--jq` per page, so filtering and
 listing work as written; counting needs a pipe (`| wc -l`).
 
-**Three weeks is 1814400 seconds**, and it is the definition of _stale_ — an item is stale on the
+**Archived items are invisible here.** `ProjectV2.items` defaults to
+`archivedStates: [NOT_ARCHIVED]`, so every recipe reads the live board only. That is what makes the
+stale-closed recipe re-runnable — it cannot see what it just archived — and it is why the `Cycle`
+snapshot in [Cycles](#cycles) passes `archivedStates: [ARCHIVED, NOT_ARCHIVED]` explicitly.
+
+**Eight weeks is 4838400 seconds**, and it is the definition of _stale_ — an item is stale on the
 board, not in someone's judgement. The cycle recipes read `CYCLE_TITLE`, `CYCLE_START` and
 `CYCLE_END` from the environment; set them from the iteration's `title`, `startDate` and
 `startDate + duration`. `CYCLE_END` is **exclusive** — an iteration ends the day before the meeting
@@ -238,8 +254,7 @@ of a cycle. Anchoring it to `CYCLE_END` instead would ask which items went stale
 today, and return nothing.
 
 **These recipes are canonical**, and no API returns a view's contents — so a view can never be
-queried directly, only mirrored. `yarn board:sync` will assert each view's filter against this
-table — it is not built yet:
+queried directly, only mirrored:
 
 | #   | View              | Filter                                             | Purpose                                   |
 | --- | ----------------- | -------------------------------------------------- | ----------------------------------------- |
@@ -251,33 +266,68 @@ table — it is not built yet:
 | 6   | ⏳ Waiting        | `status:"Waiting on input"`                        | mirrors the needs-business-input recipe   |
 | 8   | 📥 Triage         | `status:Backlog no:parent-issue`                   | the inbox, top-level only                 |
 
-`board:sync` checks **filters only**, keyed by the view **number** above — stable, never reused
-after a delete, which is why 7 is missing. A view's name, columns and tab position belong to
-whoever uses it: a change there is intent, not drift.
+View **numbers** are stable and never reused after a delete, which is why 7 is missing. Only the
+filter is worth asserting against this table: a view's name, columns and tab position belong to
+whoever uses it, so a change there is intent rather than drift.
+
+**A filter is writable.** `updateProjectV2View` takes `name`, `layout`, `filter` and
+`configuration`, so a drifted filter can be **repaired**, not only reported. Grouping and sorting
+are **readable** — `ProjectV2View` exposes `groupByFields`, `verticalGroupByFields` and
+`sortByFields` — but not writable: `ProjectV2ViewConfigurationInput` takes only `visibleFieldIds`.
+
+Both board views group by `Cycle` as swimlanes with `Status` as the columns, and **an iteration with
+no items renders no swimlane** — so a completed cycle leaves the board once its items are archived,
+and no filter is needed to hide one.
 
 ## Cycles
 
-A cycle is an iteration of the `Cycle` field — the title carries the theme, the dates carry the
-schedule. An iteration **ends the day before the meeting that closes it**.
+A cycle is an iteration of the `Cycle` field. An iteration **ends the day before the meeting that
+closes it**.
 
 Read them from the field's `configuration`. `completedIterations` holds the closed ones; the
 running cycle is the entry in `iterations` whose `startDate` is on or before today and whose
-`startDate + duration` is after it, and the next is the earliest starting after that. Select by
+`startDate + duration` is after it, and the future cycles are the ones starting after it. Select by
 date rather than by index — nothing guarantees the array's order.
 
 `Cycle` is set on top-level issues only; children inherit their parent's by definition, so a
 sub-issue with no `Cycle` is planned, not missed.
 
-**`iterations` holds exactly two** — the running cycle and next — and next is the **parking lot**,
-where deferred work is put. Keep it at two: a third is a plan someone has to maintain by hand,
-which is what the parking lot exists to avoid.
+**Three iterations are live at all times** — the running cycle and two future ones — so planning
+always has somewhere to put work deferred two meetings out.
+
+**The title carries the theme**, and until one is agreed it is the date range as a placeholder
+(`Sep 29 - Oct 12`). Dates live in the iteration's own `startDate` and `duration`. **Titles must be
+unique**: recovering from a configuration write resolves iterations by title, and two cycles sharing
+one makes that ambiguous.
+
+### Writing the configuration clears the whole board
+
+`updateProjectV2Field` is the only mutation that touches `iterationConfiguration`, and **every write
+is a full replacement that regenerates every iteration id and clears every item's `Cycle`**. Even an
+identical configuration written back does it, so appending an iteration costs exactly what renaming
+one does. The input also has **no `completedIterations`**, so any completed cycle not passed back
+inside `iterations` is deleted outright.
+
+**Make one configuration write per cycle**, folding every pending change into it — the new
+iteration, the agreed end date, any theme titles — and wrap it:
+
+1. **Snapshot** every item's `Cycle`, keyed by `<org>/<repo>#<number>`. Archived items carry values
+   too, so this is its own query passing `archivedStates: [ARCHIVED, NOT_ARCHIVED]` —
+   [`board.graphql`](board.graphql) is live-only and would silently skip them.
+2. **Write once**, passing **all** iterations, completed ones past-dated so GitHub re-sorts them
+   back into `completedIterations`. The configuration's own `startDate` cannot be read back — only
+   `startDay` is exposed — so pass the earliest iteration's `startDate`.
+3. **Restore** every snapshot value, resolving iterations **by title**, because every id changed.
+4. **Read back** `completedIterations` and the restored count. An empty `completedIterations` is the
+   failure signature; a count short of the snapshot means items were missed.
+
 
 ## Deferring work
 
 Deferring is a decision to record. Its form follows when the work comes back:
 
-- **Next cycle** — set `Cycle` to next, the parking lot. The issue stays open and the board carries
-  it.
+- **A future cycle** — set `Cycle` to one of the two ahead. The issue stays open and the board
+  carries it.
 - **A later date** — comment with the decision, the owner, and when it returns, then close with
   `--reason "not planned"`. The owner sets the calendar reminder; nothing in GitHub will raise it
   for them.
@@ -344,9 +394,6 @@ no CI gate for this.
 
 **PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_ While it is `no`, external PRs are not triaged and no `gh pr` state handling applies.
 
-GitHub shares one number space across issues and PRs, so a bare `#42` may be either — resolve with
-`gh pr view 42` and fall back to `gh issue view 42`.
-
 ## When a skill says…
 
 - **"publish to the issue tracker"** — create a GitHub issue.
@@ -376,6 +423,10 @@ for a top-level issue. GraphQL's `Issue.parent` answers truthfully, which is wha
 [`board.graphql`](board.graphql) selects. Checking issue by issue costs a request each and gets
 skipped under pressure, so **put `no:parent-issue` (or `.content.parent == null`) in the query
 itself**.
+
+**Adding an item unarchives it.** `addProjectV2ItemById` on an already-archived item silently
+returns it to the live board. Archived items are invisible to a live-only read, so a **reopened**
+issue looks absent, gets re-added, and comes back out of the archive as a side effect.
 
 **A read-back can be stale.** The project API is eventually consistent. Verify every write by
 read-back, but treat a mismatch straight after a write as unconfirmed rather than failed — re-check

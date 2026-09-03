@@ -91,8 +91,8 @@ per-repo. Read the pull request against it, then act:
   better brief or to a human, and set the `Status` to match that decision.
 
 A pull request in none of the three states — ready for review but empty, or draft with no
-explanation — is an agent defect rather than something to review. clhbid.com#2254 is the worked
-example: no changes, no acceptance criteria addressed, review requested anyway.
+explanation — is an agent defect rather than something to review. clhbid/clhbid.com#2254 is the
+worked example: no changes, no acceptance criteria addressed, review requested anyway.
 
 ## When a run goes wrong
 
