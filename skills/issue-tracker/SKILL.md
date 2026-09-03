@@ -18,7 +18,7 @@ clhbid repo. Use the `gh` CLI for all operations.
 - **Read, list, comment**: `gh issue view <number> --comments`, `gh issue list`,
   `gh issue comment <number> --body "..."`. `--jq` requires `--json`, so filtering a read means
   dropping `--comments` and naming the fields: `gh issue view <number> --json number,title,labels --jq ...`
-- **Refer to an issue as `clhbid/<repo>#<number>`**, in prose and in tables alike. GitHub renders
+- **Refer to an issue as `<org>/<repo>#<number>`**, in prose and in tables alike. GitHub renders
   that form as a link with a hovercard and shortens it to `#<number>` when it is same-repo, so the
   qualified form costs nothing to read. A **bare `#<number>` resolves against whichever repo hosts
   the text it sits in** — in an org discussion that is `clhbid/clhbid.com`, not the repo you meant —
@@ -219,7 +219,7 @@ gh api graphql --paginate -F query=@"$BOARD_QUERY" --jq '
 # ...of which dormant — swap that last clause for uncycled In progress work nobody touched
               and .content.updatedAt < env.CYCLE_START))
 
-# Stale closed items — board:sync should have archived these already. Healthy result is empty
+# Stale closed items — closed but never archived. Healthy result is empty
 ... | select(.content.state == "CLOSED"
              and (.content.closedAt | fromdateiso8601) < (now - 4838400))
 
@@ -242,17 +242,7 @@ stale-closed recipe re-runnable — it cannot see what it just archived — and 
 snapshot in [Cycles](#cycles) passes `archivedStates: [ARCHIVED, NOT_ARCHIVED]` explicitly.
 
 **Eight weeks is 4838400 seconds**, and it is the definition of _stale_ — an item is stale on the
-board, not in someone's judgement. It was three weeks until `board:sync` began archiving closed
-items against the **start of the most recently completed cycle** rather than a fixed window. That
-horizon reaches back about four weeks in normal operation and eight when a cycle stretches, so a
-three-week test still called items fresh that had already been archived.
-
-**One constant covers both recipes, deliberately.** It moves the open-work signal too: `Backlog` and
-`Ready for *` work now sits two months before a review flags it, and the stale count the notes
-report falls for reasons that have nothing to do with triage. That was weighed and accepted, so do
-not split the constant back apart without revisiting the archive horizon alongside it.
-
-The cycle recipes read `CYCLE_TITLE`, `CYCLE_START` and
+board, not in someone's judgement. The cycle recipes read `CYCLE_TITLE`, `CYCLE_START` and
 `CYCLE_END` from the environment; set them from the iteration's `title`, `startDate` and
 `startDate + duration`. `CYCLE_END` is **exclusive** — an iteration ends the day before the meeting
 that closes it, so a cycle titled `14 Aug → 28 Aug` has `CYCLE_START=2026-08-14` and
@@ -264,8 +254,7 @@ of a cycle. Anchoring it to `CYCLE_END` instead would ask which items went stale
 today, and return nothing.
 
 **These recipes are canonical**, and no API returns a view's contents — so a view can never be
-queried directly, only mirrored. `yarn board:sync` runs nightly and archives stale closed items
-today; asserting each view's filter against this table is still to come:
+queried directly, only mirrored:
 
 | #   | View              | Filter                                             | Purpose                                   |
 | --- | ----------------- | -------------------------------------------------- | ----------------------------------------- |
@@ -277,9 +266,9 @@ today; asserting each view's filter against this table is still to come:
 | 6   | ⏳ Waiting        | `status:"Waiting on input"`                        | mirrors the needs-business-input recipe   |
 | 8   | 📥 Triage         | `status:Backlog no:parent-issue`                   | the inbox, top-level only                 |
 
-`board:sync` checks **filters only**, keyed by the view **number** above — stable, never reused
-after a delete, which is why 7 is missing. A view's name, columns and tab position belong to
-whoever uses it: a change there is intent, not drift.
+View **numbers** are stable and never reused after a delete, which is why 7 is missing. Only the
+filter is worth asserting against this table: a view's name, columns and tab position belong to
+whoever uses it, so a change there is intent rather than drift.
 
 **A filter is writable.** `updateProjectV2View` takes `name`, `layout`, `filter` and
 `configuration`, so a drifted filter can be **repaired**, not only reported. Grouping and sorting
@@ -287,8 +276,8 @@ are **readable** — `ProjectV2View` exposes `groupByFields`, `verticalGroupByFi
 `sortByFields` — but not writable: `ProjectV2ViewConfigurationInput` takes only `visibleFieldIds`.
 
 Both board views group by `Cycle` as swimlanes with `Status` as the columns, and **an iteration with
-no items renders no swimlane**. A completed cycle therefore leaves the board by itself once its
-items are archived, which `board:sync` now does nightly — so no filter is needed to hide one.
+no items renders no swimlane** — so a completed cycle leaves the board once its items are archived,
+and no filter is needed to hide one.
 
 ## Cycles
 
@@ -307,27 +296,22 @@ sub-issue with no `Cycle` is planned, not missed.
 always has somewhere to put work deferred two meetings out.
 
 **The title carries the theme**, and until one is agreed it is the date range as a placeholder
-(`Sep 29 - Oct 12`). Dates live in the iteration's own `startDate` and `duration`, never only in the
-title. **Titles must be unique**: recovering from a configuration write resolves iterations by
-title, and two cycles sharing one makes that ambiguous.
+(`Sep 29 - Oct 12`). Dates live in the iteration's own `startDate` and `duration`. **Titles must be
+unique**: recovering from a configuration write resolves iterations by title, and two cycles sharing
+one makes that ambiguous.
 
 ### Writing the configuration clears the whole board
 
 `updateProjectV2Field` is the only mutation that touches `iterationConfiguration`, and **every write
-is a full replacement that regenerates every iteration id and clears every item's `Cycle`** —
-verified by writing an identical configuration back and watching all assignments vanish. Two losses,
-with different causes:
+is a full replacement that regenerates every iteration id and clears every item's `Cycle`**. Even an
+identical configuration written back does it, so appending an iteration costs exactly what renaming
+one does. The input also has **no `completedIterations`**, so any completed cycle not passed back
+inside `iterations` is deleted outright.
 
-- The input has **no `completedIterations`**, so any completed cycle not passed back inside
-  `iterations` is deleted outright.
-- The list element takes only `startDate`, `duration` and `title` — **no `id`** — and GitHub
-  reconciles nothing, so ids regenerate even for entries that did not change.
-
-There is no partial edit and no cheap change: appending an iteration costs exactly what renaming one
-does. So **make one configuration write per cycle**, folding every pending change into it — the new
+**Make one configuration write per cycle**, folding every pending change into it — the new
 iteration, the agreed end date, any theme titles — and wrap it:
 
-1. **Snapshot** every item's `Cycle`, keyed by `clhbid/<repo>#<number>`. Archived items carry values
+1. **Snapshot** every item's `Cycle`, keyed by `<org>/<repo>#<number>`. Archived items carry values
    too, so this is its own query passing `archivedStates: [ARCHIVED, NOT_ARCHIVED]` —
    [`board.graphql`](board.graphql) is live-only and would silently skip them.
 2. **Write once**, passing **all** iterations, completed ones past-dated so GitHub re-sorts them
@@ -337,8 +321,6 @@ iteration, the agreed end date, any theme titles — and wrap it:
 4. **Read back** `completedIterations` and the restored count. An empty `completedIterations` is the
    failure signature; a count short of the snapshot means items were missed.
 
-The restore is bounded by the live cycles rather than the backlog — around 45 items — because
-`board:sync` archives each finished cycle's items nightly. It does not grow as the backlog does.
 
 ## Deferring work
 
@@ -443,9 +425,8 @@ skipped under pressure, so **put `no:parent-issue` (or `.content.parent == null`
 itself**.
 
 **Adding an item unarchives it.** `addProjectV2ItemById` on an already-archived item silently
-returns it to the live board. Undocumented, measured against project 4. It bites because archived
-items are invisible to a live-only read: a **reopened** issue looks absent, gets re-added to "fix"
-that, and comes back out of the archive as a side effect.
+returns it to the live board. Archived items are invisible to a live-only read, so a **reopened**
+issue looks absent, gets re-added, and comes back out of the archive as a side effect.
 
 **A read-back can be stale.** The project API is eventually consistent. Verify every write by
 read-back, but treat a mismatch straight after a write as unconfirmed rather than failed — re-check

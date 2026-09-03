@@ -10,19 +10,11 @@ The cycle review is a **round trip through a GitHub Discussion**. Branch A publi
 notes as a Discussion, the meeting works through them, the project manager posts their decisions as
 a comment, and branch B turns those decisions into tracker writes.
 
-**The Discussion is the record.** It is what anyone reads later to see what was planned versus
-delivered, and it is the baseline the next cycle's notes are diffed against. Notes go in the
-[**Meetings** category](https://github.com/orgs/clhbid/discussions/categories/meetings).
-
-**Every org-wide discussion is hosted by the `clhbid/clhbid.com` repository**, whatever
-`github.com/orgs/clhbid/discussions` implies — that is the repo the API reads and writes them
-through, and it is why a bare `#<number>` anywhere in the notes resolves against `clhbid.com`. `gh`
-has no discussion command, so use `gh api graphql`: `createDiscussion`, `updateDiscussion`, and
-`repository { discussion(number:) }` to read one back.
+**The Discussion is the record**, and the baseline the next cycle's notes are diffed against. See
+[Editing Discussions](#editing-discussions) for where they live and how to read and write one.
 
 **The notes are not edited during the meeting.** The project manager posts a comment using the same
-headers, and branch B integrates it afterwards. That keeps the published body a clean record and
-the decisions attributable.
+headers, and branch B integrates it afterwards.
 
 A cycle is an iteration of the `Cycle` field; work state is the `Status` field. Both live on the
 CLHbid Delivery project. **Read the field mechanics, the `Status` values, the reference convention
@@ -79,12 +71,11 @@ go-ahead, like every other mutation.
    are, add one. **This is a destructive configuration write** — follow the procedure in
    `issue-tracker`, and fold every other pending change into the same write, because a second one
    costs a second restore of the whole board.
-2. **Housekeeping.** Run the `issue-tracker` **stale closed items** recipe. **It should be empty** —
-   `board:sync` archives everything closed before the last completed cycle began, nightly. A
-   non-empty result is therefore diagnostic rather than routine debris: check when the nightly job
-   last ran before treating it as broken, and raise a real failure with the project manager in
-   conversation. Archive by hand with `archiveProjectV2Item` only if the meeting cannot wait.
-   **Either way this stays out of the notes.**
+2. **Housekeeping.** Run the `issue-tracker` **stale closed items** recipe and flag what it
+   returns, along with any issue that should be on the board and is not. **Both are healthy empty**,
+   so a result is a signal that the sweep behind them is failing. Report it to the project manager
+   in conversation and archive by hand with `archiveProjectV2Item` only if the meeting cannot wait.
+   **This stays out of the notes.**
 3. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
    closing cycle's window and keep the top-level results. A sub-issue needs no write and no row —
    it inherits its parent's cycle. This is bookkeeping, not triage: no meeting decision, no
@@ -95,11 +86,10 @@ go-ahead, like every other mutation.
      committed to it. Credit it to the cycle now opening — unfinished work belongs to the cycle
      that will finish it — and record it in **both** places: an `➕ Added mid-cycle, not done` row
      in **Last Cycle** whose reason says it carries forward, and an entry in **Committed This
-     Cycle**. A row in one place only reads as work that appeared from nowhere.
+     Cycle**.
    - **Dormant** work — the **dormant** variant of the same recipe, untouched since before the
-     closing cycle began — gets **no write**. It has either stalled, which means the cycle was
-     over-committed, or it is blocked and nobody said so. List it as its own decision with its
-     status flagged **suspect**. Never auto-credit it, and never reset it to `Backlog`.
+     closing cycle began — gets **no write**. List it as its own decision with its status flagged
+     **suspect**. Never auto-credit it, and never reset it to `Backlog`.
 4. **Read the board.** Project items, the `Cycle` configuration, and the previous cycle's notes
    discussion.
 5. **Draft Last Cycle.** Restate the closing cycle's goal, then table every issue committed to it.
@@ -126,9 +116,8 @@ go-ahead, like every other mutation.
    heading is a convention, not the test. If no comment asks it, that is an **error**: the question
    has never been put to anyone, so say so rather than reconstructing one from the title.
 8. **Draft Stale Issues.** Run the `issue-tracker` **stale issues** recipe and report two numbers:
-   the total stale, and how many went **newly stale** during the cycle just closing — that second
-   number is derived from the same `updatedAt`, anchored to the closing cycle's `startDate`, not
-   from a baseline anyone stored. Then do the reading:
+   the total stale, and how many went **newly stale** during the cycle just closing. Then do the
+   reading:
    - **Close candidates** — a handful, judged on _old_, _underspecified_ or _duplicate_. This means
      reading each candidate's body and cross-checking the board for duplicates. Sorting by age is
      not the job.
@@ -138,20 +127,17 @@ go-ahead, like every other mutation.
      own evidence: comment volume, a prior assignee, other issues referencing it. A judgement call,
      not a threshold.
 9. **Draft Future Work** — one sub-section per future cycle, headed by the iteration name, each
-   with its own table. Separate tables make the load committed to each cycle visible at a glance;
-   one wide table with a cycle column does not.
+   with its own table, so the load committed to each is visible at a glance.
 10. **Draft the closing sections.** **Out of Office** is a blank prompt for the team. **Next
     Actions** is present but empty, showing the owner-first shape.
 11. **Reconcile against the live board.** Every cycle section must agree with what the board
-    actually says. `clhbid/clhbid.com#2325` was committed to a cycle and missing from Committed
-    This Cycle because the two were written as separate steps with nothing comparing them.
+    actually says, item for item.
 12. **Publish.** Create the Discussion, or update it if this cycle's notes already exist. **Branch A
     is re-runnable**: run it again whenever the board changes and it revises the same discussion.
 
-**Every section is worked one decision at a time.** That is why each triage line, each
-`Waiting on input` question and each stale candidate carries its own `Decision` rather than a
-shared verdict at the end of a table — a section with one decision on it gets skimmed, and the
-items underneath get silently agreed to.
+**Every section is worked one decision at a time.** Each triage line, each `Waiting on input`
+question and each stale candidate carries its own `Decision`, never a shared verdict at the end of
+a table.
 
 See [The notes](#the-notes) for the shape, with every `Decision`, `Reason` and **Next Actions** line
 blank in the draft and filled in on the way back.
@@ -160,18 +146,16 @@ blank in the draft and filled in on the way back.
 
 Read the published body and the project manager's comment from the API by discussion number.
 
-**Accept both reference forms.** The qualified `clhbid/<repo>#<number>` resolves as written. A bare
-`#<number>` resolves against `clhbid/clhbid.com`, the repo hosting the discussion — **say which
-issue you resolved it to** before acting on it, because that default is wrong as often as it is
-right.
+**Accept both reference forms.** A qualified `<org>/<repo>#<number>` resolves as written; a bare
+`#<number>` resolves against `clhbid/clhbid.com`, the repo hosting the discussion. **Say which issue
+you resolved a bare reference to** before acting on it.
 
 1. **Last Cycle** — the discussion is the record and the backfill already set every `Cycle` in
    branch A. Nothing to write.
 2. **Sweep.** **No open item may still carry the closing cycle** (`cycle:@previous is:open` on the
    board). Reassign every straggler with `gh project item-edit` — usually to current, or clear the
-   field if the work was dropped. This step is dull and sits in front of the interesting work,
-   which is exactly the shape that invites skipping it; an orphan left behind is invisible to every
-   cycle-scoped view from then on.
+   field if the work was dropped. An orphan left behind is invisible to every cycle-scoped view
+   from then on.
 3. **New Issue Triage** — apply each line: set `Cycle` and `Status` with `gh project item-edit`, or
    close the issue with `--reason "not planned"`.
 4. **Stale Issues** — apply each line: close candidates are closed `--reason "not planned"`; work
@@ -182,28 +166,24 @@ right.
    to the comment that asked it, prefixed `> *Recorded from the <date> planning meeting.*`, and
    **fold the answer into the issue body** so someone picking the work up cold has the whole spec.
    The comment is the audit trail; the body is the spec. Never delete what was there. An item the
-   meeting could not resolve is **left untouched**, `Waiting on input` and all — it reappears in
-   next cycle's notes by itself.
+   meeting could not resolve is **left untouched**, `Waiting on input` and all.
 
    Then route it off `Waiting on input`, and only when **every** question on the issue is answered:
    `Ready for Agent` **only if the updated body now reads as a complete brief an agent could work
-   from cold** — this is the gate that keeps the AFK queue trustworthy; `Ready for Human` if it
-   needs judgement, external access, a design decision or manual testing; `Backlog` if it is
-   answered but still underspecified, said out loud rather than guessed at. An answer that raises a
+   from cold**; `Ready for Human` if it needs judgement, external access, a design decision or
+   manual testing; `Backlog` if it is answered but still underspecified. An answer that raises a
    **new** question has not unblocked anything: post the new question as a comment in the same
    shape and leave the issue on `Waiting on input`.
-6. **Significant Dates** and **Out of Office** — informational. They are context for what the team
-   could commit to; they produce no tracker write.
+6. **Significant Dates** and **Out of Office** — informational; no tracker write.
 7. **Committed This Cycle** and each **Future Work** section — set `Cycle` on each top-level issue,
    skipping anything the branch A backfill already credited.
-8. **Next Actions** — decide by **what the line describes, not who owns it**. The project manager's
-   own lines cover both tracker work they delegate to you and follow-ups they handle themselves, so
-   the owner tells you nothing. Execute the tracker actions — cycle and status changes, closures,
-   the new-issue draft. Leave person-to-person follow-ups alone.
+8. **Next Actions** — decide by **what the line describes, not who owns it**: the owner tells you
+   nothing, since the project manager's own lines cover both delegated tracker work and follow-ups
+   they handle themselves. Execute the tracker actions — cycle and status changes, closures, the
+   new-issue draft. Leave person-to-person follow-ups alone.
 9. **Apply any agreed cycle date change** to the `Cycle` field's configuration. **The write is
    destructive** — follow the procedure in `issue-tracker`. Branch A has usually already made this
-   cycle's one configuration write, so an agreed date should have gone in with it; a separate write
-   here costs a second restore of the whole board.
+   cycle's one write, so an agreed date should have gone in with it.
 10. **Draft an issue** for work in the notes that matches nothing on the board — category label
     only, no state, body drawn from the notes. It is new input, so it lands in `Backlog` like
     anything filed from a template.
@@ -371,13 +351,17 @@ someone else's job._
   meeting, and record it on the issue.
 ````
 
-## Known limitations
+## Editing Discussions
 
-- **Rescheduling has no convention.** Correcting a cycle date that has already been agreed and
-  published is a different problem from setting the next cycle's date for the first time, which
-  branch B does directly. The mechanism is the configuration write above; what is missing is who
-  decides and how it is recorded. Work one out and document it here the next time a cycle actually
-  needs moving.
+Notes go in the
+[**Meetings** category](https://github.com/orgs/clhbid/discussions/categories/meetings).
+
+**Every org-wide discussion is hosted by the `clhbid/clhbid.com` repository**, whatever
+`github.com/orgs/clhbid/discussions` implies. That is the repo the API addresses them through, and
+it is why a bare `#<number>` in the notes resolves against `clhbid.com`.
+
+`gh` has no discussion command, so use `gh api graphql`: `createDiscussion` and `updateDiscussion`
+to write, `repository { discussion(number:) }` to read a body and its comments back.
 
 ## Iterating on the skill
 
