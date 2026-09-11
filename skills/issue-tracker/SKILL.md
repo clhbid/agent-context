@@ -12,9 +12,8 @@ clhbid repo. Use the `gh` CLI for all operations.
 ## Conventions
 
 - **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line
-  bodies. This does not apply an issue form — see
-  [Templates apply a category, never a state](#templates-apply-a-category-never-a-state) for what
-  you then owe.
+  bodies. This does not apply an issue form — follow
+  [Creating an issue from the org form](#creating-an-issue-from-the-org-form).
 - **Read, list, comment**: `gh issue view <number> --comments`, `gh issue list`,
   `gh issue comment <number> --body "..."`. `--jq` requires `--json`, so filtering a read means
   dropping `--comments` and naming the fields: `gh issue view <number> --json number,title,labels --jq ...`
@@ -80,8 +79,8 @@ business.
 
 **Prefer `Ready for Agent`**, which needs both halves of its row — fully specified _and_ already
 sliced. Work that cannot be specified until someone decides something is `Waiting on input`: a
-question to answer, not work to schedule. `Ready for Human` is for what no agent can finish.
-`/afk-loop` covers dispatching.
+question to answer, not work to schedule. `Ready for Human` is for what no agent can finish. For
+what counts as an agent brief, see [`afk-loop` § The agent brief](../afk-loop/SKILL.md#the-agent-brief).
 
 **Claiming is an assignee write.** `gh issue edit <n> --add-assignee @me` is the atomic first
 write that stops two agents taking the same issue; setting `Status` to `In progress` follows it.
@@ -348,6 +347,29 @@ Issue templates apply exactly one of them, and `/wayfinder` adds its own — see
 
 Any other label is decoration — read it if you like, but nothing keys off it.
 
+## Creating an issue from the org form
+
+Issue forms in `clhbid/.github/.github/ISSUE_TEMPLATE/` are the source of truth for what an issue
+body contains.
+
+Before `gh issue create`, fetch the form you need:
+
+```bash
+gh api repos/clhbid/.github/contents/.github/ISSUE_TEMPLATE/<bug|enhancement>.yml \
+  --jq .content | base64 -d
+```
+
+Use each field's `label` as a `### ` heading in the issue body, in the same order as the form. Fill
+every required field. Omit optional fields when they do not apply. This rule applies to any
+agent-authored body, including later edits.
+
+Anything beyond the form's fields — acceptance criteria, interface notes, verification steps, or
+scope boundaries outside the form itself — belongs in the issue's agent-brief comment (or a
+triage-notes comment), not as extra body headings. See [`afk-loop` § The agent brief](../afk-loop/SKILL.md#the-agent-brief).
+
+Creating this way still means one category label (`bug` or `enhancement`), no state label, and then
+confirming the issue landed on `Backlog` — see [Status](#status).
+
 ## Templates apply a category, never a state
 
 Issue forms come from the org defaults in `clhbid/.github` under `.github/ISSUE_TEMPLATE/`. **A
@@ -356,12 +378,8 @@ person filing an issue should use one** — they collect fields a triager otherw
 A form applies exactly one **category** label (`bug` or `enhancement`) and **no state**. Category
 says what kind of thing an issue is; `Status` says where it has got to — nothing about the category
 implies a state.
-
-**`gh issue create` does not apply a form**, and it is the normal path here — an agent has no
-browser to fill one in. Creating directly is fine; it means you owe what the form would have done:
-exactly one category label, no state, and the body the form would have collected rather than a bare
-title and a sentence. The issue then lands on `Backlog` — see [Status](#status) for confirming that
-and for what moves it on.
+When an agent creates an issue without the browser form, use
+[Creating an issue from the org form](#creating-an-issue-from-the-org-form).
 
 ## Commit convention
 
@@ -396,7 +414,8 @@ no CI gate for this.
 
 ## When a skill says…
 
-- **"publish to the issue tracker"** — create a GitHub issue.
+- **"publish to the issue tracker"** — create a GitHub issue via
+  [Creating an issue from the org form](#creating-an-issue-from-the-org-form).
 - **"fetch the relevant ticket"** — `gh issue view <number> --comments`.
 
 ## Wayfinding operations
