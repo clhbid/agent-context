@@ -61,16 +61,22 @@ re-check after a moment rather than re-issuing it.
 
 ## Branch A — Prepare the notes
 
-Branch A produces one Markdown document and writes nothing to the tracker except the two automatic
-bookkeeping steps below. **They run first**, before a line of the draft is written, because both
-change what the tables say. _Automatic_ means no meeting decides them — they still show their list
-and take a go-ahead, like every other mutation.
+Branch A produces one Markdown document and writes nothing to the tracker except the three
+automatic bookkeeping steps below. **They run first**, before a line of the draft is written,
+because each changes what the tables say. _Automatic_ means no meeting decides them — they still
+show their list and take a go-ahead, like every other mutation.
 
 1. **Housekeeping.** Run the `issue-tracker` **stale closed items** recipe. Archive every result
    with `archiveProjectV2Item` and report what you archived to the project manager in conversation.
    **This stays out of the notes** — the auto-archive workflow missing a few items is not a decision
    the meeting makes.
-2. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
+2. **Merged, still open.** Run the `issue-tracker` **merged pull request, open issue** recipe.
+   GitHub closed nothing for these — the recipe says why — so each is finished work that no cycle
+   report has ever credited. Every row ends one of two ways: closed as `completed` naming the pull
+   request, or judged still live because the pull request was a deliberate partial. Report the
+   closures to the project manager in conversation. **This stays out of the notes** for the same
+   reason step 1 does.
+3. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
    closing cycle's window, keep the top-level results, and set `Cycle` immediately on each one. A
    sub-issue it returns needs no write and no row — it inherits its parent's cycle, so a child with
    no `Cycle` is planned, not missed. This is bookkeeping, not triage — no meeting decision, no
@@ -84,15 +90,15 @@ and take a go-ahead, like every other mutation.
      — and record it in **both** places: an `➕ Added mid-cycle, not done` row in **Last Cycle**,
      whose reason says it carries into the current cycle, and an entry already in **Committed This
      Cycle**. A row in one place only reads as work that appeared from nowhere.
-3. **Read the board.** Project items, the `Cycle` configuration, and the prior Status Updates.
-4. **Draft Last Cycle.** Restate the closing cycle's goal, then table every issue that was
+4. **Read the board.** Project items, the `Cycle` configuration, and the prior Status Updates.
+5. **Draft Last Cycle.** Restate the closing cycle's goal, then table every issue that was
    committed to it, with `Result` and `Reason` columns **left blank for the meeting to fill in**.
    Diff the membership against the **previous opening Status Update's** frozen scope so slippage
    and mid-cycle additions are visible rather than silently absorbed.
-5. **Draft Current Cycle**, sections in this order, because each one feeds the next: the proposed
+6. **Draft Current Cycle**, sections in this order, because each one feeds the next: the proposed
    next-cycle end date (from the next meeting date, marked **proposed** — the iteration's dates are
    not written at this step), **New Issue Triage** (every issue opened since the closing cycle
-   started, `Decision` blank), **Stale Issues** (step 6), **Waiting on Input** (every
+   started, `Decision` blank), **Stale Issues** (step 7), **Waiting on Input** (every
    `Status = Waiting on input` issue, listed **one at a time** with its own `Decision`, never
    summarised as a count), **Significant Dates** (a blank prompt), then **Committed This Cycle**
    and **Parking Lot** left empty apart from anything the backfill already credited.
@@ -101,7 +107,7 @@ and take a go-ahead, like every other mutation.
    itself lives on the issue as a Triage Notes comment. **Confirm that comment exists before
    listing the item.** If it doesn't, the question has never actually been put to anyone — say so
    rather than reconstructing one from the title, because that gap means the `Status` is wrong.
-6. **Draft Stale Issues.** Run the `issue-tracker` **stale issues** recipe and report two numbers:
+7. **Draft Stale Issues.** Run the `issue-tracker` **stale issues** recipe and report two numbers:
    the total stale, and how many went **newly stale** during the cycle just closing — that second
    number is derived from the same `updatedAt`, anchored to the closing cycle's `startDate`, not
    from a baseline anyone stored. Then do the reading:
@@ -116,11 +122,11 @@ and take a go-ahead, like every other mutation.
 
    Every item in all three groups carries its own blank `Decision:`, exactly like every other
    review section.
-7. **Draft the closing sections.** **Out of Office** and **Significant Dates** are blank prompts
+8. **Draft the closing sections.** **Out of Office** and **Significant Dates** are blank prompts
    for the team — they exist for the meeting, not for the tracker. **Next Actions** is present but
    empty, showing the owner-first shape. **Next Cycle Review** is templated with the date, time and
    location of the recurring slot.
-8. **Present the draft in the conversation and stop.** It is a draft until the project manager
+9. **Present the draft in the conversation and stop.** It is a draft until the project manager
    returns it edited. Write it nowhere.
 
 **Every section is worked one decision at a time.** That is why each triage line, each
