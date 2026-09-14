@@ -33,7 +33,7 @@ scope prompt, which a container has no way to answer.
 
 | Skill | What it covers |
 | --- | --- |
-| `issue-tracker` | Issues via `gh`, the `Status` field, the board query recipes, triage roles, cycles, labels, the commit convention, and how to decompose work |
+| `issue-tracker` | The delivery language, issues via `gh`, the `Status` field, the board query recipes, triage roles, cycles, epics, labels, the commit convention, and how to decompose work |
 | `afk-loop` | Which work to hand to Copilot versus Claude Code, what makes a complete agent brief, reviewing what comes back, and what to do when a run goes wrong |
 | `cycle-review` | The recurring cycle-review meeting: publishing the notes as a GitHub Discussion, and processing the returned decisions back into `Cycle` and `Status` |
 | `open-pr` | Opening and updating a pull request, with the size backstop |
