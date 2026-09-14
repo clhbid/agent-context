@@ -16,9 +16,6 @@ The words the skills plan and report in. Every rule below is written in these te
 **Cycle**: a fortnight-ish planning period that work is committed to. Committing an issue to a
 cycle is a promise to finish it in that cycle. _Avoid_: sprint, milestone.
 
-**Slipped**: committed to a cycle and still open when it closed. Always a missed commitment, never
-"progressing as expected". _Avoid_: in flight, carried over.
-
 **Epic**: a top-level issue carrying the `Epic` issue type, too large for one cycle and delivered
 through its children. An epic is never committed to a cycle; each child fits in one cycle and is
 committed on its own. _Avoid_: initiative, program, tracker issue, parent (every epic is a parent;
@@ -26,6 +23,9 @@ few parents are epics).
 
 **Committed unit**: the issue whose `Cycle` is set — a top-level issue, or a child of an epic. Its
 descendants inherit the cycle and are never set directly. _Avoid_: planned issue, scheduled issue.
+
+**Slipped**: committed to a cycle and still open when it closed. Always a missed commitment, never
+"progressing as expected". _Avoid_: in flight, carried over.
 
 **Progress**: an epic's completed children over its total children. _Avoid_: percent complete,
 velocity, burndown.
@@ -68,6 +68,7 @@ epic. _Avoid_: ticket, story.
     or an abandonment; nothing else is needed.
   - `--duplicate-of` sets the reason to `duplicate` and links the two issues, so the survivor's
     thread becomes the history. Take the number of the issue that stays open.
+
 - **Fix a close reason**: `gh issue edit` cannot set one, and `gh issue close` no-ops on an
   already-closed issue. For `completed` and `not planned`, PATCH it:
   `gh api --method PATCH repos/{owner}/{repo}/issues/{n} -f state=closed -f state_reason=not_planned`
@@ -248,9 +249,11 @@ def business: .content.issueType.name != "Epic"
              and .content.subIssuesSummary.total > 0
              and .content.subIssuesSummary.completed == .content.subIssuesSummary.total)
 
-# Epic children closed in a cycle — the per-cycle progress of every epic
-... | select(.content.parent.issueType.name == "Epic" and .content.state == "CLOSED"
-             and .content.closedAt >= env.CYCLE_START and .content.closedAt < env.CYCLE_END)
+# Epic candidates — committed parents that are not epics. Read each one; the recipe only narrows
+... | select(.content.state == "OPEN" and .content.issueType.name != "Epic"
+             and .content.parent == null and .content.subIssuesSummary.total > 0
+             and .cycle != null)
+    | "\(.content.repository.name)#\(.content.number)  \(.content.subIssuesSummary.completed) of \(.content.subIssuesSummary.total)  \(.content.title)"
 
 # Status/state mismatch — the Item closed workflow missing one. Healthy result is empty
 ... | select((.content.state == "CLOSED" and .status.name != "Done")
@@ -370,7 +373,6 @@ iteration, the agreed end date, any theme titles — and wrap it:
 3. **Restore** every snapshot value, resolving iterations **by title**, because every id changed.
 4. **Read back** `completedIterations` and the restored count. An empty `completedIterations` is the
    failure signature; a count short of the snapshot means items were missed.
-
 
 ## Epics
 

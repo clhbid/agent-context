@@ -24,9 +24,9 @@ never restates them, so the two cannot drift.
 **Everything branch A reports is the business view.** Every section of the notes, every number
 quoted beside one, and anything said in conversation about them filters to **business work** with
 the `business` filter — see **Business and delivery** in `issue-tracker`: top-level issues and the
-children of epics. An epic itself appears only in [Epics](#the-notes); its committed children are
-rows in the cycle tables, written `<epic> ↳ <child>` in the Issue cell so the arc they belong to
-is visible. The one thing that must not be lost to the filter is a **question**: when the issue
+children of epics. Every issue table opens with an **Epic** column naming the epic a row belongs
+to, blank for ordinary work; an epic's rows sit together, ordered by `Result`. An epic itself
+appears only in [Epics](#the-notes). The one thing that must not be lost to the filter is a **question**: when the issue
 blocking on business input is a sub-issue of an ordinary parent, list the parent as the item and
 name the child, so branch B knows which issue the answer lands on.
 
@@ -102,12 +102,15 @@ go-ahead, like every other mutation.
    closing pull request, a comment, sub-issue state. Leave it blank rather than inferring one. Diff
    the membership against the previous cycle's notes so slippage and mid-cycle additions are
    visible rather than silently absorbed.
-6. **Draft Epics.** One row per open epic, from the `issue-tracker` **Epics** recipe: progress as
-   `completed of total`, the children closed in the closing cycle's window (the **epic children
-   closed in a cycle** recipe), and the children committed to the current cycle. An epic closed
-   during the window gets a final row, `🏁 Completed`. Below the table, one line with its own
-   `Decision` for every epic the **Epics ready to close** recipe returns — closing is the meeting's
-   call.
+6. **Draft Epics.** One row per open epic, from the `issue-tracker` **Epics** recipe: its
+   `Status`, progress as `completed of total`, and the children committed to the current cycle. An
+   epic closed during the window gets a final row, `🏁 Completed`. Then two lists, each line with
+   its own `Decision`:
+   - **Ready to close** — every epic the **Epics ready to close** recipe returns. Closing is the
+     meeting's call, and a decision to keep one open names what remains to be done.
+   - **Epic candidates** — from the **Epic candidates** recipe, keep the ones that slipped or whose
+     open children plainly exceed a cycle, with a `Why`. Work committed "this cycle and the next
+     few" is the signature.
 7. **Draft Next Cycle Review** — date, time and location together, from the invocation or empty. It
    comes **before** Current Cycle because it sets when the cycle ends, and therefore how much fits
    in it.
@@ -188,9 +191,10 @@ you resolved a bare reference to** before acting on it.
 7. **Committed This Cycle** and each **Future Work** section — set `Cycle` on each committed unit,
    skipping anything the branch A backfill already credited. The first child of an epic committed
    to any cycle moves the epic to `In progress` if it is not there already.
-8. **Epics** — informational, except the close decisions below the table: an agreed close is
-   `gh issue close --reason completed`. An epic with every child closed and no decision is **left
-   open** and reappears next time.
+8. **Epics** — the table is informational; the two lists below it are writes. An agreed close is
+   `gh issue close --reason completed`; an epic kept open has what remains filed as a new child, so
+   its progress stops reading complete. An agreed candidate becomes an epic: PATCH its type, clear
+   its `Cycle`, and set `Cycle` on the children committed — see **Epics** in `issue-tracker`.
 9. **Next Actions** — decide by **what the line describes, not who owns it**: the owner tells you
    nothing, since the project manager's own lines cover both delegated tracker work and follow-ups
    they handle themselves. Execute the tracker actions — cycle and status changes, closures, the
@@ -230,18 +234,18 @@ to cover the range of states the skill has to handle. Nothing here is real work.
 
 **Goal:** Stop checkout failing under load, and finish moving off the old payments vendor.
 
-| Issue | Title | Result | Reason |
-| ----- | ----- | ------ | ------ |
-| acme/site#412 | Retry failed payment captures instead of dropping them | ✅ Done | — |
-| acme/site#418 | Checkout times out when the vendor is slow to respond | ✅ Done | — |
-| acme/api#207 | Remove the legacy payments client | ✅ Done | — |
-| acme/infra#88 | Alert on checkout error rate rather than raw 5xx count | ✅ Done | — |
-| acme/site#421 ↳ acme/site#423 | Export stored payment methods from the old vendor | ✅ Done | — |
-| acme/site#421 ↳ acme/site#424 | Import stored payment methods into the new vendor | ❌ Slipped → current cycle | The vendor's import API rate-limits at a rate that makes a single-pass import impossible; needs a batched approach. |
-| acme/api#215 | Retire the vendor webhook shim | ❌ Slipped → current cycle | Blocked on acme/site#424 — the shim cannot go until stored methods have moved. |
-| acme/site#430 | Fix the currency rounding error on partial refunds | ➕ Added mid-cycle, done | Reported by finance mid-cycle and treated as urgent; nothing was displaced to fit it. |
-| acme/infra#91 | Rotate the credentials the old vendor had access to | ➕ Added mid-cycle, done | Closed during the cycle without ever being committed to it. |
-| acme/api#219 | Split the checkout handler so failures are isolated | ➕ Added mid-cycle, not done | Picked up mid-cycle without being committed; carries into the current cycle, where it is listed under Committed This Cycle. |
+| Epic | Issue | Title | Result | Reason |
+| ---- | ----- | ----- | ------ | ------ |
+| acme/site#421 | acme/site#423 | Export stored payment methods from the old vendor | ✅ Done | — |
+| acme/site#421 | acme/site#424 | Import stored payment methods into the new vendor | ❌ Slipped → current cycle | The vendor's import API rate-limits at a rate that makes a single-pass import impossible; needs a batched approach. |
+| | acme/site#412 | Retry failed payment captures instead of dropping them | ✅ Done | — |
+| | acme/site#418 | Checkout times out when the vendor is slow to respond | ✅ Done | — |
+| | acme/api#207 | Remove the legacy payments client | ✅ Done | — |
+| | acme/infra#88 | Alert on checkout error rate rather than raw 5xx count | ✅ Done | — |
+| | acme/api#215 | Retire the vendor webhook shim | ❌ Slipped → current cycle | Blocked on acme/site#424 — the shim cannot go until stored methods have moved. |
+| | acme/site#430 | Fix the currency rounding error on partial refunds | ➕ Added mid-cycle, done | Reported by finance mid-cycle and treated as urgent; nothing was displaced to fit it. |
+| | acme/infra#91 | Rotate the credentials the old vendor had access to | ➕ Added mid-cycle, done | Closed during the cycle without ever being committed to it. |
+| | acme/api#219 | Split the checkout handler so failures are isolated | ➕ Added mid-cycle, not done | Picked up mid-cycle without being committed; carries into the current cycle, where it is listed under Committed This Cycle. |
 
 **Decision:** Both slipped items carry into the current cycle as-is. The batching approach for
 acme/site#424 is agreed in principle — no rework of what has already migrated.
@@ -250,14 +254,24 @@ acme/site#424 is agreed in principle — no rework of what has already migrated.
 
 _Work too large for one cycle, delivered a child at a time. Progress counts children._
 
-| Epic | Progress | Done last cycle | Committed this cycle |
-| ---- | -------- | --------------- | -------------------- |
-| acme/site#421 · Migrate stored payment methods to the new vendor | 3 of 8 | 1 · acme/site#423 | 2 · acme/site#424, acme/site#425 |
-| acme/api#198 · Schema consolidation | 0 of 6 | — | — |
-| acme/site#380 · Retire the legacy admin | 5 of 5 | 1 · acme/site#399 | — |
+| Epic | Status | Progress | Committed this cycle |
+| ---- | ------ | -------- | -------------------- |
+| acme/site#421 · Migrate stored payment methods to the new vendor | `In progress` | 3 of 8 | 2 · acme/site#424, acme/site#425 |
+| acme/api#198 · Schema consolidation | `Ready for Human` | 0 of 6 | — |
+| acme/site#380 · Retire the legacy admin | `In progress` | 5 of 5 | — |
 
-- **acme/site#380** — every child is closed. Close the epic? **Decision:** ✅ Closed, completed —
-  the old admin is gone and nothing else was waiting on it.
+**Ready to close**
+
+- **acme/site#380** — every child is closed. **Decision:** Kept open — the old admin's DNS entry
+  still points at the retired host; filed as a new child, and the epic closes with it.
+
+**Epic candidates**
+
+_Work that is behaving like an epic without being one._
+
+| Issue | Title | Why | Decision |
+| ----- | ----- | --- | -------- |
+| acme/site#390 | Review and close the never-triaged backlog | Committed "this cycle and the next few" — a promise to finish is the wrong shape for it. | ✅ Becomes an epic — one child per backlog area, the first (acme/site#450) committed this cycle |
 
 ## Next Cycle Review
 
@@ -273,13 +287,14 @@ _Agreed first, because it sets when the current cycle ends and therefore how muc
 
 _Every issue opened since the last cycle, and where it landed._
 
-| Issue | Title | Status | Decision |
-| ----- | ----- | ------ | -------- |
-| acme/site#437 | Search returns nothing for hyphenated terms | `Backlog` | ➡️ This cycle — reported by three customers this week |
-| acme/site#441 | Add a "recently viewed" row to the listings page | `Backlog` | ⏸ Reporting refresh — no urgency, and it fits that theme better |
-| acme/api#224 | Document the search ranking fields | `Ready for Agent` | ➡️ This cycle — small, and unblocks acme/site#437 |
-| acme/infra#96 | Evaluate a managed search service | `Waiting on input` | ⏸ Apr 15 – Apr 28 — see Waiting on Input below |
-| acme/site#444 | Dark mode for the account pages | `Backlog` | 🚫 Closed, not planned — nobody has asked for it; reopen if that changes |
+| Epic | Issue | Title | Status | Decision |
+| ---- | ----- | ----- | ------ | -------- |
+| acme/site#421 | acme/site#425 | Cut over checkout to the new vendor's stored methods | `Ready for Agent` | ➡️ This cycle — the last step of the migration |
+| | acme/site#437 | Search returns nothing for hyphenated terms | `Backlog` | ➡️ This cycle — reported by three customers this week |
+| | acme/site#441 | Add a "recently viewed" row to the listings page | `Backlog` | ⏸ Reporting refresh — no urgency, and it fits that theme better |
+| | acme/api#224 | Document the search ranking fields | `Ready for Agent` | ➡️ This cycle — small, and unblocks acme/site#437 |
+| | acme/infra#96 | Evaluate a managed search service | `Waiting on input` | ⏸ Apr 15 – Apr 28 — see Waiting on Input below |
+| | acme/site#444 | Dark mode for the account pages | `Backlog` | 🚫 Closed, not planned — nobody has asked for it; reopen if that changes |
 
 ### Stale Issues
 
@@ -287,35 +302,35 @@ _Every issue opened since the last cycle, and where it landed._
 stale** since this cycle opened. 54 of the 58 are `Backlog`.
 
 > Triage at this scale will not be fixed one issue at a time — acme/site#390 is the lever worth
-> pulling, and it is committed to this cycle and the next few.
+> pulling, and it becomes an epic this cycle.
 
 **Close candidates**
 
-| Issue | Title | Why it's a candidate | Decision |
-| ----- | ----- | -------------------- | -------- |
-| acme/site#102 | Investigate an idea for the landing page | Open 14 months. The issue template was never filled in — every section is still an empty comment. | ✅ Closed, not planned |
-| acme/api#61 | Consider caching the catalogue response | Open 9 months, empty body, no comments. The title is the entire specification. | ✅ Closed, not planned |
-| acme/api#77 | Cache catalogue responses at the edge | Duplicates acme/api#61, filed later with more detail. | ✅ Closed as duplicate of acme/api#61 |
+| Epic | Issue | Title | Why it's a candidate | Decision |
+| ---- | ----- | ----- | -------------------- | -------- |
+| | acme/site#102 | Investigate an idea for the landing page | Open 14 months. The issue template was never filled in — every section is still an empty comment. | ✅ Closed, not planned |
+| | acme/api#61 | Consider caching the catalogue response | Open 9 months, empty body, no comments. The title is the entire specification. | ✅ Closed, not planned |
+| | acme/api#77 | Cache catalogue responses at the edge | Duplicates acme/api#61, filed later with more detail. | ✅ Closed as duplicate of acme/api#61 |
 
 **Needs a cycle, not a close**
 
-| Issue | Title | Why | Decision |
-| ----- | ----- | --- | -------- |
-| acme/site#390 | Review and close the never-triaged backlog | `Ready for Human`. Genuinely needed — it is the only item that addresses the 58 above — but has sat untriaged for six weeks. | ➡️ This cycle, and the next few |
+| Epic | Issue | Title | Why | Decision |
+| ---- | ----- | ----- | --- | -------- |
+| | acme/site#390 | Review and close the never-triaged backlog | `Ready for Human`. Genuinely needed — it is the only item that addresses the 58 above — but has sat untriaged for six weeks. | ➡️ This cycle, as an epic — see Epic candidates |
 
 **Newly stale, worth a look**
 
-| Issue | Title | Why it's worth a look | Decision |
-| ----- | ----- | --------------------- | -------- |
-| acme/infra#84 | Remove the old vendor's IAM roles | Went stale during the very cycle themed on the vendor migration. | ✅ Closed — the work was done and the issue was left open by accident |
-| acme/api#198 | Schema consolidation | An epic with six children and nothing committed. Real design discussion in the comments, and it looked close to agreement before it went quiet. | ➡️ Reporting refresh — commit its first child |
+| Epic | Issue | Title | Why it's worth a look | Decision |
+| ---- | ----- | ----- | --------------------- | -------- |
+| | acme/infra#84 | Remove the old vendor's IAM roles | Went stale during the very cycle themed on the vendor migration. | ✅ Closed — the work was done and the issue was left open by accident |
+| | acme/api#198 | Schema consolidation | An epic with six children and nothing committed. Real design discussion in the comments, and it looked close to agreement before it went quiet. | ➡️ Reporting refresh — commit its first child |
 
 ### Waiting on Input
 
-| Issue | Question | Decision |
-| ----- | -------- | -------- |
-| acme/infra#96 | Is moving search to a managed service worth the cost, or do we keep running it ourselves? | Worth doing eventually, but not now — revisit once search relevance work has settled and we know the real query load. Deferred to Apr 15 – Apr 28. |
-| acme/site#433 | Which customer segments should see the new pricing display? | Not resolved — nobody on the call had the definitive answer. Left as `Waiting on input`; it will reappear in next cycle's notes on its own. |
+| Epic | Issue | Question | Decision |
+| ---- | ----- | -------- | -------- |
+| | acme/infra#96 | Is moving search to a managed service worth the cost, or do we keep running it ourselves? | Worth doing eventually, but not now — revisit once search relevance work has settled and we know the real query load. Deferred to Apr 15 – Apr 28. |
+| | acme/site#433 | Which customer segments should see the new pricing display? | Not resolved — nobody on the call had the definitive answer. Left as `Waiting on input`; it will reappear in next cycle's notes on its own. |
 
 ### Significant Dates
 
@@ -328,15 +343,15 @@ _Upcoming events to plan releases around._
 
 ### Committed This Cycle
 
-| Issue | Title | Status |
-| ----- | ----- | ------ |
-| acme/site#421 ↳ acme/site#424 | Import stored payment methods into the new vendor | `In progress` |
-| acme/site#421 ↳ acme/site#425 | Cut over checkout to the new vendor's stored methods | `Ready for Agent` |
-| acme/api#219 | Split the checkout handler so failures are isolated | `In progress` |
-| acme/site#390 | Review and close the never-triaged backlog | `Ready for Human` |
-| acme/api#215 | Retire the vendor webhook shim | `Ready for Human` |
-| acme/api#224 | Document the search ranking fields | `Ready for Agent` |
-| acme/site#437 | Search returns nothing for hyphenated terms | `Backlog` |
+| Epic | Issue | Title | Status |
+| ---- | ----- | ----- | ------ |
+| acme/site#421 | acme/site#424 | Import stored payment methods into the new vendor | `In progress` |
+| acme/site#421 | acme/site#425 | Cut over checkout to the new vendor's stored methods | `Ready for Agent` |
+| acme/site#390 | acme/site#450 | Close the never-triaged issues older than a year | `Ready for Human` |
+| | acme/api#219 | Split the checkout handler so failures are isolated | `In progress` |
+| | acme/api#215 | Retire the vendor webhook shim | `Ready for Human` |
+| | acme/api#224 | Document the search ranking fields | `Ready for Agent` |
+| | acme/site#437 | Search returns nothing for hyphenated terms | `Backlog` |
 
 ## Future Work
 
@@ -345,10 +360,10 @@ cycle closes, rather than being re-argued every fortnight._
 
 ### Reporting refresh (1 Apr → 14 Apr 2026)
 
-| Issue | Title | Status |
-| ----- | ----- | ------ |
-| acme/api#198 ↳ acme/api#226 | Merge the two customer tables | `Ready for Human` |
-| acme/site#441 | Add a "recently viewed" row to the listings page | `Backlog` |
+| Epic | Issue | Title | Status |
+| ---- | ----- | ----- | ------ |
+| acme/api#198 | acme/api#226 | Merge the two customer tables | `Ready for Human` |
+| | acme/site#441 | Add a "recently viewed" row to the listings page | `Backlog` |
 
 The listings redesign is already designed and underway in a pull request. It sits beneath
 acme/site#441, along with acme/site#446 — "Sort recently viewed by last visit" — which was folded in
@@ -358,9 +373,9 @@ as part of that work.
 
 _No theme agreed yet, so the cycle carries its dates as a placeholder until one is._
 
-| Issue | Title | Status |
-| ----- | ----- | ------ |
-| acme/infra#96 | Evaluate a managed search service | `Waiting on input` |
+| Epic | Issue | Title | Status |
+| ---- | ----- | ----- | ------ |
+| | acme/infra#96 | Evaluate a managed search service | `Waiting on input` |
 
 ## Out of Office
 
