@@ -79,7 +79,12 @@ go-ahead, like every other mutation.
    returns, along with any issue that should be on the board and is not. **Both are healthy empty**,
    so a result is a signal that the sweep behind them is failing. Report it to the project manager
    in conversation and archive by hand with `archiveProjectV2Item` only if the meeting cannot wait.
-   **This stays out of the notes.**
+   Then run the **Epic candidates** recipe, read each result, and put the ones that slipped or
+   whose open children plainly exceed a cycle to the project manager — work committed "this cycle
+   and the next few" is the signature. **Converting is the project manager's call, made before
+   the meeting**, never a `Decision` line: for each agreed one, PATCH its type, clear its `Cycle`,
+   set `Cycle` on the children being committed and move its `Status` along the ladder — see
+   **Epics** in `issue-tracker`. **All of this stays out of the notes.**
 3. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
    closing cycle's window and keep the business results — top-level issues and epic children. A
    sub-issue of an ordinary parent needs no write and no row — it inherits its parent's cycle. This
@@ -104,13 +109,10 @@ go-ahead, like every other mutation.
    visible rather than silently absorbed.
 6. **Draft Epics.** One row per open epic, from the `issue-tracker` **Epics** recipe: its
    `Status`, progress as `completed of total`, and the children committed to the current cycle. An
-   epic closed during the window gets a final row, `🏁 Completed`. Then two lists, each line with
-   its own `Decision`:
-   - **Ready to close** — every epic the **Epics ready to close** recipe returns. Closing is the
-     meeting's call, and a decision to keep one open names what remains to be done.
-   - **Epic candidates** — from the **Epic candidates** recipe, keep the ones that slipped or whose
-     open children plainly exceed a cycle, with a `Why`. Work committed "this cycle and the next
-     few" is the signature.
+   epic closed during the window gets a final row, `🏁 Completed`. Below the table, a **Ready to
+   close** line with its own `Decision` for every epic the **Epics ready to close** recipe
+   returns. Closing is the meeting's call, and a decision to keep one open names what remains to
+   be done.
 7. **Draft Next Cycle Review** — date, time and location together, from the invocation or empty. It
    comes **before** Current Cycle because it sets when the cycle ends, and therefore how much fits
    in it.
@@ -191,10 +193,9 @@ you resolved a bare reference to** before acting on it.
 7. **Committed This Cycle** and each **Future Work** section — set `Cycle` on each committed unit,
    skipping anything the branch A backfill already credited. The first child of an epic committed
    to any cycle moves the epic to `In progress` if it is not there already.
-8. **Epics** — the table is informational; the two lists below it are writes. An agreed close is
-   `gh issue close --reason completed`; an epic kept open has what remains filed as a new child, so
-   its progress stops reading complete. An agreed candidate becomes an epic: PATCH its type, clear
-   its `Cycle`, and set `Cycle` on the children committed — see **Epics** in `issue-tracker`.
+8. **Epics** — the table is informational; the **Ready to close** lines are writes. An agreed
+   close is `gh issue close --reason completed`; an epic kept open has what remains filed as a new
+   child, so its progress stops reading complete.
 9. **Next Actions** — decide by **what the line describes, not who owns it**: the owner tells you
    nothing, since the project manager's own lines cover both delegated tracker work and follow-ups
    they handle themselves. Execute the tracker actions — cycle and status changes, closures, the
@@ -258,20 +259,13 @@ _Work too large for one cycle, delivered a child at a time. Progress counts chil
 | ---- | ------ | -------- | -------------------- |
 | acme/site#421 · Migrate stored payment methods to the new vendor | `In progress` | 3 of 8 | 2 · acme/site#424, acme/site#425 |
 | acme/api#198 · Schema consolidation | `Ready for Human` | 0 of 6 | — |
+| acme/site#390 · Review and close the never-triaged backlog | `Ready for Human` | 0 of 4 | 1 · acme/site#450 |
 | acme/site#380 · Retire the legacy admin | `In progress` | 5 of 5 | — |
 
 **Ready to close**
 
 - **acme/site#380** — every child is closed. **Decision:** Kept open — the old admin's DNS entry
   still points at the retired host; filed as a new child, and the epic closes with it.
-
-**Epic candidates**
-
-_Work that is behaving like an epic without being one._
-
-| Issue | Title | Why | Decision |
-| ----- | ----- | --- | -------- |
-| acme/site#390 | Review and close the never-triaged backlog | Committed "this cycle and the next few" — a promise to finish is the wrong shape for it. | ✅ Becomes an epic — one child per backlog area, the first (acme/site#450) committed this cycle |
 
 ## Next Cycle Review
 
@@ -302,7 +296,7 @@ _Every issue opened since the last cycle, and where it landed._
 stale** since this cycle opened. 54 of the 58 are `Backlog`.
 
 > Triage at this scale will not be fixed one issue at a time — acme/site#390 is the lever worth
-> pulling, and it becomes an epic this cycle.
+> pulling, and its first child is committed this cycle.
 
 **Close candidates**
 
@@ -316,7 +310,7 @@ stale** since this cycle opened. 54 of the 58 are `Backlog`.
 
 | Epic | Issue | Title | Why | Decision |
 | ---- | ----- | ----- | --- | -------- |
-| | acme/site#390 | Review and close the never-triaged backlog | `Ready for Human`. Genuinely needed — it is the only item that addresses the 58 above — but has sat untriaged for six weeks. | ➡️ This cycle, as an epic — see Epic candidates |
+| | acme/api#230 | Add retries to the nightly settlement export | `Ready for Agent`. Fully briefed and genuinely needed — finance re-runs it by hand every time it fails — but nine weeks without a cycle. | ➡️ This cycle |
 
 **Newly stale, worth a look**
 
