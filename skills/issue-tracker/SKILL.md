@@ -303,6 +303,30 @@ against today, and not-yet-stale against `CYCLE_START`. There is no baseline to 
 of a cycle. Anchoring it to `CYCLE_END` instead would ask which items went stale between today and
 today, and return nothing.
 
+**Pull requests are not board items**, so the recipe below runs per repository against
+`gh pr list` instead, taking the issue from the `NNNN:` title prefix or the `NNNN-` branch prefix
+(see [Commit convention](#commit-convention)):
+
+```bash
+# Merged pull request, open issue — a closing reference that never fired, or none. Healthy result is empty
+for repo in $(gh repo list clhbid --no-archived --json name,hasIssuesEnabled --jq '.[] | select(.hasIssuesEnabled) | .name'); do
+  open=$(gh issue list --repo "clhbid/$repo" --state open --limit 500 --json number --jq '.[].number')
+  gh pr list --repo "clhbid/$repo" --state merged --limit 200 --json number,title,headRefName,closingIssuesReferences \
+    --jq '.[] | ((.title | capture("^#?(?<n>[0-9]+)[: ]")?) // (.headRefName | capture("(^|/)(?<n>[0-9]+)-")?) // empty) as $m
+          | "\($m.n)\t\(.number)\t\(.closingIssuesReferences | length)\t\(.title)"' \
+  | while IFS=$'\t' read -r n pr refs title; do
+      grep -qx "$n" <<<"$open" && echo "$repo#$n open — merged in $repo#$pr, $refs closing reference(s)  $title"
+    done
+done
+```
+
+**A closing reference fires only on a merge into the default branch.** A row with a closing
+reference and an open issue is a pull request that merged somewhere else — a stacked slice merged
+into its parent before GitHub retargeted it, or anything merged into `scale-up` or `development`.
+A row with none had no `Closes` line, or a deliberate `Refs`/`Part of`. Either way the issue closes
+by hand — as `completed`, naming the pull request, per [Conventions](#conventions) — unless the pull
+request was a partial and the issue is still live.
+
 **These recipes are canonical**, and no API returns a view's contents — so a view can never be
 queried directly, only mirrored:
 

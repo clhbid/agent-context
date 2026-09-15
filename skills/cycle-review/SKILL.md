@@ -85,7 +85,13 @@ go-ahead, like every other mutation.
    the meeting**, never a `Decision` line: for each agreed one, PATCH its type, clear its `Cycle`,
    set `Cycle` on the children being committed and move its `Status` along the ladder — see
    **Epics** in `issue-tracker`. **All of this stays out of the notes.**
-3. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
+3. **Merged, still open.** Run the `issue-tracker` **merged pull request, open issue** recipe.
+   GitHub closed nothing for these — the recipe says why — so each is finished work that no cycle
+   report has ever credited. Every row ends one of two ways: closed as `completed` naming the pull
+   request, or judged still live because the pull request was a deliberate partial. Report the
+   closures to the project manager in conversation. **This stays out of the notes** for the same
+   reason step 2 does.
+4. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
    closing cycle's window and keep the business results — top-level issues and epic children. A
    sub-issue of an ordinary parent needs no write and no row — it inherits its parent's cycle. This
    is bookkeeping, not triage: no meeting decision, no `Decision` line.
@@ -99,24 +105,24 @@ go-ahead, like every other mutation.
    - **Dormant** work — the **dormant** variant of the same recipe, untouched since before the
      closing cycle began — gets **no write**. List it as its own decision with its status flagged
      **suspect**. Never auto-credit it, and never reset it to `Backlog`.
-4. **Read the board.** Project items, the `Cycle` configuration, and the previous cycle's notes
+5. **Read the board.** Project items, the `Cycle` configuration, and the previous cycle's notes
    discussion.
-5. **Draft Last Cycle.** Restate the closing cycle's goal, then table every committed unit in it.
+6. **Draft Last Cycle.** Restate the closing cycle's goal, then table every committed unit in it.
    **`Result` is filled in** — closed is `✅ Done`, open is `❌ Slipped`. **`Reason` is blank**
    unless the row slipped or was added mid-cycle, and it is filled **only from direct evidence**: a
    closing pull request, a comment, sub-issue state. Leave it blank rather than inferring one. Diff
    the membership against the previous cycle's notes so slippage and mid-cycle additions are
    visible rather than silently absorbed.
-6. **Draft Epics.** One row per open epic, from the `issue-tracker` **Epics** recipe: its
+7. **Draft Epics.** One row per open epic, from the `issue-tracker` **Epics** recipe: its
    `Status`, progress as `completed of total`, and the children committed to the current cycle. An
    epic closed during the window gets a final row, `🏁 Completed`. Below the table, a **Ready to
    close** line with its own `Decision` for every epic the **Epics ready to close** recipe
    returns. Closing is the meeting's call, and a decision to keep one open names what remains to
    be done.
-7. **Draft Next Cycle Review** — date, time and location together, from the invocation or empty. It
+8. **Draft Next Cycle Review** — date, time and location together, from the invocation or empty. It
    comes **before** Current Cycle because it sets when the cycle ends, and therefore how much fits
    in it.
-8. **Draft Current Cycle**, sections in this order, because each one feeds the next: **New Issue
+9. **Draft Current Cycle**, sections in this order, because each one feeds the next: **New Issue
    Triage** (every issue opened since the closing cycle started, `Decision` blank), **Stale
    Issues** (next step), **Waiting on Input** (every `Status = Waiting on input` issue, listed
    **one at a time** with its own `Decision`, never summarised as a count), **Significant Dates** (a
@@ -130,7 +136,7 @@ go-ahead, like every other mutation.
    exist as a comment on the issue** — a plain comment stating it is enough; the _Triage Notes_
    heading is a convention, not the test. If no comment asks it, that is an **error**: the question
    has never been put to anyone, so say so rather than reconstructing one from the title.
-9. **Draft Stale Issues.** Run the `issue-tracker` **stale issues** recipe and report two numbers:
+10. **Draft Stale Issues.** Run the `issue-tracker` **stale issues** recipe and report two numbers:
    the total stale, and how many went **newly stale** during the cycle just closing. Then do the
    reading:
    - **Close candidates** — a handful, judged on _old_, _underspecified_ or _duplicate_. This means
@@ -141,13 +147,13 @@ go-ahead, like every other mutation.
    - **Newly stale, worth a look** — anything that went stale this cycle and looks important on its
      own evidence: comment volume, a prior assignee, other issues referencing it. A judgement call,
      not a threshold.
-10. **Draft Future Work** — one sub-section per future cycle, headed by the iteration name, each
+11. **Draft Future Work** — one sub-section per future cycle, headed by the iteration name, each
    with its own table, so the load committed to each is visible at a glance.
-11. **Draft the closing sections.** **Out of Office** is a blank prompt for the team. **Next
+12. **Draft the closing sections.** **Out of Office** is a blank prompt for the team. **Next
     Actions** is present but empty, showing the owner-first shape.
-12. **Reconcile against the live board.** Every cycle section must agree with what the board
+13. **Reconcile against the live board.** Every cycle section must agree with what the board
     actually says, item for item.
-13. **Publish.** Create the Discussion, or update it if this cycle's notes already exist. **Branch A
+14. **Publish.** Create the Discussion, or update it if this cycle's notes already exist. **Branch A
     is re-runnable**: run it again whenever the board changes and it revises the same discussion.
 
 **Every section is worked one decision at a time.** Each triage line, each `Waiting on input`
