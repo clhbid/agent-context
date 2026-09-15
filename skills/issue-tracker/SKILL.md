@@ -273,8 +273,8 @@ def business: .content.issueType.name != "Epic"
 ... | select(.content.state == "CLOSED"
              and (.content.closedAt | fromdateiso8601) < (now - 4838400))
 
-# Stale issues — actionable work untouched for eight weeks
-... | select(.content.state == "OPEN"
+# Stale issues — business work untouched for eight weeks
+... | select(.content.state == "OPEN" and business
              and (.status.name | IN("Backlog", "Ready for Agent", "Ready for Human"))
              and (.content.updatedAt | fromdateiso8601) < (now - 4838400))
 
@@ -292,7 +292,8 @@ stale-closed recipe re-runnable — it cannot see what it just archived — and 
 snapshot in [Cycles](#cycles) passes `archivedStates: [ARCHIVED, NOT_ARCHIVED]` explicitly.
 
 **Eight weeks is 4838400 seconds**, and it is the definition of _stale_ — an item is stale on the
-board, not in someone's judgement. The cycle recipes read `CYCLE_TITLE`, `CYCLE_START` and
+board, not in someone's judgement, and staleness is measured on business work. The cycle recipes
+read `CYCLE_TITLE`, `CYCLE_START` and
 `CYCLE_END` from the environment; set them from the iteration's `title`, `startDate` and
 `startDate + duration`. `CYCLE_END` is **exclusive** — an iteration ends the day before the meeting
 that closes it, so a cycle titled `14 Aug → 28 Aug` has `CYCLE_START=2026-08-14` and
