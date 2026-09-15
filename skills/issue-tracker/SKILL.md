@@ -1,6 +1,6 @@
 ---
 name: issue-tracker
-description: Read and set work state on the CLHbid Delivery board — issues via gh, the Status field, the board query recipes, cycles, labels, the commit convention and the decomposition rules. Use for any GitHub issue or project-board operation in a clhbid repo.
+description: Read and set work state on the CLHbid Delivery board — the delivery language, issues via gh, the Status field, the board query recipes, cycles, epics, labels, the commit convention and the decomposition rules. Use for any GitHub issue or project-board operation in a clhbid repo, and for what a cycle, epic or slipped issue means.
 ---
 
 # Issue tracker: GitHub
@@ -9,15 +9,45 @@ Issues and specs for this repo live as GitHub issues. **Work state lives on the
 [CLHbid Delivery](https://github.com/orgs/clhbid/projects/4) org project**, which spans every
 clhbid repo. Use the `gh` CLI for all operations.
 
+## Language
+
+The words the skills plan and report in. Every rule below is written in these terms.
+
+**Cycle**: a fortnight-ish planning period that work is committed to. Committing an issue to a
+cycle is a promise to finish it in that cycle. _Avoid_: sprint, milestone.
+
+**Epic**: a top-level issue carrying the `Epic` issue type, too large for one cycle and delivered
+through its children. An epic is never committed to a cycle; each child fits in one cycle and is
+committed on its own. _Avoid_: initiative, program, tracker issue, parent (every epic is a parent;
+few parents are epics).
+
+**Committed unit**: the issue whose `Cycle` is set — a top-level issue, or a child of an epic. Its
+descendants inherit the cycle and are never set directly. _Avoid_: planned issue, scheduled issue.
+
+**Slipped**: committed to a cycle and still open when it closed. Always a missed commitment, never
+"progressing as expected". _Avoid_: in flight, carried over.
+
+**Progress**: an epic's completed children over its total children. _Avoid_: percent complete,
+velocity, burndown.
+
+**Business work**: what the business plans and reads about — a top-level issue, or a child of an
+epic. _Avoid_: ticket, story.
+
 ## Conventions
 
 - **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line
-  bodies. This does not apply an issue form — see
-  [Templates apply a category, never a state](#templates-apply-a-category-never-a-state) for what
-  you then owe.
+  bodies. This does not apply an issue form — follow
+  [Creating an issue from the org form](#creating-an-issue-from-the-org-form).
 - **Read, list, comment**: `gh issue view <number> --comments`, `gh issue list`,
   `gh issue comment <number> --body "..."`. `--jq` requires `--json`, so filtering a read means
   dropping `--comments` and naming the fields: `gh issue view <number> --json number,title,labels --jq ...`
+- **Refer to an issue as `<org>/<repo>#<number>`**, in prose and in tables alike. GitHub renders
+  that form as a link with a hovercard and shortens it to `#<number>` when it is same-repo, so the
+  qualified form costs nothing to read. A **bare `#<number>` resolves against whichever repo hosts
+  the text it sits in** — in an org discussion that is `clhbid/clhbid.com`, not the repo you meant —
+  and links silently to the wrong issue. GitHub also shares one number space across issues and pull
+  requests, so resolve an unqualified reference with `gh pr view <n>`, falling back to
+  `gh issue view <n>`.
 - **Set state**: a project field, not a label — see [Status](#status).
 - **Close**: an issue closes as `completed`, `not planned` or `duplicate`. The reason is the
   record, so pick the one that matches and say why in a closing comment.
@@ -38,6 +68,7 @@ clhbid repo. Use the `gh` CLI for all operations.
     or an abandonment; nothing else is needed.
   - `--duplicate-of` sets the reason to `duplicate` and links the two issues, so the survivor's
     thread becomes the history. Take the number of the issue that stays open.
+
 - **Fix a close reason**: `gh issue edit` cannot set one, and `gh issue close` no-ops on an
   already-closed issue. For `completed` and `not planned`, PATCH it:
   `gh api --method PATCH repos/{owner}/{repo}/issues/{n} -f state=closed -f state_reason=not_planned`
@@ -73,8 +104,8 @@ business.
 
 **Prefer `Ready for Agent`**, which needs both halves of its row — fully specified _and_ already
 sliced. Work that cannot be specified until someone decides something is `Waiting on input`: a
-question to answer, not work to schedule. `Ready for Human` is for what no agent can finish.
-`/afk-loop` covers dispatching.
+question to answer, not work to schedule. `Ready for Human` is for what no agent can finish. For
+what counts as an agent brief, see [`afk-loop` § The agent brief](../afk-loop/SKILL.md#the-agent-brief).
 
 **Claiming is an assignee write.** `gh issue edit <n> --add-assignee @me` is the atomic first
 write that stops two agents taking the same issue; setting `Status` to `In progress` follows it.
@@ -84,10 +115,11 @@ workflows put newly-opened issues on the board; after creating one, give the wor
 then confirm it landed, adding anything that was missed.
 
 **Adding one issue adds its whole tree.** Adding a parent pulls in every descendant, across
-repository boundaries and including repos nobody had in scope. So
-[planning being top-level only](#business-and-delivery) does not make the board top-level only —
-most of it is children, and they arrive with `Cycle` unset. Any group-by-`Cycle` view therefore
-carries a large **No Cycle** bucket of children whose parents are planned.
+repository boundaries and including repos nobody had in scope. So planning being set on
+[committed units](#business-and-delivery) does not make the board that shallow — most of it is
+descendants, and they arrive with `Cycle` unset. Any group-by-`Cycle` view therefore carries a
+large **No Cycle** bucket: descendants whose committed ancestor is planned, and epics, which never
+carry one.
 
 ### Setting Status
 
@@ -146,14 +178,19 @@ When a skill says "apply the AFK-ready triage label", set `Status` to the value 
 sliced and reviewed one pull request at a time — see
 [Decomposing work before Ready for Agent](#decomposing-work-before-ready-for-agent). The business
 does not track work at that grain: a **top-level issue is the unit of business work**, and its
-children are how that work gets done.
+children are how that work gets done. The one exception is an [epic](#epics), whose children are
+each business work in their own right because each is committed to a cycle on its own.
 
-The board carries both audiences as views — **📋 Delivery board** is everything, **💼 Business** is
-`no:parent-issue`. The same split governs anything read outside the board:
+The board carries both audiences as views — **📋 Delivery board** is everything but epics,
+**💼 Business** is `no:parent-issue -type:Epic`, and **🗺️ Epics** is the epics with their progress.
+The same split governs anything read outside the board:
 
-- **Reporting to the business** — cycle notes, Status Updates, anything the business reads — is
-  top-level only. Add `and .content.parent == null` to any recipe below to get its business view,
-  as the **Planning view** recipe does.
+- **Reporting to the business** — cycle notes, and anything else the business reads — is business
+  work only, counts included: top-level issues and the children of epics, with epics themselves
+  reported in their own section rather than in any cycle table. Add the `business` filter below to
+  any recipe to get its business view, as the **Planning view** recipe does. A board view cannot
+  express it — project filters have no OR across qualifiers — which is why **💼 Business** shows
+  epic children only through the cycle views.
 - **Dispatching and doing the work** reads the leaves, because that is where a branch and a pull
   request attach. The **Agent frontier** recipe is the example: it excludes anything with children.
 
@@ -195,8 +232,28 @@ gh api graphql --paginate -F query=@"$BOARD_QUERY" --jq '
 # In flight
 ... | select(.content.state == "OPEN" and .content.assignees.totalCount > 0)
 
-# Planning view — top-level work only
-... | select(.content.state == "OPEN" and .content.parent == null)
+# Business filter — top-level issues and epic children, never an epic itself. Goes at the head of
+# the jq program, before `.data`, in any recipe that wants its business view
+def business: .content.issueType.name != "Epic"
+              and (.content.parent == null or .content.parent.issueType.name == "Epic");
+
+# Planning view — open business work
+... | select(.content.state == "OPEN" and business)
+
+# Epics — every open epic with its progress
+... | select(.content.state == "OPEN" and .content.issueType.name == "Epic")
+    | "\(.content.repository.name)#\(.content.number)  \(.content.subIssuesSummary.completed) of \(.content.subIssuesSummary.total)  \(.content.title)"
+
+# Epics ready to close — open, with every child closed. A person closes them
+... | select(.content.state == "OPEN" and .content.issueType.name == "Epic"
+             and .content.subIssuesSummary.total > 0
+             and .content.subIssuesSummary.completed == .content.subIssuesSummary.total)
+
+# Epic candidates — committed parents that are not epics. Read each one; the recipe only narrows
+... | select(.content.state == "OPEN" and .content.issueType.name != "Epic"
+             and .content.parent == null and .content.subIssuesSummary.total > 0
+             and .cycle != null)
+    | "\(.content.repository.name)#\(.content.number)  \(.content.subIssuesSummary.completed) of \(.content.subIssuesSummary.total)  \(.content.title)"
 
 # Status/state mismatch — the Item closed workflow missing one. Healthy result is empty
 ... | select((.content.state == "CLOSED" and .status.name != "Done")
@@ -206,26 +263,35 @@ gh api graphql --paginate -F query=@"$BOARD_QUERY" --jq '
 ... | select((.content.state == "CLOSED"
               and .content.closedAt >= env.CYCLE_START and .content.closedAt < env.CYCLE_END
               and (.cycle.title // "") != env.CYCLE_TITLE)
-          or (.content.state == "OPEN" and .status.name == "In progress" and .cycle == null))
+          or (.content.state == "OPEN" and .status.name == "In progress" and .cycle == null
+              and .content.updatedAt >= env.CYCLE_START))
 
-# Stale closed items — auto-archive missed these. Healthy result is empty
-... | select(.content.state == "CLOSED" and .isArchived == false
-             and (.content.closedAt | fromdateiso8601) < (now - 1814400))
+# ...of which dormant — swap that last clause for uncycled In progress work nobody touched
+              and .content.updatedAt < env.CYCLE_START))
 
-# Stale issues — actionable work untouched for three weeks
+# Stale closed items — closed but never archived. Healthy result is empty
+... | select(.content.state == "CLOSED"
+             and (.content.closedAt | fromdateiso8601) < (now - 4838400))
+
+# Stale issues — actionable work untouched for eight weeks
 ... | select(.content.state == "OPEN"
              and (.status.name | IN("Backlog", "Ready for Agent", "Ready for Human"))
-             and (.content.updatedAt | fromdateiso8601) < (now - 1814400))
+             and (.content.updatedAt | fromdateiso8601) < (now - 4838400))
 
 # ...of which newly stale — add this clause to keep the ones not yet stale when the cycle began
              and (.content.updatedAt | fromdateiso8601)
-                 >= ((env.CYCLE_START | strptime("%Y-%m-%d") | mktime) - 1814400)
+                 >= ((env.CYCLE_START | strptime("%Y-%m-%d") | mktime) - 4838400)
 ```
 
 `...` stands in for the full command above. `--paginate` applies `--jq` per page, so filtering and
 listing work as written; counting needs a pipe (`| wc -l`).
 
-**Three weeks is 1814400 seconds**, and it is the definition of _stale_ — an item is stale on the
+**Archived items are invisible here.** `ProjectV2.items` defaults to
+`archivedStates: [NOT_ARCHIVED]`, so every recipe reads the live board only. That is what makes the
+stale-closed recipe re-runnable — it cannot see what it just archived — and it is why the `Cycle`
+snapshot in [Cycles](#cycles) passes `archivedStates: [ARCHIVED, NOT_ARCHIVED]` explicitly.
+
+**Eight weeks is 4838400 seconds**, and it is the definition of _stale_ — an item is stale on the
 board, not in someone's judgement. The cycle recipes read `CYCLE_TITLE`, `CYCLE_START` and
 `CYCLE_END` from the environment; set them from the iteration's `title`, `startDate` and
 `startDate + duration`. `CYCLE_END` is **exclusive** — an iteration ends the day before the meeting
@@ -262,46 +328,106 @@ by hand — as `completed`, naming the pull request, per [Conventions](#conventi
 request was a partial and the issue is still live.
 
 **These recipes are canonical**, and no API returns a view's contents — so a view can never be
-queried directly, only mirrored. `yarn board:sync` will assert each view's filter against this
-table — it is not built yet:
+queried directly, only mirrored:
 
 | #   | View              | Filter                                             | Purpose                                   |
 | --- | ----------------- | -------------------------------------------------- | ----------------------------------------- |
-| 1   | 📋 Delivery board | _(none)_                                           | everything, grouped by `Status`           |
+| 1   | 📋 Delivery board | `-type:Epic`                                       | everything but epics, grouped by `Status` |
 | 2   | 🎯 This cycle     | `cycle:@current`                                   | the running cycle                         |
 | 3   | ⏭️ Next cycle     | `cycle:@next`                                      | what is planned next                      |
-| 4   | 💼 Business       | `no:parent-issue`                                  | top-level work, delivered and outstanding |
+| 4   | 💼 Business       | `no:parent-issue -type:Epic`                       | top-level work, delivered and outstanding |
 | 5   | 🤖 Frontier       | `status:"Ready for Agent" no:assignee -is:blocked` | mirrors the frontier recipe               |
 | 6   | ⏳ Waiting        | `status:"Waiting on input"`                        | mirrors the needs-business-input recipe   |
 | 8   | 📥 Triage         | `status:Backlog no:parent-issue`                   | the inbox, top-level only                 |
+| 9   | 🗺️ Epics          | `type:Epic`                                        | mirrors the epics recipe                  |
 
-`board:sync` checks **filters only**, keyed by the view **number** above — stable, never reused
-after a delete, which is why 7 is missing. A view's name, columns and tab position belong to
-whoever uses it: a change there is intent, not drift.
+View **numbers** are stable and never reused after a delete, which is why 7 is missing. Only the
+filter is worth asserting against this table: a view's name, columns and tab position belong to
+whoever uses it, so a change there is intent rather than drift. The one column worth naming is
+**Sub-issues progress** on 🗺️ Epics — a built-in field, and the progress bar the view exists for.
+
+**A filter is writable.** `updateProjectV2View` takes `name`, `layout`, `filter` and
+`configuration`, so a drifted filter can be **repaired**, not only reported. Grouping and sorting
+are **readable** — `ProjectV2View` exposes `groupByFields`, `verticalGroupByFields` and
+`sortByFields` — but not writable: `ProjectV2ViewConfigurationInput` takes only `visibleFieldIds`.
+
+Both board views group by `Cycle` as swimlanes with `Status` as the columns, and **an iteration with
+no items renders no swimlane** — so a completed cycle leaves the board once its items are archived,
+and no filter is needed to hide one.
 
 ## Cycles
 
-A cycle is an iteration of the `Cycle` field — the title carries the theme, the dates carry the
-schedule. An iteration **ends the day before the meeting that closes it**.
+A cycle is an iteration of the `Cycle` field. An iteration **ends the day before the meeting that
+closes it**.
 
 Read them from the field's `configuration`. `completedIterations` holds the closed ones; the
 running cycle is the entry in `iterations` whose `startDate` is on or before today and whose
-`startDate + duration` is after it, and the next is the earliest starting after that. Select by
+`startDate + duration` is after it, and the future cycles are the ones starting after it. Select by
 date rather than by index — nothing guarantees the array's order.
 
-`Cycle` is set on top-level issues only; children inherit their parent's by definition, so a
-sub-issue with no `Cycle` is planned, not missed.
+`Cycle` is set on the **committed unit** — a top-level issue, or a child of an [epic](#epics) —
+and its descendants inherit it, so a sub-issue with no `Cycle` is planned, not missed. An epic's
+own `Cycle` is never set.
 
-**`iterations` holds exactly two** — the running cycle and next — and next is the **parking lot**,
-where deferred work is put. Keep it at two: a third is a plan someone has to maintain by hand,
-which is what the parking lot exists to avoid.
+**Three iterations are live at all times** — the running cycle and two future ones — so planning
+always has somewhere to put work deferred two meetings out.
+
+**The title carries the theme**, and until one is agreed it is the date range as a placeholder
+(`Sep 29 - Oct 12`). Dates live in the iteration's own `startDate` and `duration`. **Titles must be
+unique**: recovering from a configuration write resolves iterations by title, and two cycles sharing
+one makes that ambiguous.
+
+### Writing the configuration clears the whole board
+
+`updateProjectV2Field` is the only mutation that touches `iterationConfiguration`, and **every write
+is a full replacement that regenerates every iteration id and clears every item's `Cycle`**. Even an
+identical configuration written back does it, so appending an iteration costs exactly what renaming
+one does. The input also has **no `completedIterations`**, so any completed cycle not passed back
+inside `iterations` is deleted outright.
+
+**Make one configuration write per cycle**, folding every pending change into it — the new
+iteration, the agreed end date, any theme titles — and wrap it:
+
+1. **Snapshot** every item's `Cycle`, keyed by `<org>/<repo>#<number>`. Archived items carry values
+   too, so this is its own query passing `archivedStates: [ARCHIVED, NOT_ARCHIVED]` —
+   [`board.graphql`](board.graphql) is live-only and would silently skip them.
+2. **Write once**, passing **all** iterations, completed ones past-dated so GitHub re-sorts them
+   back into `completedIterations`. The configuration's own `startDate` cannot be read back — only
+   `startDay` is exposed — so pass the earliest iteration's `startDate`.
+3. **Restore** every snapshot value, resolving iterations **by title**, because every id changed.
+4. **Read back** `completedIterations` and the restored count. An empty `completedIterations` is the
+   failure signature; a count short of the snapshot means items were missed.
+
+## Epics
+
+An epic is work too large for one cycle — see [Language](#language). The hierarchy is
+**epic → issue → sub-issues**, the first and last optional, and the epic layer is one deep: an
+epic sits under nothing, and its children are the committed units. Work that turns out to span
+cycles becomes an epic by being split into children that each fit one.
+
+- **The `Epic` issue type is the marker**, and the only issue type the skills key off. Set it with
+  `gh api --method PATCH repos/{owner}/{repo}/issues/{n} -f type=Epic`; `gh issue create` cannot,
+  so create the issue and PATCH it. Find them with `gh issue list --search type:Epic`, or the
+  **Epics** recipe. If the org has no `Epic` type, creating one is `createIssueType` on the org
+  node, and it needs the `admin:org` scope that the default `gh` login lacks.
+- **Status walks the ordinary ladder**, and so does each child, triaged like anything else.
+  `Backlog` while the epic still needs decomposing, `Ready for Human` once its children exist,
+  `In progress` from the first child committed to a cycle, `Done` when a person closes it.
+- **`Cycle` is never set on the epic.** Each child is a committed unit and carries its own — so a
+  child left open at cycle close slipped, and the epic is neither done nor slipped, only
+  progressing.
+- **Decompose before the first child is committed.** Progress counts direct children only, so it
+  reads truthfully only when every child is a one-cycle piece. A child that will not fit a cycle
+  is split into two children of the epic, keeping the layer one deep.
+- **Closing is a judgement**, so a person does it. The **Epics ready to close** recipe finds
+  candidates.
 
 ## Deferring work
 
 Deferring is a decision to record. Its form follows when the work comes back:
 
-- **Next cycle** — set `Cycle` to next, the parking lot. The issue stays open and the board carries
-  it.
+- **A future cycle** — set `Cycle` to one of the two ahead. The issue stays open and the board
+  carries it.
 - **A later date** — comment with the decision, the owner, and when it returns, then close with
   `--reason "not planned"`. The owner sets the calendar reminder; nothing in GitHub will raise it
   for them.
@@ -322,6 +448,29 @@ Issue templates apply exactly one of them, and `/wayfinder` adds its own — see
 
 Any other label is decoration — read it if you like, but nothing keys off it.
 
+## Creating an issue from the org form
+
+Issue forms in `clhbid/.github/.github/ISSUE_TEMPLATE/` are the source of truth for what an issue
+body contains.
+
+Before `gh issue create`, fetch the form you need:
+
+```bash
+gh api repos/clhbid/.github/contents/.github/ISSUE_TEMPLATE/<bug|enhancement>.yml \
+  --jq .content | base64 -d
+```
+
+Use each field's `label` as a `### ` heading in the issue body, in the same order as the form. Fill
+every required field. Omit optional fields when they do not apply. This rule applies to any
+agent-authored body, including later edits.
+
+Anything beyond the form's fields — acceptance criteria, interface notes, verification steps, or
+scope boundaries outside the form itself — belongs in the issue's agent-brief comment (or a
+triage-notes comment), not as extra body headings. See [`afk-loop` § The agent brief](../afk-loop/SKILL.md#the-agent-brief).
+
+Creating this way still means one category label (`bug` or `enhancement`), no state label, and then
+confirming the issue landed on `Backlog` — see [Status](#status).
+
 ## Templates apply a category, never a state
 
 Issue forms come from the org defaults in `clhbid/.github` under `.github/ISSUE_TEMPLATE/`. **A
@@ -330,12 +479,8 @@ person filing an issue should use one** — they collect fields a triager otherw
 A form applies exactly one **category** label (`bug` or `enhancement`) and **no state**. Category
 says what kind of thing an issue is; `Status` says where it has got to — nothing about the category
 implies a state.
-
-**`gh issue create` does not apply a form**, and it is the normal path here — an agent has no
-browser to fill one in. Creating directly is fine; it means you owe what the form would have done:
-exactly one category label, no state, and the body the form would have collected rather than a bare
-title and a sentence. The issue then lands on `Backlog` — see [Status](#status) for confirming that
-and for what moves it on.
+When an agent creates an issue without the browser form, use
+[Creating an issue from the org form](#creating-an-issue-from-the-org-form).
 
 ## Commit convention
 
@@ -346,7 +491,8 @@ a diff, read the leading `NNNN:` and ignore the trailing `(#NNNN)`.
 ## Decomposing work before Ready for Agent
 
 Keep `1 issue = 1 branch = 1 PR`. If work is too large, split the **issue**, not the pull request.
-Size is a precondition of `Ready for Agent`.
+Size is a precondition of `Ready for Agent`. Work too large for a **cycle** is an [epic](#epics),
+split one level higher.
 
 **Smaller is better.** ~1000 changed lines is the ceiling — excluding lockfiles, snapshots and
 generated files — but it is a limit, not a target: a changeset that splits cleanly should be split
@@ -368,12 +514,10 @@ no CI gate for this.
 
 **PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_ While it is `no`, external PRs are not triaged and no `gh pr` state handling applies.
 
-GitHub shares one number space across issues and PRs, so a bare `#42` may be either — resolve with
-`gh pr view 42` and fall back to `gh issue view 42`.
-
 ## When a skill says…
 
-- **"publish to the issue tracker"** — create a GitHub issue.
+- **"publish to the issue tracker"** — create a GitHub issue via
+  [Creating an issue from the org form](#creating-an-issue-from-the-org-form).
 - **"fetch the relevant ticket"** — `gh issue view <number> --comments`.
 
 ## Wayfinding operations
@@ -400,6 +544,10 @@ for a top-level issue. GraphQL's `Issue.parent` answers truthfully, which is wha
 [`board.graphql`](board.graphql) selects. Checking issue by issue costs a request each and gets
 skipped under pressure, so **put `no:parent-issue` (or `.content.parent == null`) in the query
 itself**.
+
+**Adding an item unarchives it.** `addProjectV2ItemById` on an already-archived item silently
+returns it to the live board. Archived items are invisible to a live-only read, so a **reopened**
+issue looks absent, gets re-added, and comes back out of the archive as a side effect.
 
 **A read-back can be stale.** The project API is eventually consistent. Verify every write by
 read-back, but treat a mismatch straight after a write as unconfirmed rather than failed — re-check
