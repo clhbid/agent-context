@@ -30,7 +30,7 @@ appears only in [Epics](#the-notes). The one thing that must not be lost to the 
 blocking on business input is a sub-issue of an ordinary parent, list the parent as the item and
 name the child, so branch B knows which issue the answer lands on.
 
-**The notes are a business document.** No agent commentary — tooling state, recipe caveats and
+**The notes are a business document**, written with `writing-lean`. No agent commentary — tooling state, recipe caveats and
 process notes go to the project manager in conversation or into your own TODO list.
 
 ## Cycle roles

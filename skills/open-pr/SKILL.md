@@ -5,7 +5,7 @@ description: Create or update a GitHub pull request with a standardized template
 
 # Open PR
 
-Create or update a GitHub pull request with a KISS (short, scannable) template.
+Create or update a GitHub pull request from the template below, written with `writing-lean`.
 
 ## Step 1: Check for Existing PR
 
@@ -96,8 +96,8 @@ holds the number; don't restate it here, or there are two copies to keep in step
 
 If the diff is over, say so and propose, in this order:
 
-1. **Simplify.** Drop surplus documentation first, then anything else the change doesn't need. Most
-   oversized diffs shrink here.
+1. **Simplify.** Cut documentation that fails the `writing-lean` deletion test first, then anything
+   else the change doesn't need. Most oversized diffs shrink here.
 2. **Split.** Only once it's as small as it's going to get: cut sub-issues, set the leaves to
    `Ready for Agent`, and open this pull request for the slice that's finished — stacking it on the
    previous slice where they depend on each other.
@@ -116,12 +116,11 @@ Example: `54: Return to after login`
 ```markdown
 ## Description
 
-- 1-2 bullets: what/why (not a changelog)
+- 1-2 bullets: what and why
 
 ## Changes
 
 - 2-5 bullets max: user-visible or behavior changes
-- Avoid file-by-file lists unless it materially helps reviewers
 
 ## How to Test
 
@@ -219,7 +218,4 @@ gh pr edit --title "<issue_number>: <issue_title>"
   short. Reserve it for the **Blocked** and **Error** endings in **How a run ends** in the repo's
   `AGENTS.md`, where the PR carries a comment explaining what is needed. A **Complete** run opens
   the PR ready and asks a human to look at it
-- The Description should be scannable and based on the issue contents
-- The Changes section should be capped at 2-5 bullets and focus on behavior
-- Use `Closes #N` syntax to auto-close the linked issue when merged
-- When updating, keep it short; delete stale bullets rather than adding more
+- When updating, replace stale bullets rather than appending to them

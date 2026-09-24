@@ -462,7 +462,7 @@ gh api repos/clhbid/.github/contents/.github/ISSUE_TEMPLATE/<bug|enhancement>.ym
 ```
 
 Use each field's `label` as a `### ` heading in the issue body, in the same order as the form. Fill
-every required field. Omit optional fields when they do not apply. This rule applies to any
+every required field, written with `writing-lean`. Omit optional fields when they do not apply. This rule applies to any
 agent-authored body, including later edits.
 
 Anything beyond the form's fields — acceptance criteria, interface notes, verification steps, or
@@ -498,7 +498,8 @@ split one level higher.
 **Smaller is better.** ~1000 changed lines is the ceiling — excluding lockfiles, snapshots and
 generated files — but it is a limit, not a target: a changeset that splits cleanly should be split
 well below it, because a reviewer reads a small diff and skims a large one. If a plan crosses the
-ceiling, simplify first, dropping surplus documentation before anything else, then split. There is
+ceiling, simplify first, cutting documentation that fails the `writing-lean` deletion test before
+anything else, then split. There is
 no CI gate for this.
 
 - A valid slice is **independently mergeable and green**. Behaviour-neutral slices (rename,
