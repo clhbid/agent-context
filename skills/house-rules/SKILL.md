@@ -11,5 +11,7 @@ Write the code, and everything that describes it, with the `writing-lean` skill.
   given: import its values rather than copying its tables, and leave its behaviour to its own tests.
 - **Single source of truth.** Take each value from where it is defined: the Tailwind scale
   (`max-w-7xl`, not `max-w-[1468px]`), a shared constant, or the package's own types.
-- **Spec style.** Set up and tear down in `beforeEach` and `afterEach`. Arrange, act, then assert,
-  and assert the whole result (`toEqual`), so an extra item fails the test.
+- **Spec style.** Set up and tear down in the test framework's hooks. Arrange, act, then assert,
+  and assert the whole result, so an extra item fails the test.
+- **Fake the clock** whenever a spec depends on the time, so it passes at any hour and in any time
+  zone.
