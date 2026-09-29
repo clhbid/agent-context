@@ -1,20 +1,19 @@
 ---
 name: writing-lean
-description: Lean writing for anything a teammate or agent reads. Use when writing or editing code comments, doc comments, a README or docs, or a pull request, issue, review, comment or commit message.
+description: Lean writing. Use when writing or editing comments, docs, a pull request, issue, review or commit message.
 ---
 
 # Writing lean
 
-Write all copy with `/writing-for-agents`.
-
-The code and its specs are the first source of truth, and a reader new to the project should be
-able to learn it by reading them. Writing is **lean** when it carries only what they cannot say,
-once, where it applies, in the fewest sentences that carry it.
+The code and its specs are the first source of truth: a reader new to the project should learn it
+by reading them. Writing is **lean** when it carries only what they cannot say.
 
 - **Code first.** Reach for a clearer name, a smaller function or a sharper spec before a longer
   explanation.
-- **Write what bites.** A comment earns its place with a constraint, a trap, a citation or a
-  non-obvious why.
+- **One word per idea.** Use the project's term for a concept, from `CONTEXT.md` or the code, every
+  time; a synonym reads as a second concept.
+- **Say what to do.** State the target ("one-line comments"), not the ban; a prohibition earns its
+  place only as a hard guardrail, paired with what to do instead.
 - **Once, where it bites.** Each fact has a single source of truth, below; anywhere else, link
   to it.
 - **History goes to the story.** What was weighed and what was rejected belong in the issue, pull
@@ -31,7 +30,8 @@ competent reader loses. If nothing, the code already said it, and it stays delet
 | Doc comment        | What the member is for, in one sentence                               |
 | README             | The common path: what it is, how to use it, where to go next          |
 | Repo docs          | A decision or context the code cannot show                            |
-| Issue, agent brief | The contract: behaviour, acceptance criteria, scope                   |
+| Issue              | What's wanted and why, in the issue form's fields                     |
+| Agent brief        | The contract: behaviour, acceptance criteria, scope                   |
 | Pull request       | What changed and why, linked to its issue                             |
 | Commit message     | What changed, and why when the diff cannot show it                    |
 | Review comment     | One finding and its fix                                               |
