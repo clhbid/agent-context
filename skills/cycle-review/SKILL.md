@@ -409,12 +409,5 @@ to write, `repository { discussion(number:) }` to read a body and its comments b
 
 ## Iterating on the skill
 
-This skill is committed, so it versions and reviews like code. Three habits keep it improving
-rather than calcifying:
-
-- **Fix the skill, not the output.** Whenever a draft needs hand-editing, that edit is a bug
-  report. Change the skill and re-run rather than patching the notes by hand.
-- **File skill bugs as issues** (`enhancement`) so they flow through the same triage and cycle
-  machinery as everything else — the workflow tests itself.
-- **Edit it with `/writing-for-agents`.** Its no-op test (delete whole sentences that don't
-  change behaviour) is the antidote to a skill that accretes caveats after every awkward run.
+**Fix the skill, not the output.** Whenever a draft needs hand-editing, that edit is a bug report.
+Change the skill and re-run rather than patching the notes by hand.
