@@ -1,6 +1,6 @@
 ---
 name: writing-lean
-description: Lean writing. Use when writing or editing comments, docs, a pull request, issue, review or commit message.
+description: Lean writing and fluent code. Use when writing or editing code, comments, docs, a pull request, issue, review or commit message.
 ---
 
 # Writing lean
@@ -26,6 +26,7 @@ competent reader loses. If nothing, the code already said it, and it stays delet
 
 | Channel            | Its one job                                                           |
 | ------------------ | --------------------------------------------------------------------- |
+| Code               | Fluent: concise function and variable names that say what it does     |
 | Code comment       | A constraint, trap, citation or non-obvious why, at the line it bites |
 | Doc comment        | What the member is for, in one sentence                               |
 | README             | The common path: what it is, how to use it, where to go next          |
