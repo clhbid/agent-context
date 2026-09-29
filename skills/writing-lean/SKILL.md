@@ -5,6 +5,8 @@ description: Lean writing for anything a teammate or agent reads. Use when writi
 
 # Writing lean
 
+Write all copy with `/writing-for-agents`.
+
 The code and its specs are the first source of truth, and a reader new to the project should be
 able to learn it by reading them. Writing is **lean** when it carries only what they cannot say,
 once, where it applies, in the fewest sentences that carry it.
@@ -13,7 +15,8 @@ once, where it applies, in the fewest sentences that carry it.
   explanation.
 - **Write what bites.** A comment earns its place with a constraint, a trap, a citation or a
   non-obvious why.
-- **Once, where it bites.** Each fact has one home, below; anywhere else, link to it.
+- **Once, where it bites.** Each fact has a single source of truth, below; anywhere else, link
+  to it.
 - **History goes to the story.** What was weighed and what was rejected belong in the issue, pull
   request or commit, where the discussion and the diff sit beside them and `git blame` leads back.
 
@@ -33,7 +36,7 @@ competent reader loses. If nothing, the code already said it, and it stays delet
 | Commit message     | What changed, and why when the diff cannot show it                    |
 | Review comment     | One finding and its fix                                               |
 | Thread comment     | The new fact or decision, linked to what it answers                   |
-| Skill, `AGENTS.md` | Written with `/writing-for-agents`                                    |
+| Skill, `AGENTS.md` | How an agent does the work: the steps and the reference behind them   |
 
 ## Links from code
 
