@@ -37,6 +37,7 @@ scope prompt, which a container has no way to answer.
 | `afk-loop` | Which work to hand to Copilot versus Claude Code, what makes a complete agent brief, reviewing what comes back, and what to do when a run goes wrong |
 | `cycle-review` | The recurring cycle-review meeting: publishing the notes as a GitHub Discussion, and processing the returned decisions back into `Cycle` and `Status` |
 | `open-pr` | Opening and updating a pull request, with the size backstop |
+| `writing-lean` | How to write fluent code, and its comments, docs, pull requests, issues, reviews and commits — every other skill points here |
 
 `skills/issue-tracker/board.graphql` sits beside the skill that uses it: one query against the
 delivery board, filtered per use with `--jq`. The recipes resolve it from wherever the skill was
