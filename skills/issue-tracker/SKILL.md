@@ -41,13 +41,7 @@ epic. _Avoid_: ticket, story.
 - **Read, list, comment**: `gh issue view <number> --comments`, `gh issue list`,
   `gh issue comment <number> --body "..."`. `--jq` requires `--json`, so filtering a read means
   dropping `--comments` and naming the fields: `gh issue view <number> --json number,title,labels --jq ...`
-- **Refer to an issue as `<org>/<repo>#<number>`**, in prose and in tables alike. GitHub renders
-  that form as a link with a hovercard and shortens it to `#<number>` when it is same-repo, so the
-  qualified form costs nothing to read. A **bare `#<number>` resolves against whichever repo hosts
-  the text it sits in** — in an org discussion that is `clhbid/clhbid.com`, not the repo you meant —
-  and links silently to the wrong issue. GitHub also shares one number space across issues and pull
-  requests, so resolve an unqualified reference with `gh pr view <n>`, falling back to
-  `gh issue view <n>`.
+- **Refer to an issue** by its full reference — see [References](#references).
 - **Set state**: a project field, not a label — see [Status](#status).
 - **Close**: an issue closes as `completed`, `not planned` or `duplicate`. The reason is the
   record, so pick the one that matches and say why in a closing comment.
@@ -74,6 +68,37 @@ epic. _Avoid_: ticket, story.
   `gh api --method PATCH repos/{owner}/{repo}/issues/{n} -f state=closed -f state_reason=not_planned`
   To record a duplicate after the fact, reopen and re-close:
   `gh issue reopen <number> && gh issue close <number> --duplicate-of <other-number>`.
+
+## References
+
+**Write every reference in full, as `<org>/<repo>#<number>`**, in prose and in tables alike. GitHub
+renders it as a link with a hovercard and shortens it to `#<number>` when it is same-repo, so it
+costs nothing to read. A **bare `#<number>` resolves against whichever repo hosts the text it sits
+in** — in an org discussion that is `clhbid/clhbid.com`, not the repo you meant — and links silently
+to the wrong issue.
+
+**Read short references; write full ones.** People use a bare `#<number>` and the aliases below,
+matched regardless of case. Resolve one before acting on it, and say which issue you resolved it to.
+When editing a doc or notes that hold short references, propose replacing them with full ones. Ask
+when an alias is unknown or could mean two issues, and suggest a short alias for any repository the
+table lacks.
+
+| Alias               | Repository                           |
+| ------------------- | ------------------------------------ |
+| `LA`                | `clhbid/CLHbid-LiveAuction`          |
+| `com`               | `clhbid/clhbid.com`                  |
+| `AC`                | `clhbid/agent-context`               |
+| `infra`             | `clhbid/infrastructure`              |
+| `TZ`, `hotpatch`    | `clhbid/canadian-time-zone-hotpatch` |
+| `DF`                | `clhbid/devcontainer-features`       |
+| `gh`, `.github`     | `clhbid/.github`                     |
+| `scripts`           | `clhbid/clhbid-scripts`              |
+| `E2I`               | `clhbid/email-to-issue`              |
+| `SFET`              | `clhbid/salesforce-email-templates`  |
+| `template`          | `clhbid/repository-template`         |
+
+Issues and pull requests share one number space, so resolve a number with `gh pr view <n>`, falling
+back to `gh issue view <n>`.
 
 ## Status
 
@@ -188,16 +213,6 @@ each business work in their own right because each is committed to a cycle on it
 
 The board carries both audiences as views — **📋 Delivery board** is everything but epics,
 **💼 Business** is `no:parent-issue -type:Epic`, and **🗺️ Epics** is the epics with their progress.
-The same split governs anything read outside the board:
-
-- **Reporting to the business** — cycle notes, and anything else the business reads — is business
-  work only, counts included: top-level issues and the children of epics, with epics themselves
-  reported in their own section rather than in any cycle table. Add the `business` filter below to
-  any recipe to get its business view, as the **Planning view** recipe does. A board view cannot
-  express it — project filters have no OR across qualifiers — which is why **💼 Business** shows
-  epic children only through the cycle views.
-- **Dispatching and doing the work** reads the leaves, because that is where a branch and a pull
-  request attach. The **Agent frontier** recipe is the example: it excludes anything with children.
 
 ## Querying the board
 
