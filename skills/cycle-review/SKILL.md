@@ -7,8 +7,9 @@ disable-model-invocation: true
 # Cycle Review
 
 The cycle review is a **round trip through a GitHub Discussion**. Branch A publishes the meeting
-notes as a Discussion, the meeting works through them, the project manager posts their decisions as
-a comment, and branch B turns those decisions into tracker writes.
+notes as a Discussion and in email prior to the meeting, the meeting works through them, the
+project manager posts their decisions as a comment, and branch B turns those decisions into tracker
+writes.
 
 **The Discussion is the record**, and the baseline the next cycle's notes are diffed against. See
 [Editing Discussions](#editing-discussions) for where they live and how to read and write one.
@@ -60,8 +61,9 @@ each section against a 30-minute meeting with this budget; the notes show only t
 | Next Actions          | 1       |
 
 **Number in reading order.** Decided by Email items are `E1`, `E2`…; Decisions are `D1`, `D2`….
-Whenever an item moves, renumber so the numbers still run in reading order, and tell the project
-manager, since a sent agenda carries the old numbers.
+Until the agenda is emailed, renumber whenever an item moves so the numbers still run in reading
+order. **Once it is emailed, numbers are fixed**: an item added later takes the next unused number,
+sits in the section it belongs to, and is marked _(added after the agenda)_.
 
 ## Cycle roles
 
@@ -104,7 +106,7 @@ below. **They run first**, before a line of the draft is written, because they c
 notes say. _Automatic_ means no meeting decides them — they still show their list and take a
 go-ahead, like every other mutation.
 
-1. **Open the next cycle.** Current and both future cycles must exist. If the last is missing, add
+1. **Open the next cycle.** Current and both future cycles must exist. If either is missing, add
    it; if the meeting has moved off the planned date, the roles will not resolve until the new
    dates are written. **This is a destructive configuration write** — follow the procedure in
    `issue-tracker`, and fold every other pending change into the same write, because a second one
@@ -160,7 +162,7 @@ go-ahead, like every other mutation.
    anything missing, and: _Any high-risk sales we should avoid releasing around?_
 8. **Draft Next Review** — date, time and location, from the invocation or proposed. It comes
    **before** Decisions because it sets when the current cycle ends, and therefore how much fits in
-   it. **Never on a sale day or the morning after one.**
+   it. **Never on a sale day.**
 9. **Draft Decided by Email** — a brief `ID | Description | Decision` table of decisions settled by
    email since the last review, kept for reference. Find them in the answers recorded on issues
    since then, and confirm the list with the project manager.
@@ -189,12 +191,13 @@ go-ahead, like every other mutation.
     - work the team has asked about has a cycle, or is listed under Backlog;
     - sale dates come from the `RUNBOOK`'s sources;
     - every item reads on its own, without GitHub;
-    - D and E numbers run in reading order.
+    - D and E numbers run in reading order, apart from items added after the agenda went out.
 15. **Reconcile against the live board.** Every cycle section must agree with what the board
     actually says, item for item.
 16. **Publish.** Create the Discussion, or update it if this cycle's notes already exist, and hand
     the project manager the body to send as the email agenda. **Branch A is re-runnable**: run it
-    again whenever the board changes and it revises the same discussion.
+    again whenever the board changes and it revises the same discussion. **Read the live body
+    before every update**, and build on it: the project manager edits the notes on GitHub too.
 
 See [The notes](#the-notes) for the shape, drafted without the **Decision** column and with **Next
 Actions** blank; both are filled in on the way back.
@@ -203,9 +206,8 @@ Actions** blank; both are filled in on the way back.
 
 Read the published body and the project manager's comment from the API by discussion number.
 
-**Accept both reference forms.** A qualified `<org>/<repo>#<number>` resolves as written; a bare
-`#<number>` resolves against `clhbid/clhbid.com`, the repo hosting the discussion. **Say which issue
-you resolved a bare reference to** before acting on it.
+**Resolve references** per **References** in `issue-tracker`: the comment may use bare numbers and
+aliases, and a bare `#<number>` resolves against `clhbid/clhbid.com`, the repo hosting the discussion.
 
 1. **Last Cycle** — the discussion is the record and the backfill already set every `Cycle` in
    branch A. Nothing to write.
