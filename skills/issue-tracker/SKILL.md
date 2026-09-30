@@ -107,6 +107,11 @@ sliced. Work that cannot be specified until someone decides something is `Waitin
 question to answer, not work to schedule. `Ready for Human` is for what no agent can finish. For
 what counts as an agent brief, see [`afk-loop` § The agent brief](../afk-loop/SKILL.md#the-agent-brief).
 
+**Ask the business by email.** A business decision is emailed as it comes up rather than saved for
+the cycle review, which is for what needs real discussion. The email says what is happening in plain
+language, the decision needed, the options each with its consequence, a recommendation and why, and
+a link to the issue.
+
 **Claiming is an assignee write.** `gh issue edit <n> --add-assignee @me` is the atomic first
 write that stops two agents taking the same issue; setting `Status` to `In progress` follows it.
 
@@ -200,14 +205,16 @@ Issue search cannot read project fields: `status:"In progress"` is not a qualifi
 nothing. Every state query therefore runs against the board with
 [`board.graphql`](board.graphql) — one query, filtered per use with `--jq`.
 
-**Find `board.graphql` first.** It sits beside this file, but where that is depends on how the
-skill was installed. Resolve it once per session and reuse it:
+**Find `board.graphql` first.** It sits beside this file, with [`snapshot.graphql`](snapshot.graphql),
+but where that is depends on how the skill was installed. Resolve them once per session and reuse
+them:
 
 ```bash
-for p in ~/.claude/skills/issue-tracker/board.graphql \
-         ~/.agents/skills/issue-tracker/board.graphql \
-         .claude/skills/issue-tracker/board.graphql; do
-  [ -f "$p" ] && BOARD_QUERY="$p" && break
+for d in ~/.claude/skills/issue-tracker \
+         ~/.agents/skills/issue-tracker \
+         .claude/skills/issue-tracker; do
+  [ -f "$d/board.graphql" ] && BOARD_QUERY="$d/board.graphql" \
+    && SNAPSHOT_QUERY="$d/snapshot.graphql" && break
 done
 ```
 
@@ -288,8 +295,8 @@ listing work as written; counting needs a pipe (`| wc -l`).
 
 **Archived items are invisible here.** `ProjectV2.items` defaults to
 `archivedStates: [NOT_ARCHIVED]`, so every recipe reads the live board only. That is what makes the
-stale-closed recipe re-runnable — it cannot see what it just archived — and it is why the `Cycle`
-snapshot in [Cycles](#cycles) passes `archivedStates: [ARCHIVED, NOT_ARCHIVED]` explicitly.
+stale-closed recipe re-runnable — it cannot see what it just archived — and it is why
+[`snapshot.graphql`](snapshot.graphql) passes `archivedStates: [ARCHIVED, NOT_ARCHIVED]` explicitly.
 
 **Eight weeks is 4838400 seconds**, and it is the definition of _stale_ — an item is stale on the
 board, not in someone's judgement, and staleness is measured on business work. The cycle recipes
@@ -375,8 +382,8 @@ always has somewhere to put work deferred two meetings out.
 
 **The title carries the theme**, and until one is agreed it is the date range as a placeholder
 (`Sep 29 - Oct 12`). Dates live in the iteration's own `startDate` and `duration`. **Titles must be
-unique**: recovering from a configuration write resolves iterations by title, and two cycles sharing
-one makes that ambiguous.
+unique**: the cycle recipes match on `CYCLE_TITLE` and the swimlanes are labelled by title, so two
+cycles sharing one read as one.
 
 ### Writing the configuration clears the whole board
 
@@ -389,13 +396,22 @@ inside `iterations` is deleted outright.
 **Make one configuration write per cycle**, folding every pending change into it — the new
 iteration, the agreed end date, any theme titles — and wrap it:
 
-1. **Snapshot** every item's `Cycle`, keyed by `<org>/<repo>#<number>`. Archived items carry values
-   too, so this is its own query passing `archivedStates: [ARCHIVED, NOT_ARCHIVED]` —
-   [`board.graphql`](board.graphql) is live-only and would silently skip them.
+1. **Snapshot** every item's `Cycle`, archived items included, with
+   [`snapshot.graphql`](snapshot.graphql) — [`board.graphql`](board.graphql) is live-only and
+   would silently skip them:
+
+   ```bash
+   gh api graphql --paginate -F query=@"$SNAPSHOT_QUERY" \
+     --jq '.data.organization.projectV2.items.nodes[] | select(.cycle.startDate)' \
+     > /tmp/cycle-snapshot.jsonl
+   ```
+
 2. **Write once**, passing **all** iterations, completed ones past-dated so GitHub re-sorts them
    back into `completedIterations`. The configuration's own `startDate` cannot be read back — only
    `startDay` is exposed — so pass the earliest iteration's `startDate`.
-3. **Restore** every snapshot value, resolving iterations **by title**, because every id changed.
+3. **Restore** every snapshot value, resolving iterations **by `startDate`** — every id changed, and
+   a title may have moved to another date. An archived item cannot be edited, so unarchive it
+   (`unarchiveProjectV2Item`), set its `Cycle`, and archive it again (`archiveProjectV2Item`).
 4. **Read back** `completedIterations` and the restored count. An empty `completedIterations` is the
    failure signature; a count short of the snapshot means items were missed.
 
