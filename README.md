@@ -35,7 +35,7 @@ scope prompt, which a container has no way to answer.
 | --- | --- |
 | `issue-tracker` | The delivery language, issues via `gh`, the `Status` field, the board query recipes, triage roles, cycles, epics, labels, the commit convention, and how to decompose work |
 | `afk-loop` | Which work to hand to Copilot versus Claude Code, what makes a complete agent brief, reviewing what comes back, and what to do when a run goes wrong |
-| `cycle-review` | The recurring cycle-review meeting: publishing the notes as a GitHub Discussion, and processing the returned decisions back into `Cycle` and `Status` |
+| `cycle-review` | The recurring cycle-review meeting: publishing the business-first notes as a GitHub Discussion and email agenda, and processing the returned decisions back into `Cycle` and `Status` |
 | `open-pr` | Opening and updating a pull request, with the size backstop |
 | `house-rules` | The rules every agent loads before changing code: testing, single source of truth and spec style, deferring to `writing-lean` |
 | `writing-lean` | How to write fluent code, and its comments, docs, pull requests, issues, reviews and commits — every other skill points here |

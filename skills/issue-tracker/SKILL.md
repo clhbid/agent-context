@@ -191,11 +191,11 @@ The board carries both audiences as views — **📋 Delivery board** is everyth
 The same split governs anything read outside the board:
 
 - **Reporting to the business** — cycle notes, and anything else the business reads — is business
-  work only, counts included: top-level issues and the children of epics, with epics themselves
-  reported in their own section rather than in any cycle table. Add the `business` filter below to
-  any recipe to get its business view, as the **Planning view** recipe does. A board view cannot
-  express it — project filters have no OR across qualifiers — which is why **💼 Business** shows
-  epic children only through the cycle views.
+  work only: top-level issues and the children of epics, with an epic's progress reported as a
+  highlight rather than as a cycle item. Add the `business` filter below to any recipe to get its
+  business view, as the **Planning view** recipe does. A board view cannot express it — project
+  filters have no OR across qualifiers — which is why **💼 Business** shows epic children only
+  through the cycle views.
 - **Dispatching and doing the work** reads the leaves, because that is where a branch and a pull
   request attach. The **Agent frontier** recipe is the example: it excludes anything with children.
 
