@@ -41,8 +41,9 @@ scope prompt, which a container has no way to answer.
 | `writing-lean` | How to write fluent code, and its comments, docs, pull requests, issues, reviews and commits — every other skill points here |
 
 `skills/issue-tracker/board.graphql` sits beside the skill that uses it: one query against the
-delivery board, filtered per use with `--jq`. The recipes resolve it from wherever the skill was
-installed.
+delivery board, filtered per use with `--jq`. `snapshot.graphql` beside it reads every item's
+`Cycle`, archived items included, for a cycle configuration write. The recipes resolve both from
+wherever the skill was installed.
 
 `labels.yml` is the shared label vocabulary — a category and the wayfinder ticket types. Labels
 never carry state; state is the `Status` field on the board.

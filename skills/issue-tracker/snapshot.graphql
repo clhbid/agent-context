@@ -1,0 +1,33 @@
+# Every item's `Cycle` on the CLHbid Delivery board, archived items included.
+# The snapshot for a Cycle configuration write: run it with `gh api graphql --paginate`.
+# See SKILL.md beside this file for the procedure.
+query ($endCursor: String) {
+  organization(login: "clhbid") {
+    projectV2(number: 4) {
+      items(first: 100, after: $endCursor, archivedStates: [ARCHIVED, NOT_ARCHIVED]) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          id
+          isArchived
+          cycle: fieldValueByName(name: "Cycle") {
+            ... on ProjectV2ItemFieldIterationValue {
+              title
+              startDate
+            }
+          }
+          content {
+            ... on Issue {
+              number
+              repository {
+                nameWithOwner
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
