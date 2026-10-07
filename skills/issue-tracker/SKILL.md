@@ -261,6 +261,9 @@ gh api graphql --paginate -F query=@"$BOARD_QUERY" --jq '
 # In flight
 ... | select(.content.state == "OPEN" and .content.assignees.totalCount > 0)
 
+# Security — every open issue labelled security
+... | select(.content.state == "OPEN" and any(.content.labels.nodes[].name; . == "security"))
+
 # Business filter — top-level issues and epic children, never an epic itself. Goes at the head of
 # the jq program, before `.data`, in any recipe that wants its business view
 def business: .content.issueType.name != "Epic"
@@ -370,11 +373,13 @@ queried directly, only mirrored:
 | 6   | ⏳ Waiting        | `status:"Waiting on input"`                        | mirrors the needs-business-input recipe   |
 | 8   | 📥 Triage         | `status:Backlog no:parent-issue`                   | the inbox, top-level only                 |
 | 9   | 🗺️ Epics          | `type:Epic`                                        | mirrors the epics recipe                  |
+| 13  | 🔒 Security       | `label:security is:open`                           | mirrors the security recipe               |
 
-View **numbers** are stable and never reused after a delete, which is why 7 is missing. Only the
-filter is worth asserting against this table: a view's name, columns and tab position belong to
-whoever uses it, so a change there is intent rather than drift. The one column worth naming is
-**Sub-issues progress** on 🗺️ Epics — a built-in field, and the progress bar the view exists for.
+View **numbers** are stable and never reused after a delete, so the table's numbers have gaps.
+Only the filter is worth asserting against this table: a view's name, columns and tab position
+belong to whoever uses it, so a change there is intent rather than drift. The one column worth
+naming is **Sub-issues progress** on 🗺️ Epics — a built-in field, and the progress bar the view
+exists for.
 
 **A filter is writable.** `updateProjectV2View` takes `name`, `layout`, `filter` and
 `configuration`, so a drifted filter can be **repaired**, not only reported. Grouping and sorting
@@ -481,11 +486,27 @@ Deferring is a decision to record. Its form follows when the work comes back:
 ## Labels
 
 Labels carry neither state nor category — state is [`Status`](#status), category is the
-[issue type](#epics). The only labels with meaning are the `wayfinder:*` set that `/wayfinder`
-applies — see [Wayfinding operations](#wayfinding-operations).
+[issue type](#epics). Two kinds of label have meaning:
+
+- **`wayfinder:*`** — the set `/wayfinder` applies; see
+  [Wayfinding operations](#wayfinding-operations).
+- **`security`** — any issue for a security vulnerability, hardening, or a security process change.
+  When you create or triage one, apply it as well as setting the type:
+  `gh issue edit <n> --add-label security`, or `-f 'labels[]=security'` on the create call in
+  [Creating an issue from the org form](#creating-an-issue-from-the-org-form). It is a label, not a
+  type, because an issue has one type and a security finding can be a `Bug` or an `Enhancement`.
 
 Any other label, `bug` and `enhancement` included, is decoration — read it if you like, but nothing
 keys off it.
+
+**Nothing syncs the vocabulary to repos**, so a repo may lack a label. Check before applying it
+(`gh label list --repo <owner>/<repo> --search <name>`), and if it is missing create it with the
+name, colour and description from [`labels.yml`](../../labels.yml) in `clhbid/agent-context`:
+
+```bash
+gh api repos/clhbid/agent-context/contents/labels.yml --jq .content | base64 -d
+gh label create <name> --repo <owner>/<repo> --color <color> --description "<description>"
+```
 
 ## Creating an issue from the org form
 

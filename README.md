@@ -46,8 +46,9 @@ delivery board, filtered per use with `--jq`. `snapshot.graphql` beside it reads
 `Cycle`, archived items included, for a cycle configuration write. The recipes resolve both from
 wherever the skill was installed.
 
-`labels.yml` is the shared label vocabulary — the wayfinder ticket types. Labels carry neither state
-nor category; state is the `Status` field on the board, and category is the issue type.
+`labels.yml` is the shared label vocabulary — the wayfinder ticket types and `security`. Labels
+carry neither state nor category; state is the `Status` field on the board, and category is the
+issue type.
 
 ## What does *not* belong here
 
