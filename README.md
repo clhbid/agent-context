@@ -33,7 +33,7 @@ scope prompt, which a container has no way to answer.
 
 | Skill | What it covers |
 | --- | --- |
-| `issue-tracker` | The delivery language, issues via `gh`, the `Status` field, the board query recipes, triage roles, cycles, epics, labels, the commit convention, and how to decompose work |
+| `issue-tracker` | The delivery language, issues via `gh`, the `Status` field, the board query recipes, triage roles, cycles, epics, issue types, labels, the commit convention, and how to decompose work |
 | `afk-loop` | Which work to hand to Copilot versus Claude Code, what makes a complete agent brief, reviewing what comes back, and what to do when a run goes wrong |
 | `cycle-review` | The recurring cycle-review meeting: publishing the business-first notes as a GitHub Discussion and email agenda, and processing the returned decisions back into `Cycle` and `Status` |
 | `email-to-issue` | Run by typing `/email-to-issue`. Turns flagged Outlook threads into issues or comments through the Microsoft 365 connector. A `/morning` section such as "Flagged Outlook email not yet in GitHub" lists them, and its button starts the sweep |
@@ -46,8 +46,8 @@ delivery board, filtered per use with `--jq`. `snapshot.graphql` beside it reads
 `Cycle`, archived items included, for a cycle configuration write. The recipes resolve both from
 wherever the skill was installed.
 
-`labels.yml` is the shared label vocabulary — a category and the wayfinder ticket types. Labels
-never carry state; state is the `Status` field on the board.
+`labels.yml` is the shared label vocabulary — the wayfinder ticket types. Labels carry neither state
+nor category; state is the `Status` field on the board, and category is the issue type.
 
 ## What does *not* belong here
 

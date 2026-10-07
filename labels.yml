@@ -1,16 +1,9 @@
 # The label vocabulary shared across clhbid repos.
 #
-# Labels never carry state — state is the `Status` field on the CLHbid Delivery
-# project. See the `issue-tracker` skill. Only what carries meaning is listed:
-# a category, and the wayfinder ticket types.
-
-- name: bug
-  color: "d73a4a"
-  description: Something isn't working
-
-- name: enhancement
-  color: "A2EEEF"
-  description: New feature or request
+# Labels carry neither state nor category — state is the `Status` field on the
+# CLHbid Delivery project, and category is the issue type. See the
+# `issue-tracker` skill. Only what carries meaning is listed: the wayfinder
+# ticket types.
 
 - name: wayfinder:map
   color: "5319E7"

@@ -78,9 +78,9 @@ gh repo view clhbid/<repo> --json visibility --jq .visibility
 
 Show one table for the whole sweep:
 
-| #   | Source                                 | Action    | Target              | Visibility | Title                         | Label |
+| #   | Source                                 | Action    | Target              | Visibility | Title                         | Type  |
 | --- | -------------------------------------- | --------- | ------------------- | ---------- | ----------------------------- | ----- |
-| 1   | Pat Example (`pat@example.com`), 2 Mar | New issue | `clhbid/<repo>`     | PRIVATE    | Bid export drops the last lot | `bug` |
+| 1   | Pat Example (`pat@example.com`), 2 Mar | New issue | `clhbid/<repo>`     | PRIVATE    | Bid export drops the last lot | `Bug` |
 | 2   | Sam Sample (`sam@example.org`), 3 Mar  | Comment   | `clhbid/<repo>#123` | PUBLIC     | Second report of the timeout  | —     |
 
 The user approves, edits or skips each row. GitHub stays untouched until then.

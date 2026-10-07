@@ -246,7 +246,7 @@ aliases, and a bare `#<number>` resolves against `clhbid/clhbid.com`, the repo h
    nothing, since the project manager's own lines cover both delegated tracker work and follow-ups
    they handle themselves. Execute the tracker actions — cycle and status changes, closures, the
    new-issue draft. Leave person-to-person follow-ups alone.
-9. **Draft an issue** for work in the notes that matches nothing on the board — category label
+9. **Draft an issue** for work in the notes that matches nothing on the board — category type
    only, no state, body drawn from the notes. It is new input, so it lands in `Backlog` like
    anything filed from a template.
 10. **Update the discussion** with the decisions integrated — a **Decision** column on the
