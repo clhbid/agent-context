@@ -3,7 +3,7 @@
 # Labels carry neither state nor category — state is the `Status` field on the
 # CLHbid Delivery project, and category is the issue type. See the
 # `issue-tracker` skill. Only what carries meaning is listed: the wayfinder
-# ticket types.
+# ticket types and `security`.
 
 - name: wayfinder:map
   color: "5319E7"
@@ -18,9 +18,13 @@
   description: "HITL ticket: build a cheap concrete artifact to react to"
 
 - name: wayfinder:grilling
-  color: "B60205"
+  color: "D4C5F9"
   description: "HITL ticket: one-question-at-a-time interview to sharpen a decision"
 
 - name: wayfinder:task
   color: "C2E0C6"
   description: Manual work that must happen before a decision can be made
+
+- name: security
+  color: "B60205"
+  description: Security finding or hardening
