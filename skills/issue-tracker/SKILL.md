@@ -1,6 +1,6 @@
 ---
 name: issue-tracker
-description: Read and set work state on the CLHbid Delivery board — the delivery language, issues via gh, the Status field, the board query recipes, cycles, epics, labels, the commit convention and the decomposition rules. Use for any GitHub issue or project-board operation in a clhbid repo, and for what a cycle, epic or slipped issue means.
+description: Read and set work state on the CLHbid Delivery board — the delivery language, issues via gh, the Status field, the board query recipes, cycles, epics, issue types, labels, the commit convention and the decomposition rules. Use for any GitHub issue or project-board operation in a clhbid repo, and for what a cycle, epic or slipped issue means.
 ---
 
 # Issue tracker: GitHub
@@ -15,6 +15,9 @@ The words the skills plan and report in. Every rule below is written in these te
 
 **Cycle**: a fortnight-ish planning period that work is committed to. Committing an issue to a
 cycle is a promise to finish it in that cycle. _Avoid_: sprint, milestone.
+
+**Category**: what kind of thing an issue is, carried as its issue type — `Bug`, `Enhancement` or
+`Epic`, exactly one per issue. _Avoid_: label, kind.
 
 **Epic**: a top-level issue carrying the `Epic` issue type, too large for one cycle and delivered
 through its children. An epic is never committed to a cycle; each child fits in one cycle and is
@@ -36,7 +39,7 @@ epic. _Avoid_: ticket, story.
 ## Conventions
 
 - **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line
-  bodies. This does not apply an issue form — follow
+  bodies. This applies neither an issue form nor a type — follow
   [Creating an issue from the org form](#creating-an-issue-from-the-org-form).
 - **Read, list, comment**: `gh issue view <number> --comments`, `gh issue list`,
   `gh issue comment <number> --body "..."`. `--jq` requires `--json`, so filtering a read means
@@ -188,18 +191,22 @@ Read the value back afterwards — a wrong option id is accepted silently.
 
 ## Triage roles
 
-The skills speak in terms of five canonical triage roles. Here a role is a **`Status` value**, not
-a label — [Status](#status) has what each one means.
+The skills speak in terms of seven canonical triage roles: two category and five state. Here none
+is a label — a category role is an **issue type** (see [Epics](#epics)) and a state role is a
+**`Status` value** ([Status](#status) has what each one means).
 
-| Role in mattpocock/skills | Status here                         |
+| Role in mattpocock/skills | Here                                |
 | ------------------------- | ----------------------------------- |
+| `bug`                     | type `Bug`                          |
+| `enhancement`             | type `Enhancement`                  |
 | `needs-triage`            | Backlog                             |
 | `needs-info`              | Waiting on input                    |
 | `ready-for-agent`         | Ready for Agent                     |
 | `ready-for-human`         | Ready for Human                     |
 | `wontfix`                 | close with `--reason "not planned"` |
 
-When a skill says "apply the AFK-ready triage label", set `Status` to the value in this table.
+When a skill says "apply the category", set the type; when it says "apply the AFK-ready triage
+label", set `Status` to the value in this table.
 `In progress` and `Done` have no counterpart in that vocabulary.
 
 ## Business and delivery
@@ -437,11 +444,15 @@ An epic is work too large for one cycle — see [Language](#language). The hiera
 epic sits under nothing, and its children are the committed units. Work that turns out to span
 cycles becomes an epic by being split into children that each fit one.
 
-- **The `Epic` issue type is the marker**, and the only issue type the skills key off. Set it with
-  `gh api --method PATCH repos/{owner}/{repo}/issues/{n} -f type=Epic`; `gh issue create` cannot,
-  so create the issue and PATCH it. Find them with `gh issue list --search type:Epic`, or the
-  **Epics** recipe. If the org has no `Epic` type, creating one is `createIssueType` on the org
-  node, and it needs the `admin:org` scope that the default `gh` login lacks.
+- **The `Epic` issue type is the marker.** The org has three types — `Bug` (something is broken),
+  `Enhancement` (everything else: new features, and the tooling, config and refactor work we used
+  to call chores) and `Epic` — and every issue carries exactly one. Set any of them with
+  `gh api --method PATCH repos/{owner}/{repo}/issues/{n} -f type=<Bug|Enhancement|Epic>`, or
+  `-f type=` on the REST create call; `gh issue create` and `gh issue edit` have no type flag.
+  Read it as `issueType { name }` in GraphQL or `.type.name` in REST. Find them with
+  `gh issue list --search type:Epic`, or the **Epics** recipe. If the org lacks a type, creating
+  one is `createIssueType` on the org node, and it needs the `admin:org` scope that the default
+  `gh` login lacks.
 - **Status walks the ordinary ladder**, and so does each child, triaged like anything else.
   `Backlog` while the epic still needs decomposing, `Ready for Human` once its children exist,
   `In progress` from the first child committed to a cycle, `Done` when a person closes it.
@@ -469,23 +480,19 @@ Deferring is a decision to record. Its form follows when the work comes back:
 
 ## Labels
 
-Labels never carry state. Two matter:
+Labels carry neither state nor category — state is [`Status`](#status), category is the
+[issue type](#epics). The only labels with meaning are the `wayfinder:*` set that `/wayfinder`
+applies — see [Wayfinding operations](#wayfinding-operations).
 
-- **`bug`** — something is broken.
-- **`enhancement`** — everything else: new features, and the tooling, config and refactor work we
-  used to call chores.
-
-Issue templates apply exactly one of them, and `/wayfinder` adds its own — see
-[Wayfinding operations](#wayfinding-operations).
-
-Any other label is decoration — read it if you like, but nothing keys off it.
+Any other label, `bug` and `enhancement` included, is decoration — read it if you like, but nothing
+keys off it.
 
 ## Creating an issue from the org form
 
 Issue forms in `clhbid/.github/.github/ISSUE_TEMPLATE/` are the source of truth for what an issue
 body contains.
 
-Before `gh issue create`, fetch the form you need:
+Before creating the issue, fetch the form you need:
 
 ```bash
 gh api repos/clhbid/.github/contents/.github/ISSUE_TEMPLATE/<bug|enhancement>.yml \
@@ -500,15 +507,23 @@ Anything beyond the form's fields — acceptance criteria, interface notes, veri
 scope boundaries outside the form itself — belongs in the issue's agent-brief comment (or a
 triage-notes comment), not as extra body headings. See [`afk-loop` § The agent brief](../afk-loop/SKILL.md#the-agent-brief).
 
-Creating this way still means one category label (`bug` or `enhancement`), no state label, and then
-confirming the issue landed on `Backlog` — see [Status](#status).
+Create it through the REST endpoint, which sets the type in the same call — `gh issue create` has no
+`--type` flag. The type matches the form: `Bug` for `bug.yml`, `Enhancement` for `enhancement.yml`.
+
+```bash
+gh api repos/<owner>/<repo>/issues -f title="..." -f body="..." -f type=<Bug|Enhancement> \
+  --jq .html_url
+```
+
+That is one type, no state, and then confirming the issue landed on `Backlog` — see
+[Status](#status).
 
 ## Templates apply a category, never a state
 
 Issue forms come from the org defaults in `clhbid/.github` under `.github/ISSUE_TEMPLATE/`. **A
 person filing an issue should use one** — they collect fields a triager otherwise has to ask for.
 
-A form applies exactly one **category** label (`bug` or `enhancement`) and **no state**. Category
+A form applies exactly one **category** type (`Bug` or `Enhancement`) and **no state**. Category
 says what kind of thing an issue is; `Status` says where it has got to — nothing about the category
 implies a state.
 When an agent creates an issue without the browser form, use
