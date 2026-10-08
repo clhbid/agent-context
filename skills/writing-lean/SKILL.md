@@ -10,7 +10,7 @@ by reading them. Writing is **lean** when it carries only what they cannot say.
 
 - **Code first.** Reach for a clearer name, a smaller function or a sharper spec before a longer
   explanation.
-- **One word per idea.** Use the project's term for a concept, from `CONTEXT.md` or the code, every
+- **One word per idea.** Use the project's term for a concept, from `GLOSSARY.md` or the code, every
   time; a synonym reads as a second concept.
 - **Say what to do.** State the target ("one-line comments"), not the ban; a prohibition earns its
   place only as a hard guardrail, paired with what to do instead.

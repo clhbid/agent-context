@@ -44,6 +44,9 @@ epic. _Avoid_: ticket, story.
 - **Read, list, comment**: `gh issue view <number> --comments`, `gh issue list`,
   `gh issue comment <number> --body "..."`. `--jq` requires `--json`, so filtering a read means
   dropping `--comments` and naming the fields: `gh issue view <number> --json number,title,labels --jq ...`
+- **Make an issue a sub-issue**: `gh issue edit <child> --parent <parent-url>` after creating it —
+  the REST create in [Creating an issue from the org form](#creating-an-issue-from-the-org-form)
+  takes no parent. The URL form reaches a parent in another repo, as an epic's children often are.
 - **Refer to an issue** by its full reference — see [References](#references).
 - **Set state**: a project field, not a label — see [Status](#status).
 - **Close**: an issue closes as `completed`, `not planned` or `duplicate`. The reason is the
@@ -488,7 +491,7 @@ Deferring is a decision to record. Its form follows when the work comes back:
 Labels carry neither state nor category — state is [`Status`](#status), category is the
 [issue type](#epics). Two kinds of label have meaning:
 
-- **`wayfinder:*`** — the set `/wayfinder` applies; see
+- **`wayfinder:*`** — the set `wayfinder` applies; see
   [Wayfinding operations](#wayfinding-operations).
 - **`security`** — any issue for a security vulnerability, hardening, or a security process change.
   When you create or triage one, apply it as well as setting the type:
@@ -580,7 +583,7 @@ anything else, then split. There is no CI gate for this.
 
 ## Pull requests as a triage surface
 
-**PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_ While it is `no`, external PRs are not triaged and no `gh pr` state handling applies.
+**PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `triage` reads this flag.)_ While it is `no`, external PRs are not triaged and no `gh pr` state handling applies.
 
 ## When a skill says…
 
@@ -590,10 +593,10 @@ anything else, then split. There is no CI gate for this.
 
 ## Wayfinding operations
 
-Used by `/wayfinder`. The **map** is a single issue with **child** issues as tickets.
+Used by `wayfinder`. The **map** is a single issue with **child** issues as tickets.
 
 - **Map**: a single issue labelled `wayfinder:map`, holding the Notes / Decisions-so-far / Fog body. `gh issue create --label wayfinder:map`.
-- **Child ticket**: an issue linked to the map as a GitHub sub-issue (`gh api` on the sub-issues endpoint). Labels: `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving dev.
+- **Child ticket**: an issue linked to the map as a GitHub sub-issue; see [Conventions](#conventions). Labels: `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving dev.
 - **Blocking**: GitHub's **native issue dependencies**. Add an edge with `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`, where `<blocker-db-id>` is the blocker's numeric **database id** (`gh api repos/<owner>/<repo>/issues/<n> --jq .id`, _not_ the `#number` or `node_id`). GitHub reports `issue_dependencies_summary.blocked_by` (open blockers only — the live gate). A ticket is unblocked when every blocker is closed.
 - **Frontier query**: list the map's open children, drop any with an open blocker or an assignee; first in map order wins.
 - **Claim**: `gh issue edit <n> --add-assignee @me` — the session's first write.

@@ -32,7 +32,7 @@ Copilot candidate by definition. See **Triage roles** in the `issue-tracker` ski
 
 ## The agent brief
 
-A structured comment posted on the issue when it moves to `Ready for Agent`, written by `/triage`
+A structured comment posted on the issue when it moves to `Ready for Agent`, written by `triage`
 with `writing-lean`.
 **The issue body and discussion are context; the brief is the contract** — it is what the agent
 works from.
@@ -49,7 +49,7 @@ A brief is complete when it has all of:
 
 The full reference, with worked good and bad examples, is
 [`AGENT-BRIEF.md`](https://github.com/mattpocock/skills/blob/main/skills/engineering/triage/AGENT-BRIEF.md)
-in Matt's `/triage` skill. It ships with the skills rather than this repo, so it is absent from a
+in Matt's `triage` skill. It ships with the skills rather than this repo, so it is absent from a
 Copilot container — which is why the checklist above is inlined, and why that link points at
 GitHub rather than a local path.
 
