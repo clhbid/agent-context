@@ -60,7 +60,7 @@ Concretely, each repo keeps its own:
 
 - **`AGENTS.md`** — build, test and lint commands, and the **How a run ends** contract. Copilot
   reads this and nothing else, so it has to be self-sufficient.
-- **`CONTEXT.md` and `docs/adr/`** — domain vocabulary and decisions.
+- **`GLOSSARY.md` and `docs/adr/`** — domain vocabulary and decisions.
 
 Matt Pocock's skills are **installed alongside** these rather than vendored, so upstream fixes keep
 flowing and we maintain only our own.
