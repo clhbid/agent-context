@@ -37,7 +37,7 @@ scope prompt, which a container has no way to answer.
 | `afk-loop` | Which work to hand to Copilot versus Claude Code, what makes a complete agent brief, reviewing what comes back, and what to do when a run goes wrong |
 | `cycle-review` | The recurring cycle-review meeting: publishing the business-first notes as a GitHub Discussion and email agenda, and processing the returned decisions back into `Cycle` and `Status` |
 | `email-to-issue` | Run by typing `/email-to-issue`. Turns flagged Outlook threads into issues or comments through the Microsoft 365 connector. A `/morning` section such as "Flagged Outlook email not yet in GitHub" lists them, and its button starts the sweep |
-| `open-pr` | Opening and updating a pull request, with the size backstop |
+| `open-pr` | Opening, pushing and updating a pull request: base branch, title, closing reference, size check, ready or draft. Upstream `pr` writes the body |
 | `house-rules` | The rules every agent loads before changing code: testing, single source of truth and spec style, deferring to `writing-lean` |
 | `writing-lean` | How to write fluent code, and its comments, docs, pull requests, issues, reviews and commits — every other skill points here |
 
@@ -63,7 +63,8 @@ Concretely, each repo keeps its own:
 - **`GLOSSARY.md` and `docs/adr/`** — domain vocabulary and decisions.
 
 Matt Pocock's skills are **installed alongside** these rather than vendored, so upstream fixes keep
-flowing and we maintain only our own.
+flowing and we maintain only our own. We don't use `implement-spec` for now: it lands a whole spec
+as one pull request.
 
 ## Changing a skill
 
