@@ -1,6 +1,6 @@
 ---
 name: open-pr
-description: Open, push or update a GitHub pull request: base branch, title, closing reference, size check, ready or draft. Use when the user wants to open a PR, push changes to one, or update its description. Write the body with `pr`.
+description: "Open, push or update a GitHub pull request: base branch, title, closing reference, size check, ready or draft. Use when the user wants to open a PR, push changes to one, or update its description. Write the body with `pr`."
 ---
 
 # Open PR
