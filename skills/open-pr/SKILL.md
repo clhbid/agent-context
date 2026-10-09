@@ -43,8 +43,8 @@ rather than writing a PR body against someone else's issue.
 
 ```bash
 git status                      # warn the user about uncommitted changes
-git log --oneline <base>...HEAD
-git diff <base>...HEAD
+git log --oneline "origin/<base>"...HEAD
+git diff "origin/<base>"...HEAD
 ```
 
 ## Step 4: Check the size
