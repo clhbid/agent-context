@@ -24,21 +24,21 @@ Record its number, repository, base, head SHA, author, and the issue it closes. 
 agent wrote it: a `copilot/` branch, a bot author, or agent co-authors on its commits.
 
 When the reviewer has reviewed this pull request before, this is a **follow-up review**: record the
-commit that review covered, and review only the commits since; see
-[GITHUB.md](GITHUB.md#the-last-reviewed-commit).
+commit their last review covered ([GITHUB.md](GITHUB.md#the-last-reviewed-commit)). **The diff under
+review** runs from that commit to the head, or from the base when there is none.
 
-**Done when** each of those is recorded.
+**Done when** each of those is recorded, and the diff under review is known.
 
 ## 2. Start the background work
 
 Dispatch these as background subagents, so they run while the reviewer answers step 3:
 
-- **`code-review`** against the pull request's base, or in a follow-up review against the last
-  reviewed commit. Its requirements are the closing issue and its agent brief, plus the earlier
-  review's findings in a follow-up review. Add `house-rules` and `writing-lean` to its Standards
-  sources as documented standards; they override its smell baseline. When `code-review` isn't
+- **`code-review`** over the diff under review. Its requirements are the closing issue and its agent
+  brief, plus the earlier review's findings in a follow-up review. Add `house-rules` and
+  `writing-lean` to its Standards sources as documented standards; they override its smell
+  baseline. When `code-review` isn't
   installed, the subagent instead checks the closing issue and every acceptance criterion in its
-  agent brief against the diff, and reports each as met, partly met or missing.
+  agent brief against the diff under review, and reports each as met, partly met or missing.
 - **Checks.** Read the pull request's checks. Cite passing ones as they are. Run locally only the
   checks that failed and the documented checks CI doesn't run, using the commands in the repo's
   `AGENTS.md`.
@@ -62,7 +62,7 @@ When the reviewer is the author, tell them now how that limits the review's even
 
 When the diff under review runs past about 400 changed lines or touches many files, recommend
 asking for a split before going further. In a follow-up review, recommend carrying on instead:
-commits answering a review rarely split well. The reviewer decides either way.
+commits answering a review rarely split well.
 
 Their answers set how deep each step teaches and which findings rank first: a security review leads
 with leaks.
@@ -72,17 +72,17 @@ with leaks.
 ## 4. Plan the steps
 
 Wait for the `code-review` findings and the earlier threads, then build the step plan from them and
-the diff. Where they disagree on an earlier finding, the thread replies win: they hold the
-reviewer's later decisions. Order the plan from the shared foundation (helpers, contracts, data
-shapes) out to the edges and interfaces, so each step builds on the last. Give the most time to
-steps holding serious findings, and fold quiet areas into their neighbours.
+the diff under review. Where `code-review` and a thread disagree on an earlier finding, the thread's
+replies win: they hold the reviewer's later decisions. Order the plan from the shared foundation
+(helpers, contracts, data shapes) out to the edges and interfaces, so each step builds on the last.
+Give the most time to steps holding serious findings, and fold quiet areas into their neighbours.
 
 Show the plan as a numbered list, one line per step naming its files, and let the reviewer reorder,
 merge or skip steps. Then add the closing steps: remaining specs, local testing, and draft and
 post.
 
-**Done when** the reviewer accepts the plan and every changed file sits in a step or on the
-not-reviewed list.
+**Done when** the reviewer accepts the plan and every file in the diff under review sits in a step
+or on the not-reviewed list.
 
 ## 5. Walk each step
 
@@ -121,8 +121,8 @@ Add each agreed finding to the draft as soon as it's agreed.
 Cover the spec files no step discussed, and the gaps that cut across steps, such as a path that
 only runs on reconnect or failure. End with a round.
 
-**Done when** every spec file in the diff has been discussed and every finding is agreed or
-rejected.
+**Done when** every spec file in the diff under review has been discussed and every finding is
+agreed or rejected.
 
 ## 7. Local testing
 

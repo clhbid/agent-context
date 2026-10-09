@@ -24,7 +24,7 @@ gh api repos/<owner>/<repo>/pulls/<n>/reviews --jq \
   '[.[] | select(.user.login == "<reviewer>" and .body != "" and .state != "PENDING")] | last | .commit_id'
 ```
 
-Empty output means this is the reviewer's first review.
+`null` means this is the reviewer's first review.
 
 ## Checks
 

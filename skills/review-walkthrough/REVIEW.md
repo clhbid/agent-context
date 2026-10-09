@@ -39,9 +39,9 @@ review if one comment lands elsewhere. When the real location isn't in the diff,
 nearest changed line that calls or uses it, and name the real `file:line` in the text.
 
 **A carried finding** comes from an earlier, unresolved thread and keeps that thread's number. When
-the thread already states the fix, list it under **Still open from earlier reviews** with its link
-and blocking status, and post no new comment. When the fix is new, or the thread never stated it,
-post a new comment that links the thread.
+the thread already states the fix, list it only under **Still open from earlier reviews**, with its
+link and blocking status. When the fix is new, or the thread never stated it, post a new comment
+that links the thread.
 
 ## The summary
 
@@ -54,7 +54,7 @@ In this order:
 4. One or two specific, true things the pull request does well.
 5. The requested findings by number, in priority order: fix (`issue`), add (`todo` features),
    missing specs (`todo` specs), clean-ups (`suggestion`, `nitpick`), then notes.
-6. **Still open from earlier reviews**: each carried thread, linked.
+6. **Still open from earlier reviews**: each carried finding, linked, with its blocking status.
 7. **Not reviewed**: steps skipped or only skimmed, generated files, lockfiles.
 8. What the pull request description must say once the changes land.
 
@@ -68,6 +68,8 @@ Recommend one, and let the reviewer choose:
 - `COMMENT` when every finding is non-blocking, and always when the reviewer is the pull request's
   author, because GitHub refuses a request for changes on your own pull request.
 - `APPROVE` only when the reviewer picks it.
+- **Pending**, with no event, when the reviewer will submit it from GitHub themselves, for example
+  to choose the model Copilot uses.
 
 ## Posting
 
@@ -75,8 +77,6 @@ Recommend one, and let the reviewer choose:
 2. Show the reviewer the full draft: the summary and every comment.
 3. Once the reviewer approves the draft, post the review in one request with the head SHA you
    reviewed, then read it back: its state, and that it carries one comment per finding.
-
-The reviewer may submit it themselves, for example to choose the model Copilot uses. Then post it
-**pending**, without an event, and give them the summary in a copyable Markdown block, because
-GitHub shows a pending review's body only once it's submitted. A finding agreed after the draft
-was shown goes into the pending review; see [GITHUB.md](GITHUB.md#changing-a-pending-review).
+4. For a pending review, give the reviewer the summary in a copyable Markdown block: GitHub shows a
+   pending review's body only once it's submitted. A finding agreed after this goes into the
+   pending review; see [GITHUB.md](GITHUB.md#changing-a-pending-review).
