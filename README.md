@@ -38,6 +38,7 @@ scope prompt, which a container has no way to answer.
 | `cycle-review` | The recurring cycle-review meeting: publishing the business-first notes as a GitHub Discussion and email agenda, and processing the returned decisions back into `Cycle` and `Status` |
 | `email-to-issue` | Run by typing `/email-to-issue`. Turns flagged Outlook threads into issues or comments through the Microsoft 365 connector. A `/morning` section such as "Flagged Outlook email not yet in GitHub" lists them, and its button starts the sweep |
 | `open-pr` | Opening, pushing and updating a pull request: base branch, title, closing reference, size check, ready or draft. Upstream `pr` writes the body |
+| `review-walkthrough` | Run by typing `/review-walkthrough <PR>`. Mentors a reviewer through a pull request step by step, teaching the code as it goes, and posts the agreed findings as one GitHub review in their name |
 | `house-rules` | The rules every agent loads before changing code: testing, single source of truth and spec style, deferring to `writing-lean` |
 | `writing-lean` | How to write fluent code, and its comments, docs, pull requests, issues, reviews and commits — every other skill points here |
 
