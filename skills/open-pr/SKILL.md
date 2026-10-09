@@ -1,44 +1,27 @@
 ---
 name: open-pr
-description: Create or update a GitHub pull request with a standardized template. Use when the user wants to open a PR, create a pull request, update a PR description, submit changes, or push a PR.
+description: "Open, push or update a GitHub pull request: base branch, title, closing reference, size check, ready or draft. Use when the user wants to open a PR, push changes to one, or update its description. Write the body with `pr`."
 ---
 
 # Open PR
 
-Create or update a GitHub pull request from the template below, written with `writing-lean`.
+Open or update a pull request. The `pr` skill writes the body; this skill does everything around it.
 
-## Step 1: Check for Existing PR
-
-Check if a PR already exists for the current branch:
-
-```bash
-gh pr view --json number,title,body,url
-```
-
-- If PR exists: proceed to **update flow** (Step 5b)
-- If no PR exists: proceed to **create flow** (Step 5a)
-
-## Step 1b (Required): Identify the correct diff base
-
-**Never assume `main`.** You must diff against the actual base branch.
-
-- If updating an existing PR, use the PR base:
-
-```bash
-gh pr view --json baseRefName,headRefName
-git fetch origin --prune
-git diff --stat "origin/<baseRefName>...HEAD"
-```
-
-- If creating a new PR (no PR exists yet), use the repo default branch:
+## Step 1: Find the pull request and its base
 
 ```bash
 git fetch origin --prune
-git symbolic-ref refs/remotes/origin/HEAD
-git diff --stat "origin/<defaultBranch>...HEAD"
+gh pr view --json number,url,baseRefName
 ```
 
-## Step 2: Fetch the GitHub Issue
+**Never assume the base.** Diff against the branch the pull request targets:
+
+- **A pull request exists:** its `baseRefName`. Update it in Step 6b.
+- **None exists:** the default branch (`main` or `development`), from
+  `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name` — or the previous slice's
+  branch when this one is stacked on it. Create it in Step 6a.
+
+## Step 2: Fetch the issue
 
 Parse the issue number from the branch name. Branch names follow the pattern `{issue_number}-{description}` (e.g., `54-return-to-after-login` -> issue #54).
 
@@ -47,175 +30,79 @@ not always in the repo you are opening the PR from — a change in one repo ofte
 tracked in another. Resolve the repo before fetching, defaulting to the current one:
 
 ```bash
-# Get current branch name
-git branch --show-current
-
 # Default to this repo; override when the issue lives elsewhere
 ISSUE_REPO="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
 
-# Fetch issue details
 gh issue view <issue_number> --repo "$ISSUE_REPO" --json title,body,url
 ```
 
 If the fetched issue doesn't match the work in the diff, you have resolved the wrong repo — ask
 rather than writing a PR body against someone else's issue.
 
-Extract the issue title and body for context.
-
-## Step 3: Analyze Git Changes
-
-Run these commands to understand the scope of changes:
+## Step 3: Read the changes
 
 ```bash
-# Check for uncommitted changes (warn user if any)
-git status
-
-# Get all commits on this branch (against the *actual* base branch)
-git log <base>...HEAD --oneline
-
-# Get the full diff summary against the *actual* base branch
-git diff --stat <base>...HEAD
-
-# REQUIRED: Inspect the actual line changes (not just stats)
-git diff <base>...HEAD
+git status                      # warn the user about uncommitted changes
+git log --oneline "origin/<base>"...HEAD
+git diff "origin/<base>"...HEAD
 ```
 
-**Required rule:** Before writing/updating the PR body, you must read the diff and extract
-**1-3 concrete line-level changes** (e.g., a rename `OldName` -> `NewName`, a new env var key, an endpoint path change).
-No speculative bullets.
-
-## Step 3b: Check the size against the ceiling
+## Step 4: Check the size
 
 ```bash
 git diff --shortstat <base>...HEAD
 ```
 
-Discount lockfiles, snapshots and generated files, then compare what's left against the changed-line
-ceiling in **Decomposing work before Ready for Agent** in the `issue-tracker` skill. That skill
-holds the number; don't restate it here, or there are two copies to keep in step.
+Compare it against the ceiling in **Decomposing work before Ready for Agent** in the `issue-tracker`
+skill. If it is over, say so and propose that skill's simplify-then-split. **This never blocks**: if
+the author says ship it, ship it.
 
-If the diff is over, say so and propose, in this order:
+## Step 5: Write the body
 
-1. **Simplify.** Cut documentation that fails the `writing-lean` deletion test first, then anything
-   else the change doesn't need. Most oversized diffs shrink here.
-2. **Split.** Only once it's as small as it's going to get: cut sub-issues, set the leaves to
-   `Ready for Agent`, and open this pull request for the slice that's finished — stacking it on the
-   previous slice where they depend on each other.
+Write it with the `pr` skill, then:
 
-**This never blocks.** It's a prompt to reconsider at the last moment before a reviewer sees the
-diff, not a gate. If the author says ship it, ship it.
+- Put any task to do before or after merging ("add env var X before merging", "run migration Y
+  after") in Merge Danger's optional description.
+- End with the closing line: `Closes #<issue_number>`, or `Part of #<issue_number>` when the pull
+  request delivers only part of the issue. **Qualify it when the issue is in another repo** —
+  `Closes owner/repo#N`; a bare `#N` silently means this repo's issue N.
 
-## Step 4: Generate PR Content
+**Title format:** `{issue_number}: {issue_title}`, e.g. `54: Return to after login`.
 
-**Title format:** `{issue_number}: {issue_title}`
+## Step 6a: Create a pull request
 
-Example: `54: Return to after login`
-
-**Body template:**
-
-```markdown
-## Description
-
-- 1-2 bullets: what and why
-
-## Changes
-
-- 2-5 bullets max: user-visible or behavior changes
-
-## How to Test
-
-1. 2-4 steps max
-2. Include the single most important edge case
-
-## Deployment Notes
-
-1. OPTIONAL: Only include if there are special deployment steps or risks to call out
-2. Flag any tasks that must be done before or after merging (e.g., "Add env var X before merging", "Run data migration Y after merging", "Add a variable to 1Password")
-
-## Related Issues
-
-Closes #<issue_number>
-```
-
-**Qualify the reference when the issue is in another repo** — `Closes owner/repo#N`. The qualified
-form does close the issue on merge, the same as a same-repo reference; a bare `#N` silently means
-this repo's issue N, which is a different issue or none at all.
-
-## Step 5a: Create New PR
-
-Push the branch and open the PR ready for review:
+Save the body from Step 5 to a file, then:
 
 ```bash
-# Push branch to remote
 git push -u origin HEAD
-
-# Create the PR, against the base resolved in Step 1b
-gh pr create --base "<base>" --title "<issue_number>: <issue_title>" --body "$(cat <<'EOF'
-## Description
-- <1-2 bullets: what/why>
-
-## Changes
-- <2-5 bullets max>
-
-## How to Test
-1. <2-4 steps max>
-
-## Deployment Notes
-1. OPTIONAL: delete this section entirely if there are no special steps or risks
-2. Flag any tasks that must be done before or after merging
-
-## Related Issues
-Closes #<issue_number>
-EOF
-)"
-
-# Ask a human to look at it
+gh pr create --base "<base>" --title "<issue_number>: <issue_title>" --body-file <body-file>
 gh pr edit --add-reviewer <maintainer>
 ```
 
-**`--base` is not optional.** Without it `gh` targets the repo's default branch, so a slice
-stacked on a previous one would show its parent's changes in the diff too — the opposite of the
-clean review Step 3b's stacking advice is trying to produce.
+**`--base` is not optional.** Without it `gh` targets the default branch, so a slice stacked on a
+previous one would show its parent's changes in the diff too.
 
-## Step 5b: Update Existing PR
+**Open ready for review, and request one.** Draft means the run stopped short: reserve it for the
+**Blocked** and **Error** endings in **How a run ends** in the repo's `AGENTS.md`, where the pull
+request carries a comment explaining what is needed.
 
-Push latest changes and update the PR description:
+## Step 6b: Update a pull request
 
 ```bash
-# Push latest changes
 git push
-
-# Update PR body
-gh pr edit --body "$(cat <<'EOF'
-## Description
-- <1-2 bullets: what/why>
-
-## Changes
-- <2-5 bullets max>
-
-## How to Test
-1. <2-4 steps max>
-
-## Deployment Notes
-1. OPTIONAL: Only include if there are special deployment steps or risks to call out. If there are none, delete this section entirely.
-2. Flag any tasks that must be done before or after merging (e.g., "Add env var X before merging", "Run data migration Y after merging", "Add a variable to 1Password")
-
-## Related Issues
-Closes #<issue_number>
-EOF
-)"
+gh pr edit --body-file <body-file>
 ```
 
-Optionally update the title if needed:
+Rewrite the body against the whole diff rather than appending to it. Update the title with
+`gh pr edit --title` if the issue's title has changed.
+
+## Step 7: Check the link
 
 ```bash
-gh pr edit --title "<issue_number>: <issue_title>"
+gh pr view --json baseRefName,closingIssuesReferences
 ```
 
-## Notes
-
-- **Open ready for review, and request one.** Draft is not the default — it means the run stopped
-  short. Reserve it for the **Blocked** and **Error** endings in **How a run ends** in the repo's
-  `AGENTS.md`, where the PR carries a comment explaining what is needed. A **Complete** run opens
-  the PR ready and asks a human to look at it
-- When updating, replace stale bullets rather than appending to them
+A `Closes` line on a pull request into the default branch must show up in `closingIssuesReferences`;
+if it doesn't, fix the line. A stacked pull request shows no link until GitHub retargets it after
+its parent merges (see **A closing reference fires only on a merge into the default branch** in
+`issue-tracker`) — say so in your report. `Part of` never links.

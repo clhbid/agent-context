@@ -358,7 +358,7 @@ done
 
 **A closing reference fires only on a merge into the default branch.** A row with a closing
 reference and an open issue is a pull request that merged somewhere else — a stacked slice merged
-into its parent before GitHub retargeted it, or anything merged into `scale-up` or `development`.
+into its parent before GitHub retargeted it, or anything merged into a branch such as `scale-up`.
 A row with none had no `Closes` line, or a deliberate `Refs`/`Part of`. Either way the issue closes
 by hand — as `completed`, naming the pull request, per [Conventions](#conventions) — unless the pull
 request was a partial and the issue is still live.
@@ -561,9 +561,9 @@ a diff, read the leading `NNNN:` and ignore the trailing `(#NNNN)`.
 
 ## Decomposing work before Ready for Agent
 
-Keep `1 issue = 1 branch = 1 PR`. If work is too large, split the **issue**, not the pull request.
-Size is a precondition of `Ready for Agent`. Work too large for a **cycle** is an [epic](#epics),
-split one level higher.
+Keep `1 issue = 1 branch = 1 PR`. If work is too large, split the **issue**, not the pull request;
+if two issues are one change, close one as a duplicate of the other. Size is a precondition of
+`Ready for Agent`. Work too large for a **cycle** is an [epic](#epics), split one level higher.
 
 **Smaller is better.** ~1000 changed lines is the ceiling — excluding lockfiles, snapshots and
 generated files — but it is a limit, not a target: a changeset that splits cleanly should be split
@@ -572,10 +572,12 @@ ceiling, simplify first, cutting documentation that fails the `writing-lean` del
 anything else, then split. There is no CI gate for this.
 
 - A valid slice is **independently mergeable and green**. Behaviour-neutral slices (rename,
-  extraction, refactor) count when they stand alone.
+  extraction, refactor) count when they stand alone. A plan whose slices can't each merge green
+  goes to `Ready for Human`, with a comment on why.
 - **Stack the pull requests when slices depend on each other.** A pull request can target a branch
-  other than `main`, and GitHub retargets it automatically when its base merges — so a dependent
-  slice can be opened and reviewed straight away instead of waiting for its parent to land.
+  other than the default branch (`main` or `development`), and GitHub retargets it automatically
+  when its base merges — so a dependent slice can be opened and reviewed straight away instead of
+  waiting for its parent to land.
 - **If an agent finds mid-flight that work is too large**, it simplifies, creates sub-issues, links
   them as children, sets the leaves to `Ready for Agent`, opens a pull request for the work it has
   finished — stacked on the previous slice where they depend on each other — and comments on the
