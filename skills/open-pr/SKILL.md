@@ -71,29 +71,26 @@ Write it with the `pr` skill, then:
 
 ## Step 6a: Create a pull request
 
+Save the body from Step 5 to a file, then:
+
 ```bash
 git push -u origin HEAD
-
-gh pr create --base "<base>" --title "<issue_number>: <issue_title>" --body "$(cat <<'EOF'
-<body from Step 5>
-EOF
-)"
-
+gh pr create --base "<base>" --title "<issue_number>: <issue_title>" --body-file <body-file>
 gh pr edit --add-reviewer <maintainer>
 ```
 
 **`--base` is not optional.** Without it `gh` targets the default branch, so a slice stacked on a
 previous one would show its parent's changes in the diff too.
 
+**Open ready for review, and request one.** Draft means the run stopped short: reserve it for the
+**Blocked** and **Error** endings in **How a run ends** in the repo's `AGENTS.md`, where the pull
+request carries a comment explaining what is needed.
+
 ## Step 6b: Update a pull request
 
 ```bash
 git push
-
-gh pr edit --body "$(cat <<'EOF'
-<body from Step 5>
-EOF
-)"
+gh pr edit --body-file <body-file>
 ```
 
 Rewrite the body against the whole diff rather than appending to it. Update the title with
@@ -105,14 +102,7 @@ Rewrite the body against the whole diff rather than appending to it. Update the 
 gh pr view --json baseRefName,closingIssuesReferences
 ```
 
-- **Base is the default branch:** `closingIssuesReferences` must list the issue. If it doesn't, fix
-  the closing line.
-- **Stacked on another branch:** GitHub ignores closing keywords until the pull request targets the
-  default branch, so expect no link. It links when GitHub retargets the pull request after its
-  parent merges — say so in your report.
-
-## Ready or draft
-
-**Open ready for review, and request one.** Draft means the run stopped short: reserve it for the
-**Blocked** and **Error** endings in **How a run ends** in the repo's `AGENTS.md`, where the pull
-request carries a comment explaining what is needed.
+A `Closes` line on a pull request into the default branch must show up in `closingIssuesReferences`;
+if it doesn't, fix the line. A stacked pull request shows no link until GitHub retargets it after
+its parent merges (see **A closing reference fires only on a merge into the default branch** in
+`issue-tracker`) — say so in your report. `Part of` never links.
