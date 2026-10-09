@@ -84,7 +84,7 @@ in each are in **How a run ends**, in the repo's own `AGENTS.md` — that table 
 per-repo. Read the pull request against it, then act:
 
 - **Complete** — review it as you would anyone's pull request, and against the acceptance criteria
-  in the issue's agent brief. The pull request template asks about this directly.
+  in the issue's agent brief.
 - **Blocked** — the agent named a question it could not answer or an action it could not take.
   Resolve it, then reply in the session so the run carries on. It is waiting on you, not stalled,
   and the work resumes where it stopped.
