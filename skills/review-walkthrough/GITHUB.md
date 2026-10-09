@@ -14,24 +14,36 @@ gh api user --jq .login   # who is invoking the skill
 `closingIssuesReferences` is empty when the body links the issue some other way; read the body for
 `Closes #N` and the branch name for a leading issue number.
 
+## The last reviewed commit
+
+Each reply to a thread is also a review, with an empty body, pinned to the head at the time; skip
+those to find the commit the reviewer's last real review covered:
+
+```bash
+gh api repos/<owner>/<repo>/pulls/<n>/reviews --jq \
+  '[.[] | select(.user.login == "<reviewer>" and .body != "" and .state != "PENDING")] | last | .commit_id'
+```
+
+Empty output means this is the reviewer's first review.
+
 ## Checks
 
 ```bash
 gh pr checks <n> -R <owner>/<repo> --json name,bucket,link
 ```
 
-## Unresolved threads
+## Review threads
 
-REST doesn't say whether a thread is resolved; GraphQL does:
+REST doesn't say whether a thread is resolved, or who resolved it; GraphQL does:
 
 ```bash
 gh api graphql -F owner=<owner> -F repo=<repo> -F n=<n> -f query='
   query($owner: String!, $repo: String!, $n: Int!) {
     repository(owner: $owner, name: $repo) { pullRequest(number: $n) {
       reviewThreads(first: 100) { pageInfo { hasNextPage endCursor } nodes {
-        id isResolved isOutdated path line
-        comments(first: 20) { nodes { author { login } body url } } } } } } }' \
-  --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved | not)'
+        id isResolved resolvedBy { login } isOutdated path line
+        comments(first: 20) { nodes { author { login } body url createdAt } } } } } } }' \
+  --jq '.data.repository.pullRequest.reviewThreads.nodes[]'
 ```
 
 When `hasNextPage` is true, fetch the next page with
@@ -63,11 +75,28 @@ gh api repos/<owner>/<repo>/pulls/<n>/reviews --method POST --input review.json 
   --jq '.html_url + " " + .state'
 ```
 
+To leave the review **pending** for the reviewer to submit, leave out `event`; the state reads back
+as `PENDING`.
+
 A `422` posts nothing. `Can not request changes on your own pull request` means the reviewer is the
 author; see [REVIEW.md](REVIEW.md#the-event). Read the comment count back with:
 
 ```bash
 gh api repos/<owner>/<repo>/pulls/<n>/reviews/<review id>/comments --jq length
+```
+
+## Changing a pending review
+
+Add a comment with the review's node id (`.node_id` on the review), remove one by its comment id,
+and replace the summary:
+
+```bash
+gh api graphql -f rid=<review node id> -f path=<file> -F line=<line> -f body="$(cat finding.md)" -f query='
+  mutation($rid: ID!, $path: String!, $line: Int!, $body: String!) {
+    addPullRequestReviewThread(input: { pullRequestReviewId: $rid, path: $path, line: $line,
+      side: RIGHT, body: $body }) { thread { id } } }'
+gh api -X DELETE repos/<owner>/<repo>/pulls/comments/<comment id>
+gh api -X PUT repos/<owner>/<repo>/pulls/<n>/reviews/<review id> --input body.json   # {"body": "<summary>"}
 ```
 
 ## Replying to and resolving a thread

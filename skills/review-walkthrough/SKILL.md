@@ -8,7 +8,8 @@ disable-model-invocation: true
 
 Review a pull request the way a senior developer **mentors** a peer through it. Teach each part of
 the change and the code around it until the reviewer could change that code themselves, put each
-decision to them, and finish with one GitHub review the reviewer posts as their own.
+decision to them, and finish with one GitHub review the reviewer posts as their own. The code
+stays as the author left it: every change you want becomes a finding.
 
 Write everything with `writing-lean`. The findings, the summary and how to post them are in
 [REVIEW.md](REVIEW.md); every GitHub call is in [GITHUB.md](GITHUB.md).
@@ -22,23 +23,29 @@ reads its linked issue, description, checks and earlier reviews. With none, stop
 Record its number, repository, base, head SHA, author, and the issue it closes. Check whether an
 agent wrote it: a `copilot/` branch, a bot author, or agent co-authors on its commits.
 
+When the reviewer has reviewed this pull request before, this is a **follow-up review**: record the
+commit that review covered, and review only the commits since; see
+[GITHUB.md](GITHUB.md#the-last-reviewed-commit).
+
 **Done when** each of those is recorded.
 
 ## 2. Start the background work
 
 Dispatch these as background subagents, so they run while the reviewer answers step 3:
 
-- **`code-review`** against the pull request's base, with the closing issue and its agent brief as
-  the requirements. Add `house-rules` and `writing-lean` to its Standards sources as documented
-  standards; they override its smell baseline. When `code-review` isn't installed, the subagent
-  instead checks the closing issue and every acceptance criterion in its agent brief against the
-  diff, and reports each as met, partly met or missing.
+- **`code-review`** against the pull request's base, or in a follow-up review against the last
+  reviewed commit. Its requirements are the closing issue and its agent brief, plus the earlier
+  review's findings in a follow-up review. Add `house-rules` and `writing-lean` to its Standards
+  sources as documented standards; they override its smell baseline. When `code-review` isn't
+  installed, the subagent instead checks the closing issue and every acceptance criterion in its
+  agent brief against the diff, and reports each as met, partly met or missing.
 - **Checks.** Read the pull request's checks. Cite passing ones as they are. Run locally only the
   checks that failed and the documented checks CI doesn't run, using the commands in the repo's
   `AGENTS.md`.
-- **Earlier threads.** Fetch every unresolved review thread, from any reviewer, and classify each
-  against the commits since: addressed (with the commit), partly addressed, not addressed, or no
-  longer applies.
+- **Earlier threads.** Fetch every review thread, from any reviewer, and read every reply. Classify
+  each unresolved thread against the commits since: addressed (with the commit), partly addressed,
+  not addressed, or no longer applies. For each resolved thread, note whether a reply confirms the
+  fix.
 
 **Done when** all three are running.
 
@@ -53,8 +60,9 @@ Work out who is invoking the skill from `gh` and git, then confirm in one round:
 When the reviewer is the author, tell them now how that limits the review's event; see
 [REVIEW.md](REVIEW.md#the-event).
 
-When the diff runs past about 400 changed lines or touches many files, recommend asking for a split
-before going further. The reviewer can carry on anyway.
+When the diff under review runs past about 400 changed lines or touches many files, recommend
+asking for a split before going further. In a follow-up review, recommend carrying on instead:
+commits answering a review rarely split well. The reviewer decides either way.
 
 Their answers set how deep each step teaches and which findings rank first: a security review leads
 with leaks.
@@ -64,9 +72,10 @@ with leaks.
 ## 4. Plan the steps
 
 Wait for the `code-review` findings and the earlier threads, then build the step plan from them and
-the diff. Order it from the shared foundation (helpers, contracts, data shapes) out to the edges and
-interfaces, so each step builds on the last. Give the most time to steps holding serious findings,
-and fold quiet areas into their neighbours.
+the diff. Where they disagree on an earlier finding, the thread replies win: they hold the
+reviewer's later decisions. Order the plan from the shared foundation (helpers, contracts, data
+shapes) out to the edges and interfaces, so each step builds on the last. Give the most time to
+steps holding serious findings, and fold quiet areas into their neighbours.
 
 Show the plan as a numbered list, one line per step naming its files, and let the reviewer reorder,
 merge or skip steps. Then add the closing steps: remaining specs, local testing, and draft and
@@ -85,18 +94,20 @@ Teach each step in this order:
 3. **What's significant**: risks, traps, and problems that predate the pull request.
 4. **Coverage**: which specs exercise it, and the specific gaps.
 5. **Try it locally**: a short way to see it work. When the step changes something a user sees,
-   kick the tires with the reviewer now. Put everything else on the local-testing checklist in the
-   draft.
+   kick the tires with the reviewer now, unless running the app is costly and the requested changes
+   will touch the same path; then recommend deferring it. Put everything else on the local-testing
+   checklist in the draft.
 
-Raise each earlier thread in the step that covers its code. Note it when it's addressed, propose a
-finding when it isn't, and let the reviewer decide when it no longer applies.
+Raise each earlier thread in the step that covers its code. Note it when it's addressed, propose
+carrying it when it isn't (see [REVIEW.md](REVIEW.md#a-finding)), and let the reviewer decide when
+it no longer applies.
 
 End the step with a **round**: every proposed finding, numbered as in
 [REVIEW.md](REVIEW.md#a-finding), each with your recommendation and worded so that "yes" accepts it,
 then "Questions, or ready for the next step?":
 
 ```
-❓ **#3** - **<finding title>**: <the problem, and why it matters>
+❓ **F3** - **<finding title>**: <the problem, and why it matters>
 
 ➡️ <your recommended fix, and its label and blocking status>
 ```
@@ -124,12 +135,13 @@ requested changes land.
 
 Follow [REVIEW.md](REVIEW.md) to draft the summary and comments, recommend an event, and post.
 
-**Done when** the review is posted and its URL is shown to the reviewer.
+**Done when** the review is posted, or left pending for the reviewer to submit, and its URL is shown
+to the reviewer.
 
 ## 9. Recap
 
 In chat, recap the codebase concepts the session taught, one line each, so the reviewer leaves with
 a map of the area. Offer to reply "Addressed in `<sha>`" to each earlier thread found addressed and
-resolve it, confirming each with the reviewer.
+still unresolved, and resolve it, confirming each with the reviewer.
 
-**Done when** the reviewer has the recap and has answered the offer.
+**Done when** the reviewer has the recap and has answered any offer.
