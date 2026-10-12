@@ -38,7 +38,7 @@ scope prompt, which a container has no way to answer.
 | `cycle-review` | The recurring cycle-review meeting: publishing the business-first notes as a GitHub Discussion and email agenda, and processing the returned decisions back into `Cycle` and `Status` |
 | `email-to-issue` | Run by typing `/email-to-issue`. Turns flagged Outlook threads into issues or comments through the Microsoft 365 connector. A `/morning` section such as "Flagged Outlook email not yet in GitHub" lists them, and its button starts the sweep |
 | `open-pr` | Opening, pushing and updating a pull request: base branch, title, closing reference, size check, ready or draft. Upstream `pr` writes the body |
-| `house-rules` | The rules every agent loads before changing code: testing, single source of truth and spec style, deferring to `writing-lean` |
+| `house-rules` | The rules every agent loads before changing code or writing issues and business documents: testing, single source of truth, glossary terms and spec style, deferring to `writing-lean` |
 | `writing-lean` | How to write fluent code, and its comments, docs, pull requests, issues, reviews and commits — every other skill points here |
 
 `skills/issue-tracker/board.graphql` sits beside the skill that uses it: one query against the
