@@ -31,7 +31,6 @@ project manager in conversation or into your own TODO list.
 
 **In the project manager's voice.** The notes and the email are theirs, drafted on their behalf.
 While they are the only developer, development work is "I" ("I'm building the fixes"), never "we";
-switch to "we" once there is another developer.
 
 **The notes are also the email agenda**, sent **two business days before the meeting**, weekends
 excluded — a Tuesday review means Friday — so decisions can be settled by reply and the meeting
