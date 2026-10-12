@@ -11,7 +11,7 @@ Write the code, and everything that describes it, with the `writing-lean` skill.
   given: import its values rather than copying its tables, and leave its behaviour to its own tests.
 - **Single source of truth.** Take each value from where it is defined: the Tailwind scale
   (`max-w-7xl`, not `max-w-[1468px]`), a shared constant, or the package's own types.
-- **Domain terms from the glossary.** `GLOSSARY.md` in clhbid/CLHbid-LiveAuction is the app's
+- **Domain terms from the glossary.** `GLOSSARY.md` in clhbid/CLHbid-LiveAuction are the app's
   single source of truth: read it with the `domain-modeling` skill, use its terms, not those marked
   _Avoid_, and propose a missing term there rather than coining one.
 - **Spec style.** Set up and tear down in the test framework's hooks. Arrange, act, then assert,
