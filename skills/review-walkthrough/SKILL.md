@@ -89,8 +89,10 @@ or on the not-reviewed list.
 Teach each step in this order:
 
 1. **Purpose**: why this code exists and what problem it solves.
-2. **How it works**: short excerpts, each with a clickable link to its exact lines, and enough of
-   the surrounding system for the reviewer to change this code afterwards.
+2. **How it works**: show the code itself, not just links. Quote each block you discuss verbatim
+   in a fenced code block, under a heading or link to its exact lines, with `// ←` markers on the
+   lines a finding or point refers to; condense only boilerplate, and say so. Links alone are hard
+   to follow. Give enough of the surrounding system for the reviewer to change this code afterwards.
 3. **What's significant**: risks, traps, and problems that predate the pull request.
 4. **Coverage**: which specs exercise it, and the specific gaps.
 5. **Try it locally**: a short way to see it work. When the step changes something a user sees,
