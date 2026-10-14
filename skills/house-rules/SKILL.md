@@ -1,6 +1,6 @@
 ---
 name: house-rules
-description: The clhbid house rules. Use when writing, testing or reviewing code in a clhbid repo.
+description: The clhbid house rules. Use when writing, testing or reviewing code, issues or business documents in a clhbid repo.
 ---
 
 # House rules
@@ -11,6 +11,9 @@ Write the code, and everything that describes it, with the `writing-lean` skill.
   given: import its values rather than copying its tables, and leave its behaviour to its own tests.
 - **Single source of truth.** Take each value from where it is defined: the Tailwind scale
   (`max-w-7xl`, not `max-w-[1468px]`), a shared constant, or the package's own types.
+- **Domain terms from the glossary.** `GLOSSARY.md` in clhbid/CLHbid-LiveAuction are the app's
+  single source of truth: read it with the `domain-modeling` skill, use its terms, not those marked
+  _Avoid_, and propose a missing term there rather than coining one.
 - **Spec style.** Set up and tear down in the test framework's hooks. Arrange, act, then assert,
   and assert the whole result, so an extra item fails the test.
 - **Fake the clock** whenever a spec depends on the time, so it passes at any hour and in any time

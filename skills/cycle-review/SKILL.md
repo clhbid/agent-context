@@ -7,9 +7,9 @@ disable-model-invocation: true
 # Cycle Review
 
 The cycle review is a **round trip through a GitHub Discussion**. Branch A publishes the meeting
-notes as a Discussion and in email prior to the meeting, the meeting works through them, the
+notes as a Discussion and drafts them as the email agenda, the meeting works through them, the
 project manager posts their decisions as a comment, and branch B turns those decisions into tracker
-writes.
+writes. **Before branch A or B, load `house-rules` and `writing-lean`.**
 
 **The Discussion is the record**, and the baseline the next cycle's notes are diffed against. See
 [Editing Discussions](#editing-discussions) for where they live and how to read and write one.
@@ -24,14 +24,19 @@ never restates them, so the two cannot drift.
 
 ## Writing for the business
 
-**The notes are one document, written for the business**, with `writing-lean`. The business has no
-GitHub access, so every item makes sense on its own in plain language and ends with a reference to
-its issue, for the project manager. No agent commentary — tooling state, recipe caveats and process
-notes go to the project manager in conversation or into your own TODO list.
+**The notes are one document, written for the business.** The business has no GitHub access, so
+every item makes sense on its own in plain language and ends with a reference to its issue, for the
+project manager. No agent commentary — tooling state, recipe caveats and process notes go to the
+project manager in conversation or into your own TODO list.
 
-**The notes are also the email agenda.** The project manager sends the same text to the attendees
-two working days before the meeting where possible, so decisions can be settled by reply and the
-meeting takes only what email couldn't.
+**In the project manager's voice.** The notes and the email are theirs, drafted on their behalf.
+While they are the only developer, development work is "I" ("I'm building the fixes"), never "we";
+
+**The notes are also the email agenda**, sent **two business days before the meeting**, weekends
+excluded — a Tuesday review means Friday — so decisions can be settled by reply and the meeting
+takes only what email couldn't. Create it as an **Outlook draft the project manager sends; never
+send it**. Address it to the meeting invite's invitees, and give it the notes' text, Decisions
+first, GitHub references removed — the business can't open them — and the meeting link last.
 
 **Email first.** Business decisions and triage, bugs included, go to the business by email as they
 arrive — see **Ask the business by email** in `issue-tracker`. Developer-only triage never reaches
@@ -101,35 +106,39 @@ after a moment rather than re-issuing it.
 
 ## Branch A — Prepare the notes
 
-Branch A publishes the notes discussion and writes to the tracker only in the bookkeeping steps
-below. **They run first**, before a line of the draft is written, because they change what the
-notes say. _Automatic_ means no meeting decides them — they still show their list and take a
-go-ahead, like every other mutation.
+Branch A publishes the notes discussion and writes to the tracker only in bookkeeping steps 2–5.
+**They run first**, before a line of the draft is written, because they change what the notes say.
+No meeting decides them: **their findings, and every write they propose, go to the project manager
+as the first `grill-me` round** — numbered questions, each with a recommendation — and the answers
+are the go-ahead.
 
-1. **Open the next cycle.** Current and both future cycles must exist. If either is missing, add
+1. **Check Microsoft 365.** Run a mail search, and a calendar search for the meeting, through the
+   Microsoft 365 connector, finding its tools by capability. **If either fails, stop** and tell the
+   project manager to fix the connector before continuing. Outlook is then a source for decisions
+   settled by email, questions still waiting on a reply, the meeting's invitees and join link, and
+   the status of issues discussed only by email.
+2. **Open the next cycle.** Current and both future cycles must exist. If either is missing, add
    it; if the meeting has moved off the planned date, the roles will not resolve until the new
    dates are written. **This is a destructive configuration write** — follow the procedure in
    `issue-tracker`, and fold every other pending change into the same write, because a second one
    costs a second restore of the whole board.
-2. **Housekeeping.** Run the `issue-tracker` **stale closed items** recipe and flag what it
+3. **Housekeeping.** Run the `issue-tracker` **stale closed items** recipe and flag what it
    returns, along with any issue that should be on the board and is not. **Both are healthy empty**,
-   so a result is a signal that the sweep behind them is failing. Report it to the project manager
-   in conversation and archive by hand with `archiveProjectV2Item` only if the meeting cannot wait.
-   Then run the **Epic candidates** recipe, read each result, and put the ones that slipped or
-   whose open children plainly exceed a cycle to the project manager — work committed "this cycle
-   and the next few" is the signature. **Converting is the project manager's call, made before
-   the meeting**, never a Decision: for each agreed one, PATCH its type, clear its `Cycle`, set
-   `Cycle` on the children being committed and move its `Status` along the ladder — see **Epics**
-   in `issue-tracker`. Put what the **Epics ready to close** recipe returns to the project manager
-   too; an epic reaches Decisions only if the business must decide. **All of this stays out of the
-   notes.**
-3. **Merged, still open.** Run the `issue-tracker` **merged pull request, open issue** recipe.
+   so a result is a signal that the sweep behind them is failing. Archive by hand with
+   `archiveProjectV2Item` only if the meeting cannot wait. Then run the **Epic candidates** recipe,
+   read each result, and raise the ones that slipped or whose open children plainly exceed a cycle
+   — work committed "this cycle and the next few" is the signature. **Converting is the project
+   manager's call, made before the meeting**, never a Decision: for each agreed one, PATCH its
+   type, clear its `Cycle`, set `Cycle` on the children being committed and move its `Status` along
+   the ladder — see **Epics** in `issue-tracker`. Raise what the **Epics ready to close** recipe
+   returns too; an epic reaches Decisions only if the business must decide. **All of this stays
+   out of the notes.**
+4. **Merged, still open.** Run the `issue-tracker` **merged pull request, open issue** recipe.
    GitHub closed nothing for these — the recipe says why — so each is finished work that no cycle
    report has ever credited. Every row ends one of two ways: closed as `completed` naming the pull
-   request, or judged still live because the pull request was a deliberate partial. Report the
-   closures to the project manager in conversation. **This stays out of the notes** for the same
-   reason step 2 does.
-4. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
+   request, or judged still live because the pull request was a deliberate partial. **This stays
+   out of the notes** for the same reason step 3 does.
+5. **Worked-off-cycle backfill.** Run the `issue-tracker` **worked off-cycle** recipe against the
    closing cycle's window and keep the business results — top-level issues and epic children. A
    sub-issue of an ordinary parent needs no write — it inherits its parent's cycle. This is
    bookkeeping, not triage: no meeting decision.
@@ -139,11 +148,14 @@ go-ahead, like every other mutation.
      committed to it. Credit it to the current cycle — unfinished work belongs to the cycle that
      will finish it — and list it under This Cycle.
    - **Dormant** work — the **dormant** variant of the same recipe, untouched since before the
-     closing cycle began — gets **no write**. Put it to the project manager with its status
-     flagged **suspect**. Never auto-credit it, and never reset it to `Backlog`.
-5. **Read the board.** Project items, the `Cycle` configuration, and the previous cycle's notes
-   discussion.
-6. **Draft Last Cycle**, a TL;DR under the closing cycle's theme and dates:
+     closing cycle began — gets **no write**. Raise it with its status flagged **suspect**. Never
+     auto-credit it, and never reset it to `Backlog`.
+6. **Read the board.** Project items, the `Cycle` configuration, the previous cycle's notes
+   discussion, and Outlook since the last review.
+7. **Open the draft.** Create a Claude Doc through the docs connector and draft the notes straight
+   into it; the project manager comments on and edits it there. **Read their edits before every
+   write, and keep them.** With no docs connector, draft in a local Markdown file and say so.
+8. **Draft Last Cycle**, a TL;DR under the closing cycle's theme and dates:
    - **A one-word verdict** on its goal: met, partly met or missed.
    - **Whole-board counts** — opened, closed and open, with the trend since the last review — and
      how many of the opened issues were developer work, so the business knows it exists without
@@ -153,51 +165,54 @@ go-ahead, like every other mutation.
    - **Slipped items**, each with its reason, filled **only from direct evidence**: a closing pull
      request, a comment, sub-issue state. Leave the reason out rather than infer one. Diff the
      membership against the previous notes so slippage is visible rather than silently absorbed.
-7. **Draft Upcoming Dates**, a numbered list, one date per line, running to the end of the first
+9. **Draft Upcoming Dates**, a numbered list, one date per line, running to the end of the first
    future cycle: sales, business dates such as conventions, proposed releases each on its own line,
    and out-of-office. Keep only what affects planning. **Carry forward every date from the previous
    notes that still falls in the window.** Sale dates and release-date rules defer to the `RUNBOOK` in
    `clhbid/CLHbid-LiveAuction` — **Checking the Sale Schedule** and **Choosing a Release Date** —
    never the homepage, which lists only the next few sales. Close the section asking attendees for
    anything missing, and: _Any high-risk sales we should avoid releasing around?_
-8. **Draft Next Review** — date, time and location, from the invocation or proposed. It comes
-   **before** Decisions because it sets when the current cycle ends, and therefore how much fits in
-   it. **Never on a sale day.**
-9. **Draft Decided by Email** — a brief `ID | Description | Decision` table of decisions settled by
-   email since the last review, kept for reference. Find them in the answers recorded on issues
-   since then, and confirm the list with the project manager.
-10. **Draft Decisions** — an `ID | Description | Recommendation` table. It holds every issue still
-    `Waiting on input` and anything else that needs real discussion, such as stale work the
-    project manager has triaged and brought for input, **one row each**, never summarised as a
-    count. The description opens with a bold plain-language title and carries the
-    rationale; the recommendation is something the team can accept as written.
+10. **Draft Next Review** — date, time and location, from the invocation or proposed. It comes
+    **before** Decisions because it sets when the current cycle ends, and therefore how much fits
+    in it. **Never on a sale day.**
+11. **Draft Decided by Email** — a brief `ID | Description | Decision` table of decisions settled by
+    email since the last review, kept for reference. Find them in Outlook and in the answers
+    recorded on issues since then, and confirm the list with the project manager.
+12. **Draft Decisions** — an `ID | Description | Recommendation` table. It holds every issue still
+    `Waiting on input`, every Outlook question still waiting on a reply, and anything else that
+    needs real discussion, such as stale work the project manager has triaged and brought for
+    input, **one row each**, never summarised as a count. The description opens with a bold
+    plain-language title and carries the rationale; the recommendation is something the team can
+    accept as written.
 
-    **The question must already exist as a comment on the issue** — a plain comment stating it is
-    enough. If no comment asks it, that is an **error**: the question has never been put to
+    **The question must already have been asked** — a plain comment on the issue, or the email, is
+    enough. If neither asks it, that is an **error**: the question has never been put to
     anyone, so say so rather than reconstructing one from the title.
-11. **Draft This Cycle** — the current cycle's theme and dates, why in one sentence, and bullets of
+13. **Draft This Cycle** — the current cycle's theme and dates, why in one sentence, and bullets of
     the main work, carrying anything the backfill already credited. **We finish what we start**:
     work already `In progress` takes precedence, and new work should not be accepted into the cycle
     while it is outstanding — tell the project manager how much there is.
-12. **Draft Cycle After & Backlog** — the first future cycle's theme and main work, then business
+14. **Draft Cycle After & Backlog** — the first future cycle's theme and main work, then business
     items deliberately left without a cycle and work the team has asked about that has none. Work
     committed to the second future cycle goes here too, under its name. **Before anything stays in
     the backlog, ask whether it's worth doing at all**; if not, recommend closing it as not planned,
     with a reminder if it should come back — see **Deferring work** in `issue-tracker`.
-13. **Draft Next Actions**, last — present but empty, showing the owner-first shape.
-14. **Check before publishing**, and fix the draft rather than note the gap:
+15. **Draft Next Actions**, last — present but empty, showing the owner-first shape.
+16. **Check before publishing**, and fix the draft rather than note the gap. Settle gaps and
+    decisions the draft raises with `grill-me`, one round at a time:
     - epics and items closed since the last draft are credited to a cycle and reflected in the
       highlights;
     - work the team has asked about has a cycle, or is listed under Backlog;
     - sale dates come from the `RUNBOOK`'s sources;
     - every item reads on its own, without GitHub;
     - D and E numbers run in reading order, apart from items added after the agenda went out.
-15. **Reconcile against the live board.** Every cycle section must agree with what the board
+17. **Reconcile against the live board.** Every cycle section must agree with what the board
     actually says, item for item.
-16. **Publish.** Create the Discussion, or update it if this cycle's notes already exist, and hand
-    the project manager the body to send as the email agenda. **Branch A is re-runnable**: run it
-    again whenever the board changes and it revises the same discussion. **Read the live body
-    before every update**, and build on it: the project manager edits the notes on GitHub too.
+18. **Publish.** When the project manager calls the notes final, create the Discussion from the
+    doc's text, or update it if this cycle's notes already exist, then create the email draft.
+    Delete the doc when the project manager asks. **Branch A is re-runnable**: run it again
+    whenever the board changes and it revises the same discussion. **Read the live body before
+    every update**, and build on it: the project manager edits the notes on GitHub too.
 
 See [The notes](#the-notes) for the shape, drafted without the **Decision** column and with **Next
 Actions** blank; both are filled in on the way back.
@@ -219,13 +234,16 @@ aliases, and a bare `#<number>` resolves against `clhbid/clhbid.com`, the repo h
 4. **Next Review** — the agreed date sets the current cycle's end. Apply it to the `Cycle` field's
    configuration. **The write is destructive** — follow the procedure in `issue-tracker`. Branch A
    has usually already made this cycle's one write, so an agreed date should have gone in with it.
+   Then create a private one-hour **Cycle review prep** calendar event, with no attendees, on the
+   business day two before that review.
 5. **Decided by Email** — the writes were made when each answer came in. Check each issue carries
-   its answer, and process any that doesn't as a Decision.
+   its answer, and record any that doesn't from Outlook as a Decision.
 6. **Decisions** — for each answered question, record it on the issue in two places: a comment
-   quoting the question, prefixed `> *Recorded from the <date> planning meeting.*`, and **the answer
-   folded into the issue body** so someone picking the work up cold has the whole spec. The comment
-   is the audit trail; the body is the spec. Never delete what was there. An item the meeting could
-   not resolve is **left untouched**, `Waiting on input` and all.
+   quoting the question, prefixed `> *Recorded from the <date> planning meeting.*` — `email` for an
+   email decision — and **the answer folded into the issue body** so someone picking the work up
+   cold has the whole spec. The comment is the audit trail; the body is the spec. Never delete what
+   was there. An item the meeting could not resolve is **left untouched**, `Waiting on input` and
+   all.
 
    Then route it off `Waiting on input`, and only when **every** question on the issue is answered:
    `Ready for Agent` **only if the updated body now reads as a complete brief an agent could work
@@ -359,5 +377,5 @@ to write, `repository { discussion(number:) }` to read a body and its comments b
 
 ## Iterating on the skill
 
-**Fix the skill, not the output.** Whenever a draft needs hand-editing, that edit is a bug report.
-Change the skill and re-run rather than patching the notes by hand.
+**Fix the skill, not the output.** Whenever a draft needs hand-editing, in the doc or on GitHub,
+that edit is a bug report. Change the skill and re-run rather than patching the notes by hand.
