@@ -159,6 +159,11 @@ carry one.
 
 ### Setting Status
 
+**In a Copilot session**, run board commands, these and [Querying the board](#querying-the-board)'s,
+with `GH_TOKEN="$COPILOT_PROJECT_TOKEN"`. The session's own token reaches one repository; this one
+writes the board and reads issues. Its owner rotates it, per clhbid/clhbid.com's
+[`docs/environment-variables.md`](https://github.com/clhbid/clhbid.com/blob/main/docs/environment-variables.md#copilot_project_token).
+
 `gh project item-edit` needs three IDs. Look them up once per session:
 
 ```bash
