@@ -14,6 +14,10 @@ stays as the author left it: every change you want becomes a finding.
 Write everything with `writing-lean`. The findings, the summary and how to post them are in
 [REVIEW.md](REVIEW.md); every GitHub call is in [GITHUB.md](GITHUB.md).
 
+**The reviewer sets the pace.** From step 3 on, a step ends when its **Done when** holds and the
+reviewer says to move on. Answering a round settles its findings, not the step: ask if they're
+ready.
+
 ## 1. Pin the pull request
 
 The argument is a pull request number or URL. A pull request is required, because the walkthrough
