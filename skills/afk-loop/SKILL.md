@@ -95,6 +95,9 @@ A pull request in none of the three states — ready for review but empty, or dr
 explanation — is an agent defect rather than something to review. clhbid/clhbid.com#2254 is the
 worked example: no changes, no acceptance criteria addressed, review requested anyway.
 
+**Make description and issue edits yourself** on a pull request Copilot didn't open. There it can
+push to the branch and reply in threads, and nothing else.
+
 ## When a run goes wrong
 
 - **Steer a run that's heading the wrong way** without stopping it: open the session from the pull
