@@ -165,13 +165,15 @@ are the go-ahead.
    - **Slipped items**, each with its reason, filled **only from direct evidence**: a closing pull
      request, a comment, sub-issue state. Leave the reason out rather than infer one. Diff the
      membership against the previous notes so slippage is visible rather than silently absorbed.
-9. **Draft Upcoming Dates**, a numbered list, one date per line, running to the end of the first
-   future cycle: sales, business dates such as conventions, proposed releases each on its own line,
-   and out-of-office. Keep only what affects planning. **Carry forward every date from the previous
-   notes that still falls in the window.** Sale dates and release-date rules defer to the `RUNBOOK` in
-   `clhbid/CLHbid-LiveAuction` — **Checking the Sale Schedule** and **Choosing a Release Date** —
-   never the homepage, which lists only the next few sales. Close the section asking attendees for
-   anything missing, and: _Any high-risk sales we should avoid releasing around?_
+9. **Draft Upcoming Dates**, a `Date | What` table, one row per date, running to the end of the
+   first future cycle: sales, business dates such as conventions, proposed releases each on its own
+   row, and out-of-office. Dates are bold so they stand out, and each row opens with its kind
+   (`Sale:`, `Release (proposed):`). Keep only what affects planning. **Carry forward every date
+   from the previous notes that still falls in the window.** Sale dates and release-date rules
+   defer to the `RUNBOOK` in `clhbid/CLHbid-LiveAuction` — **Checking the Sale Schedule** and
+   **Choosing a Release Date** — never the homepage, which lists only the next few sales. Close
+   the section asking attendees for anything missing, and: _Any high-risk sales we should avoid
+   releasing around?_
 10. **Draft Next Review** — date, time and location, from the invocation or proposed. It comes
     **before** Decisions because it sets when the current cycle ends, and therefore how much fits
     in it. **Never on a sale day.**
@@ -308,13 +310,15 @@ be imported, so it runs in batches this cycle. (acme/shop#424)
 
 ## Upcoming Dates
 
-1. Sat 21 Mar — Spring sale
-2. Tue 24 Mar — Release: better search (proposed)
-3. Tue 24 – Thu 26 Mar — Jordan out
-4. Sat 28 Mar — Clearance sale
-5. Tue 7 Apr — Trade show; Priya and Sam attending
-6. Thu 9 Apr — Release: gift cards (proposed)
-7. Sat 11 Apr — Easter sale
+| Date                | What                                |
+| ------------------- | ----------------------------------- |
+| **Sat 21 Mar**      | Sale: Spring sale                   |
+| **Tue 24 Mar**      | Release (proposed): better search   |
+| **Tue 24 – 26 Mar** | Jordan out                          |
+| **Sat 28 Mar**      | Sale: Clearance sale                |
+| **Tue 7 Apr**       | Trade show; Priya and Sam attending |
+| **Thu 9 Apr**       | Release (proposed): gift cards      |
+| **Sat 11 Apr**      | Sale: Easter sale                   |
 
 Anything missing? Any high-risk sales we should avoid releasing around?
 
