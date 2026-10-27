@@ -70,6 +70,10 @@ Until the agenda is emailed, renumber whenever an item moves so the numbers stil
 order. **Once it is emailed, numbers are fixed**: an item added later takes the next unused number,
 sits in the section it belongs to, and is marked _(added after the agenda)_.
 
+**Use emoji sparingly, where they make the notes quicker to scan**: ❓ marks each item awaiting an
+answer, and branch B turns it into ✅ once the meeting answers it. One per item, at its start, and
+none as decoration.
+
 ## Cycle roles
 
 Roles are resolved from the `Cycle` field's `configuration` against the **meeting date**, never
@@ -270,8 +274,8 @@ aliases, and a bare `#<number>` resolves against `clhbid/clhbid.com`, the repo h
    only, no state, body drawn from the notes. It is new input, so it lands in `Backlog` like
    anything filed from a template.
 10. **Update the discussion** with the decisions integrated — a **Decision** column on the
-    Decisions table, and Next Actions filled in — then **re-check for issues closed since the notes
-    were published**: meeting-morning merges land after the cut and would otherwise be credited to
+    Decisions table, each answered ❓ turned to ✅, and Next Actions filled in — then **re-check
+    for issues closed since the notes were published**: meeting-morning merges land after the cut and would otherwise be credited to
     the wrong cycle.
 
 ## Branch C — Adjust
@@ -337,9 +341,9 @@ Anything missing? Any high-risk sales we should avoid releasing around?
 
 | ID  | Description | Recommendation | Decision |
 | --- | ----------- | -------------- | -------- |
-| D1  | **Who sees the new prices first?** Switching everyone at once risks confusing regulars mid-order; a staged rollout lets us watch support calls. (acme/shop#433) | Returning customers first, everyone two weeks later. | Agreed. |
-| D2  | **Pay for a hosted search service?** Our search struggles on sale days, but the service costs about $400 a month and this cycle's work may fix it. (acme/api#96) | Decide after this cycle, with real sale-day numbers. | Agreed; back as a Decision on 1 Apr. |
-| D3  | **Close the old admin project?** Everything is done except one old web address still pointing at the retired server. (acme/shop#380) | Close it once the address is removed this cycle. | Agreed. |
+| ✅ D1 | **Who sees the new prices first?** Switching everyone at once risks confusing regulars mid-order; a staged rollout lets us watch support calls. (acme/shop#433) | Returning customers first, everyone two weeks later. | Agreed. |
+| ✅ D2 | **Pay for a hosted search service?** Our search struggles on sale days, but the service costs about $400 a month and this cycle's work may fix it. (acme/api#96) | Decide after this cycle, with real sale-day numbers. | Agreed; back as a Decision on 1 Apr. |
+| ✅ D3 | **Close the old admin project?** Everything is done except one old web address still pointing at the retired server. (acme/shop#380) | Close it once the address is removed this cycle. | Agreed. |
 
 ## This Cycle: Search that finds things (18 Mar → 31 Mar)
 
