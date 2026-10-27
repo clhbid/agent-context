@@ -1,7 +1,6 @@
 ---
 name: cycle-review
 description: Run the fortnightly-ish cycle-review meeting round trip on the CLHbid Delivery board — publish the meeting notes discussion, process the returned notes back into cycles and statuses, or adjust a cycle's membership.
-disable-model-invocation: true
 ---
 
 # Cycle Review
