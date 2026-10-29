@@ -11,10 +11,11 @@ pull request lands, and what to do when a run goes wrong.
 Your repo's `AGENTS.md` is the other half of this. It states the contract an agent works to; this
 skill is the human procedure around it.
 
-**Dispatch is manual on purpose.** A team member assigns each `Ready for Agent` issue to Copilot by
-hand while we dogfood the coding agent's cost and performance. No workflow fires when a project
-field changes, so there is nothing to automate against yet in any case. Once agents pick work off
-the frontier themselves, this file loses its reader and should be deleted rather than maintained.
+**Dispatch is manual on purpose.** A team member decides which `Ready for Agent` issues go to
+Copilot, even when an agent runs the command for them, while we dogfood the coding agent's cost and
+performance. No workflow fires when a project field changes, so there is nothing to automate
+against yet in any case. Once agents pick work off the frontier themselves, this file loses its
+reader and should be deleted rather than maintained.
 
 Work state is the `Status` field on the board — see the `issue-tracker` skill.
 
@@ -66,13 +67,27 @@ change.
 To dispatch:
 
 1. Open the issue on GitHub — the 🤖 Frontier view lists what is dispatchable.
-2. Under **Assignees**, choose **Copilot**.
+2. Assign Copilot with `gh issue edit <n> --add-assignee @copilot`. The handle is `@copilot`, not
+   `Copilot`. In the UI, the alternative is **Assignees** → **Copilot**.
 3. Set `Status` to `In progress`.
-4. Copilot opens a draft pull request shortly afterwards and works in it, pushing commits and
-   ticking off its own task list as it goes.
+4. Confirm the run started. Within about a minute, all three checks hold:
 
-Assigning from the command line does not work — Copilot isn't in the repo's assignee list, so
-`gh issue edit <n> --add-assignee Copilot` fails. Use the UI.
+   ```sh
+   # Assigned: the list includes "Copilot"
+   gh issue view <n> --json assignees --jq '[.assignees[].login]'
+
+   # Acknowledged: "eyes"
+   gh api repos/{owner}/{repo}/issues/<n>/reactions --jq '.[] | select(.user.login == "Copilot") | .content'
+
+   # Working: the URL of a draft pull request titled "[WIP] …"
+   # (state == "open" skips earlier Copilot pull requests that cross-referenced the issue)
+   gh api repos/{owner}/{repo}/issues/<n>/timeline --jq '.[] | select(.event == "cross-referenced" and .source.issue.pull_request and .source.issue.user.login == "Copilot" and .source.issue.state == "open") | .source.issue.html_url'
+   ```
+
+   If Copilot is assigned but nothing else follows, the run didn't start: unassign Copilot, then
+   assign it again.
+
+Copilot then works in the draft, pushing commits and ticking off its own task list as it goes.
 
 ## Reviewing an agent's pull request
 
