@@ -15,6 +15,7 @@ Write the code, and everything that describes it, with the `writing-lean` skill.
   single source of truth: read it with the `domain-modeling` skill, use its terms, not those marked
   _Avoid_, and propose a missing term there rather than coining one.
 - **Spec style.** Set up and tear down in the test framework's hooks. Arrange, act, then assert,
-  and assert the whole result, so an extra item fails the test.
+  opening each section with an `Arrange`, `Act` or `Assert` comment, and assert the whole result,
+  so an extra item fails the test.
 - **Fake the clock** whenever a spec depends on the time, so it passes at any hour and in any time
   zone.
