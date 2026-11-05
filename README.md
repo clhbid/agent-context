@@ -37,6 +37,7 @@ scope prompt, which a container has no way to answer.
 | `afk-loop` | Which work to hand to Copilot versus Claude Code, what makes a complete agent brief, reviewing what comes back, and what to do when a run goes wrong |
 | `cycle-review` | The recurring cycle-review meeting: publishing the business-first notes as a GitHub Discussion and email agenda, and processing the returned decisions back into `Cycle` and `Status` |
 | `email-to-issue` | Run by typing `/email-to-issue`. Turns flagged Outlook threads into issues or comments through the Microsoft 365 connector. A `/morning` section such as "Flagged Outlook email not yet in GitHub" lists them, and its button starts the sweep |
+| `copilot-session` | What `COPILOT_PROJECT_TOKEN` is, and how Copilot sessions in every clhbid repo use it for board commands and pull request descriptions |
 | `open-pr` | Opening, pushing and updating a pull request: base branch, title, closing reference, size check, ready or draft. Upstream `pr` writes the body |
 | `review-walkthrough` | Run by typing `/review-walkthrough <PR>`. Mentors a reviewer through a pull request step by step, teaching the code as it goes, and posts the agreed findings as one GitHub review in their name |
 | `house-rules` | The rules every agent loads before changing code or writing issues and business documents: testing, single source of truth, glossary terms and spec style, deferring to `writing-lean` |
@@ -59,8 +60,8 @@ pull request alongside the code it constrains.
 
 Concretely, each repo keeps its own:
 
-- **`AGENTS.md`** — build, test and lint commands, and the **How a run ends** contract. Copilot
-  reads this and nothing else, so it has to be self-sufficient.
+- **`AGENTS.md`** — build, test and lint commands, and the **How a run ends** contract. Every agent
+  reads this first, so it has to be self-sufficient.
 - **`GLOSSARY.md` and `docs/adr/`** — domain vocabulary and decisions.
 
 Matt Pocock's skills are **installed alongside** these rather than vendored, so upstream fixes keep

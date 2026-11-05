@@ -96,6 +96,8 @@ gh pr edit --body-file <body-file>
 Rewrite the body against the whole diff rather than appending to it. Update the title with
 `gh pr edit --title` if the issue's title has changed.
 
+**In a Copilot session**, load `copilot-session` before editing the body.
+
 ## Step 7: Check the link
 
 ```bash
