@@ -45,8 +45,7 @@ the business, by email or in the notes.
 work shows up only in the whole-board counts in Last Cycle. The `business` filter — see **Business
 and delivery** in `issue-tracker`: top-level issues and the children of epics — is the starting
 point, not the answer: **propose which items are business work** and let the project manager
-decide item by item, either way.
-The one thing that must not be lost to the filter is a **question**: when the issue blocking on
+decide item by item, either way. The one thing that must not be lost to the filter is a **question**: when the issue blocking on
 business input is a sub-issue of an ordinary parent, describe the parent's work and reference the
 child, so branch B knows which issue the answer lands on.
 
@@ -105,22 +104,19 @@ one**; branch B takes it from the notes' title; branch C, which has no meeting, 
 cycle against today as `issue-tracker` describes. **If the roles cannot be resolved, stop and say
 so** — never invent an assignment.
 
-Every membership change is `gh project item-edit` against the `Cycle` field, on **committed units
-only** — a top-level issue or a child of an epic; descendants inherit, and an epic's own `Cycle` is
-never set. Every state change is a `Status` value from the `issue-tracker` role map. The
-milestones API plays no part in this skill.
+Every membership change is `gh project item-edit` against the `Cycle` field, on a committed unit —
+see **Cycles** in `issue-tracker`. Every state change is a `Status` value from the `issue-tracker`
+role map.
 
 **Confirm before every mutating step.** Show the proposed cycle and status values, closures, issue
 body edits, notes body and iteration-configuration diff, get an explicit go-ahead, then read the
-write back. A read-back that disagrees straight after a write is unconfirmed, not failed — re-check
-after a moment rather than re-issuing it.
+write back, as **A read-back can be stale** in `issue-tracker` describes.
 
 ## Invocation
 
 - **A. Prepare** — `/cycle-review prepare for the 2026-08-28 meeting, next one is 2026-09-11`
 - **B. Process notes** — `/cycle-review process the notes from discussion 2323`
-- **C. Adjust** — `/cycle-review move clhbid/clhbid.com#2325 into the current cycle; defer
-  clhbid/CLHbid-LiveAuction#922 to the next one`
+- **C. Adjust** — `/cycle-review move com#2325 into the current cycle; defer LA#922 to the next one`
 
 ## Branch A — Prepare the notes
 
@@ -245,8 +241,8 @@ Actions** blank; both are filled in on the way back.
 
 Read the published body and the project manager's comment from the API by discussion number.
 
-**Resolve references** per **References** in `issue-tracker`: the comment may use bare numbers and
-aliases, and a bare `#<number>` resolves against `clhbid/clhbid.com`, the repo hosting the discussion.
+**Resolve references** per **References** in `issue-tracker`: the comment may use aliases and bare
+numbers, which resolve against the repo hosting the discussion.
 
 1. **Last Cycle** — the discussion is the record and the backfill already set every `Cycle` in
    branch A. Nothing to write.
