@@ -25,11 +25,11 @@ never restates them, so the two cannot drift.
 
 **The notes are one document, written for the business.** The business has no GitHub access, so
 every item makes sense on its own in plain language and ends with a reference to its issue, for the
-project manager. No agent commentary — tooling state, recipe caveats and process notes go to the
-project manager in conversation or into your own TODO list.
+project manager. Tooling state, recipe caveats and process notes go to the project manager in
+conversation, or into your own TODO list.
 
 **In the project manager's voice.** The notes and the email are theirs, drafted on their behalf.
-While they are the only developer, development work is "I" ("I'm building the fixes"), never "we";
+While they are the only developer, development work is "I" ("I'm building the fixes").
 
 **The notes are also the email agenda**, sent **two business days before the meeting**, weekends
 excluded — a Tuesday review means Friday — so decisions can be settled by reply and the meeting
@@ -69,18 +69,19 @@ Until the agenda is emailed, renumber whenever an item moves so the numbers stil
 order. **Once it is emailed, numbers are fixed**: an item added later takes the next unused number,
 sits in the section it belongs to, and is marked _(added after the agenda)_.
 
-**Use emoji as landmarks, where they make the notes quicker to scan**: ❓ marks each item awaiting
-an answer, and branch B turns it into ✅ once the meeting answers it — one per item, at its start.
+**Emoji are landmarks** that make the notes quicker to scan. ❓ marks each item awaiting an
+answer, and branch B turns it into ✅ once the meeting answers it: one per item, at its start.
 Each section heading carries its own emoji, as in [The notes](#the-notes), and so do the verdict
-(🟢 met, 🟡 partly met, 🔴 missed), ⚠️ Slipped and each 🚀 release. The title stays plain: branch B
-reads the meeting date from it.
+(🟢 met, 🟡 partly met, 🔴 missed), ⚠️ Slipped and each 🚀 release. The title stays plain:
+branch B reads the meeting date from it.
 
-**Tables, not bullet lists.** Every list of work is a two-column table: the plain-language text on
-the left, its references as a `<ul><li>` list in an **Issues** column on the right. A reference to
-the repo hosting the discussion is a bare `#<number>`; any other repo keeps `owner/repo#<number>`.
+**Every list of work is a two-column table**: the plain-language text on the left, its references
+as a `<ul><li>` list in an **Issues** column on the right. A reference to the repo hosting the
+discussion is a bare `#<number>`; any other repo keeps `owner/repo#<number>`.
 
-**Say each fact once**, in the section it belongs to. A release is named in the verdict and its 🚀
-dates row; the highlights and This Cycle leave it out.
+**Say each fact once**, in the section it belongs to. A release's timing lives only in its 🚀 row
+of Upcoming Dates; the verdict may name what it ships, and the highlights and This Cycle leave it
+out.
 
 **Write for the meeting date.** "Today", "this afternoon" and "tomorrow" are relative to the
 meeting, not the draft, and dates before the meeting drop out of Upcoming Dates. Notes prepared days
@@ -211,14 +212,14 @@ are the go-ahead.
     anyone, so say so rather than reconstructing one from the title.
 13. **Draft This Cycle** — the current cycle's theme and dates, why in one sentence, and a
     `Work | Issues` table of the main work, carrying anything the backfill already credited. **We
-    finish what we start**: work already `In progress` takes precedence, and new work should not be accepted into the cycle
-    while it is outstanding — tell the project manager how much there is.
-14. **Draft Cycle After & Backlog** — a `Planned | Issues` table of the first future cycle's theme
-    and main work, then a `Backlog | Issues` table of business items deliberately left without a
-    cycle and work the team has asked about that has none. Work committed to the second future
-    cycle goes here too, under its name. **Before anything stays in
-    the backlog, ask whether it's worth doing at all**; if not, recommend closing it as not planned,
-    with a reminder if it should come back — see **Deferring work** in `issue-tracker`.
+    finish what we start**: work already `In progress` comes first, and new work waits until it is
+    done — tell the project manager how much there is.
+14. **Draft Cycle After & Backlog** — a `Planned | Issues` table with a row for each future cycle
+    that has committed work, opening with its theme and dates. Then a `Backlog | Issues` table of
+    business items deliberately left without a cycle and work the team has asked about that has
+    none. **Before anything stays in the backlog, ask whether it's worth doing at all**; if not,
+    recommend closing it as not planned, with a reminder if it should come back — see **Deferring
+    work** in `issue-tracker`.
 15. **Draft Next Actions**, last — present but empty, showing the owner-first shape.
 16. **Check before publishing**, and fix the draft rather than note the gap. Settle gaps and
     decisions the draft raises with `grill-me`, one round at a time:
@@ -289,11 +290,14 @@ aliases, and a bare `#<number>` resolves against `clhbid/clhbid.com`, the repo h
 9. **Draft an issue** for work in the notes that matches nothing on the board — category type
    only, no state, body drawn from the notes. It is new input, so it lands in `Backlog` like
    anything filed from a template.
-10. **Update the discussion** with the decisions integrated — a **Decision** column on the
-    Decisions table, each answered ❓ turned to ✅ — Next Review's too — agreed releases no longer
-    `(proposed)`, and Next Actions filled in — then **re-check for issues closed since the notes
-    were published**: meeting-morning merges land after the cut and would otherwise be credited to
-    the wrong cycle.
+10. **Update the discussion** with the decisions integrated:
+    - a **Decision** column on the Decisions table;
+    - each answered ❓ turned to ✅, Next Review's included;
+    - `(proposed)` dropped from each agreed release;
+    - Next Actions filled in.
+
+    Then **re-check for issues closed since the notes were published**: meeting-morning merges land
+    after the cut and would otherwise be credited to the wrong cycle.
 
 ## Branch C — Adjust
 
@@ -307,8 +311,8 @@ and **Next Actions** filled in. It is also the target branch A drafts toward: th
 the same order, the same prompts, without those. Reproduce this shape.
 
 Notice the register: outcomes in business language, owner first on **Next Actions**, a reference
-closing every item. Field names and `gh` syntax never appear — the team reads this, and branch B
-recognises a tracker action by what it describes.
+closing every item. Everything is in the team's words, since they read it, and branch B recognises
+a tracker action by what it describes.
 
 _Illustrative example, hosted as if by `acme/shop`. The organisation, people, repositories, issue
 numbers and titles are invented. Nothing here is real work._
@@ -323,13 +327,13 @@ decides how much fits in it.
 
 ## 🏁 Last Cycle: Faster checkout (4 Mar → 17 Mar)
 
-🟢 **Met.** Saved cards go live this afternoon. 41 issues opened and 47 closed, leaving 212 open,
-down from 218 at the last review. 29 of the new issues were behind-the-scenes developer work.
+🟢 **Met.** Customers can now save a card for next time. 41 issues opened and 47 closed, leaving
+212 open, down from 218 at the last review. 29 of the new issues were behind-the-scenes developer
+work.
 
 | Highlight | Issues |
 | --- | --- |
 | **Checkout is fast.** It finishes in under two seconds, even on sale days. | <ul><li>#412</li></ul> |
-| **Customers can save a card** for next time. | <ul><li>#418</li></ul> |
 | **Gift cards are 5 of 8 steps done.** Balance lookup went live on 12 Mar. | <ul><li>#400</li></ul> |
 | **Refund rounding is fixed**, after finance flagged it mid-cycle. | <ul><li>#430</li><li>acme/api#88</li></ul> |
 
@@ -350,7 +354,7 @@ down from 218 at the last review. 29 of the new issues were behind-the-scenes de
 | **Thu&nbsp;9&nbsp;Apr** | 🚀 Release (proposed): gift cards |
 | **Sat&nbsp;11&nbsp;Apr** | Sale: Easter sale |
 
-✅ The 24 Mar release is agreed. No high-risk sales to avoid.
+✅ Nothing missing, and no high-risk sales to avoid.
 
 ## ✉️ Decided by Email
 
