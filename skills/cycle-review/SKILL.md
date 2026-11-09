@@ -77,8 +77,8 @@ branch B reads the meeting date from it.
 
 **Every list of work is a two-column table**: the plain-language text on the left, its references
 as a `<ul><li>` list in an **Issues** column on the right. Text longer than one sentence opens
-with a bold summary of a few words, then carries the details in regular weight. A reference to the
-repo hosting the discussion is a bare `#<number>`; any other repo keeps `owner/repo#<number>`.
+with a bold summary of a few words, then carries the details in regular weight. Every reference
+uses the linked alias form from **References** in `issue-tracker`.
 
 **Say each fact once**, in the section it belongs to. A release's timing lives only in its 🚀 row
 of Upcoming Dates; the verdict may name what it ships, and the highlights and This Cycle leave it
@@ -315,8 +315,9 @@ Notice the register: outcomes in business language, owner first on **Next Action
 closing every item. Everything is in the team's words, since they read it, and branch B recognises
 a tracker action by what it describes.
 
-_Illustrative example, hosted as if by `acme/shop`. The organisation, people, repositories, issue
-numbers and titles are invented. Nothing here is real work._
+_Illustrative example, with `shop` and `api` as the aliases for `acme/shop` and `acme/api`. The
+organisation, people, repositories, issue numbers and titles are invented. Nothing here is real
+work._
 
 ````markdown
 # Cycle Review — 18 Mar 2026
@@ -334,13 +335,13 @@ work.
 
 | Highlight | Issues |
 | --- | --- |
-| **Checkout is fast.** It finishes in under two seconds, even on sale days. | <ul><li>#412</li></ul> |
-| **Gift cards are 5 of 8 steps done.** Balance lookup went live on 12 Mar. | <ul><li>#400</li></ul> |
-| Refund rounding is fixed, after finance flagged it mid-cycle. | <ul><li>#430</li><li>acme/api#88</li></ul> |
+| **Checkout is fast.** It finishes in under two seconds, even on sale days. | <ul><li>[shop#412](https://github.com/acme/shop/issues/412)</li></ul> |
+| **Gift cards are 5 of 8 steps done.** Balance lookup went live on 12 Mar. | <ul><li>[shop#400](https://github.com/acme/shop/issues/400)</li></ul> |
+| Refund rounding is fixed, after finance flagged it mid-cycle. | <ul><li>[shop#430](https://github.com/acme/shop/issues/430)</li><li>[api#88](https://github.com/acme/api/issues/88)</li></ul> |
 
 | ⚠️ Slipped | Issues |
 | --- | --- |
-| **Saved cards on the new provider.** The provider limits how fast cards can be imported, so it runs in batches this cycle. | <ul><li>#424</li></ul> |
+| **Saved cards on the new provider.** The provider limits how fast cards can be imported, so it runs in batches this cycle. | <ul><li>[shop#424](https://github.com/acme/shop/issues/424)</li></ul> |
 
 ## 📅 Upcoming Dates
 
@@ -361,16 +362,16 @@ work.
 
 | ID | Description | Decision |
 | --- | --- | --- |
-| E1 | **Delivery estimates on product pages.** (#441) | Yes, this cycle |
-| E2 | **Coupons that expire mid-checkout show an error.** (#447) | Fix after search |
+| E1 | **Delivery estimates on product pages.** ([shop#441](https://github.com/acme/shop/issues/441)) | Yes, this cycle |
+| E2 | **Coupons that expire mid-checkout show an error.** ([shop#447](https://github.com/acme/shop/issues/447)) | Fix after search |
 
 ## ⚖️ Decisions
 
 | ID | Description | Recommendation | Decision |
 | --- | --- | --- | --- |
-| ✅ D1 | **Who sees the new prices first?** Switching everyone at once risks confusing regulars mid-order; a staged rollout lets us watch support calls. (#433) | Returning customers first, everyone two weeks later. | Agreed. |
-| ✅ D2 | **Pay for a hosted search service?** Our search struggles on sale days, but the service costs about $400 a month and this cycle's work may fix it. (acme/api#96) | Decide after this cycle, with real sale-day numbers. | Agreed; back as a Decision on 1 Apr. |
-| ✅ D3 | **Close the old admin project?** Everything is done except one old web address still pointing at the retired server. (#380) | Close it once the address is removed this cycle. | Agreed. |
+| ✅ D1 | **Who sees the new prices first?** Switching everyone at once risks confusing regulars mid-order; a staged rollout lets us watch support calls. ([shop#433](https://github.com/acme/shop/issues/433)) | Returning customers first, everyone two weeks later. | Agreed. |
+| ✅ D2 | **Pay for a hosted search service?** Our search struggles on sale days, but the service costs about $400 a month and this cycle's work may fix it. ([api#96](https://github.com/acme/api/issues/96)) | Decide after this cycle, with real sale-day numbers. | Agreed; back as a Decision on 1 Apr. |
+| ✅ D3 | **Close the old admin project?** Everything is done except one old web address still pointing at the retired server. ([shop#380](https://github.com/acme/shop/issues/380)) | Close it once the address is removed this cycle. | Agreed. |
 
 ## 🎯 This Cycle: Search that finds things (18 Mar → 31 Mar)
 
@@ -378,20 +379,20 @@ Empty search results are our biggest source of complaints, and customers give up
 
 | Work | Issues |
 | --- | --- |
-| Finish moving saved cards to the new provider. | <ul><li>#424</li></ul> |
-| Search copes with hyphens and misspellings. | <ul><li>#437</li><li>acme/api#97</li></ul> |
-| Delivery estimates on product pages. | <ul><li>#441</li></ul> |
+| Finish moving saved cards to the new provider. | <ul><li>[shop#424](https://github.com/acme/shop/issues/424)</li></ul> |
+| Search copes with hyphens and misspellings. | <ul><li>[shop#437](https://github.com/acme/shop/issues/437)</li><li>[api#97](https://github.com/acme/api/issues/97)</li></ul> |
+| Delivery estimates on product pages. | <ul><li>[shop#441](https://github.com/acme/shop/issues/441)</li></ul> |
 
 ## 🔭 Cycle After & Backlog
 
 | Planned | Issues |
 | --- | --- |
-| **Gift cards (1 Apr → 14 Apr):** finish gift cards and launch them before the Easter sale. | <ul><li>#400</li></ul> |
+| **Gift cards (1 Apr → 14 Apr):** finish gift cards and launch them before the Easter sale. | <ul><li>[shop#400](https://github.com/acme/shop/issues/400)</li></ul> |
 
 | Backlog | Issues |
 | --- | --- |
-| Loyalty points, asked about by Priya — waits until gift cards have launched. | <ul><li>#450</li></ul> |
-| Dark mode for account pages — nobody has asked since it was filed; close it, and reopen if that changes. | <ul><li>#444</li></ul> |
+| Loyalty points, asked about by Priya — waits until gift cards have launched. | <ul><li>[shop#450](https://github.com/acme/shop/issues/450)</li></ul> |
+| Dark mode for account pages — nobody has asked since it was filed; close it, and reopen if that changes. | <ul><li>[shop#444](https://github.com/acme/shop/issues/444)</li></ul> |
 
 ## 📌 Next Actions
 

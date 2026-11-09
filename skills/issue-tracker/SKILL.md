@@ -77,22 +77,29 @@ epic. _Avoid_: ticket, story.
 
 ## References
 
-**Write every reference in full, as `<org>/<repo>#<number>`**, in prose and in tables alike. GitHub
+**Write every reference in full, as `<org>/<repo>#<number>`**, in prose and in tables. GitHub
 renders it as a link with a hovercard and shortens it to `#<number>` when it is same-repo, so it
 costs nothing to read. A **bare `#<number>` resolves against whichever repo hosts the text it sits
 in** — in an org discussion that is `clhbid/clhbid.com`, not the repo you meant — and links silently
 to the wrong issue.
 
-**Read short references; write full ones.** People use a bare `#<number>` and the aliases below,
-matched regardless of case. Resolve one before acting on it, and say which issue you resolved it to.
-When editing a doc or notes that hold short references, propose replacing them with full ones. Ask
-when an alias is unknown or could mean two issues, and suggest a short alias for any repository the
-table lacks.
+**Meeting notes write the alias instead**, as a link that carries the repo:
+`[LA#1300](https://github.com/clhbid/CLHbid-LiveAuction/issues/1300)`. The `/issues/` URL redirects
+to a pull request with that number. Notes stack references in narrow table columns, where the full
+form wraps and slows the reader.
+
+**Read short references; write full or linked ones.** People use a bare `#<number>` and the aliases
+below, matched regardless of case. Resolve one before acting on it, and say which issue you resolved
+it to. When editing a doc or notes that hold unlinked short references, propose replacing them. Ask
+when an alias is unknown or could mean two issues. A repository the table lacks, with a name too
+long to scan, gets a proposed alias, added here once agreed.
+
+The first alias in each row is the one to write.
 
 | Alias               | Repository                           |
 | ------------------- | ------------------------------------ |
 | `LA`                | `clhbid/CLHbid-LiveAuction`          |
-| `com`               | `clhbid/clhbid.com`                  |
+| `ccom`, `com`       | `clhbid/clhbid.com`                  |
 | `AC`                | `clhbid/agent-context`               |
 | `infra`             | `clhbid/infrastructure`              |
 | `TZ`, `hotpatch`    | `clhbid/canadian-time-zone-hotpatch` |
