@@ -25,11 +25,11 @@ never restates them, so the two cannot drift.
 
 **The notes are one document, written for the business.** The business has no GitHub access, so
 every item makes sense on its own in plain language and ends with a reference to its issue, for the
-project manager. No agent commentary — tooling state, recipe caveats and process notes go to the
-project manager in conversation or into your own TODO list.
+project manager. Tooling state, recipe caveats and process notes go to the project manager in
+conversation, or into your own TODO list.
 
 **In the project manager's voice.** The notes and the email are theirs, drafted on their behalf.
-While they are the only developer, development work is "I" ("I'm building the fixes"), never "we";
+While they are the only developer, development work is "I" ("I'm building the fixes").
 
 **The notes are also the email agenda**, sent **two business days before the meeting**, weekends
 excluded — a Tuesday review means Friday — so decisions can be settled by reply and the meeting
@@ -45,8 +45,7 @@ the business, by email or in the notes.
 work shows up only in the whole-board counts in Last Cycle. The `business` filter — see **Business
 and delivery** in `issue-tracker`: top-level issues and the children of epics — is the starting
 point, not the answer: **propose which items are business work** and let the project manager
-decide item by item, either way.
-The one thing that must not be lost to the filter is a **question**: when the issue blocking on
+decide item by item, either way. The one thing that must not be lost to the filter is a **question**: when the issue blocking on
 business input is a sub-issue of an ordinary parent, describe the parent's work and reference the
 child, so branch B knows which issue the answer lands on.
 
@@ -55,9 +54,9 @@ each section against a 30-minute meeting with this budget; the notes show only t
 
 | Section               | Minutes |
 | --------------------- | ------- |
+| Next Review           | 1       |
 | Last Cycle            | 3       |
 | Upcoming Dates        | 4       |
-| Next Review           | 1       |
 | Decided by Email      | 1       |
 | Decisions             | 12      |
 | This Cycle            | 4       |
@@ -69,9 +68,24 @@ Until the agenda is emailed, renumber whenever an item moves so the numbers stil
 order. **Once it is emailed, numbers are fixed**: an item added later takes the next unused number,
 sits in the section it belongs to, and is marked _(added after the agenda)_.
 
-**Use emoji sparingly, where they make the notes quicker to scan**: ❓ marks each item awaiting an
-answer, and branch B turns it into ✅ once the meeting answers it. One per item, at its start, and
-none as decoration.
+**Emoji are landmarks** that make the notes quicker to scan. ❓ marks each item awaiting an
+answer, and branch B turns it into ✅ once the meeting answers it: one per item, at its start.
+Each section heading carries its own emoji, as in [The notes](#the-notes), and so do the verdict
+(🟢 met, 🟡 partly met, 🔴 missed), ⚠️ Slipped and each 🚀 release. The title stays plain:
+branch B reads the meeting date from it.
+
+**Every list of work is a two-column table**: the plain-language text on the left, its references
+as a `<ul><li>` list in an **Issues** column on the right. Text longer than one sentence opens
+with a bold summary of a few words, then carries the details in regular weight. Every reference
+uses the linked alias form from **References** in `issue-tracker`.
+
+**Say each fact once**, in the section it belongs to. A release's timing lives only in its 🚀 row
+of Upcoming Dates; the verdict may name what it ships, and the highlights and This Cycle leave it
+out.
+
+**Write for the meeting date.** "Today", "this afternoon" and "tomorrow" are relative to the
+meeting, not the draft, and dates before the meeting drop out of Upcoming Dates. Notes prepared days
+ahead are re-read for tense on the meeting morning.
 
 ## Cycle roles
 
@@ -90,22 +104,19 @@ one**; branch B takes it from the notes' title; branch C, which has no meeting, 
 cycle against today as `issue-tracker` describes. **If the roles cannot be resolved, stop and say
 so** — never invent an assignment.
 
-Every membership change is `gh project item-edit` against the `Cycle` field, on **committed units
-only** — a top-level issue or a child of an epic; descendants inherit, and an epic's own `Cycle` is
-never set. Every state change is a `Status` value from the `issue-tracker` role map. The
-milestones API plays no part in this skill.
+Every membership change is `gh project item-edit` against the `Cycle` field, on a committed unit —
+see **Cycles** in `issue-tracker`. Every state change is a `Status` value from the `issue-tracker`
+role map.
 
 **Confirm before every mutating step.** Show the proposed cycle and status values, closures, issue
 body edits, notes body and iteration-configuration diff, get an explicit go-ahead, then read the
-write back. A read-back that disagrees straight after a write is unconfirmed, not failed — re-check
-after a moment rather than re-issuing it.
+write back, as **A read-back can be stale** in `issue-tracker` describes.
 
 ## Invocation
 
 - **A. Prepare** — `/cycle-review prepare for the 2026-08-28 meeting, next one is 2026-09-11`
 - **B. Process notes** — `/cycle-review process the notes from discussion 2323`
-- **C. Adjust** — `/cycle-review move clhbid/clhbid.com#2325 into the current cycle; defer
-  clhbid/CLHbid-LiveAuction#922 to the next one`
+- **C. Adjust** — `/cycle-review move com#2325 into the current cycle; defer LA#922 to the next one`
 
 ## Branch A — Prepare the notes
 
@@ -163,23 +174,26 @@ are the go-ahead.
    - **Whole-board counts** — opened, closed and open, with the trend since the last review — and
      how many of the opened issues were developer work, so the business knows it exists without
      seeing it listed.
-   - **Up to five highlights**, including progress on epics the business cares about and any epic
-     closed during the window.
-   - **Slipped items**, each with its reason, filled **only from direct evidence**: a closing pull
-     request, a comment, sub-issue state. Leave the reason out rather than infer one. Diff the
-     membership against the previous notes so slippage is visible rather than silently absorbed.
+   - **Up to five highlights**, a `Highlight | Issues` table, including progress on epics the
+     business cares about and any epic closed during the window.
+   - **Slipped items**, a `⚠️ Slipped | Issues` table, each with its reason, filled **only from
+     direct evidence**: a closing pull request, a comment, sub-issue state. Leave the reason out
+     rather than infer one. Diff the membership against the previous notes so slippage is visible
+     rather than silently absorbed.
 9. **Draft Upcoming Dates**, a `Date | What` table, one row per date, running to the end of the
    first future cycle: sales, business dates such as conventions, proposed releases each on its own
-   row, and out-of-office. Dates are bold so they stand out, and each row opens with its kind
-   (`Sale:`, `Release (proposed):`). Keep only what affects planning. **Carry forward every date
+   row, and out-of-office. Dates are bold, with `&nbsp;` between their parts
+   (`**Thu&nbsp;19&nbsp;Nov**`) so the Date column never wraps, and each row opens with its kind
+   (`Sale:`, `🚀 Release (proposed):`). Keep only what affects planning. **Carry forward every date
    from the previous notes that still falls in the window.** Sale dates and release-date rules
    defer to the `RUNBOOK` in `clhbid/CLHbid-LiveAuction` — **Checking the Sale Schedule** and
    **Choosing a Release Date** — never the homepage, which lists only the next few sales. Close
    the section asking attendees for anything missing, and: _Any high-risk sales we should avoid
    releasing around?_
-10. **Draft Next Review** — date, time and location, from the invocation or proposed. It comes
-    **before** Decisions because it sets when the current cycle ends, and therefore how much fits
-    in it. **Never on a sale day.**
+10. **Draft Next Review** — date, time and location, from the invocation or proposed, as a ❓
+    decision to agree. It is the **first section**, straight under the title, because it sets when
+    the current cycle ends, and therefore how much fits in it; say so in the line. **Never on a
+    sale day.**
 11. **Draft Decided by Email** — a brief `ID | Description | Decision` table of decisions settled by
     email since the last review, kept for reference. Find them in Outlook and in the answers
     recorded on issues since then, and confirm the list with the project manager.
@@ -193,15 +207,16 @@ are the go-ahead.
     **The question must already have been asked** — a plain comment on the issue, or the email, is
     enough. If neither asks it, that is an **error**: the question has never been put to
     anyone, so say so rather than reconstructing one from the title.
-13. **Draft This Cycle** — the current cycle's theme and dates, why in one sentence, and bullets of
-    the main work, carrying anything the backfill already credited. **We finish what we start**:
-    work already `In progress` takes precedence, and new work should not be accepted into the cycle
-    while it is outstanding — tell the project manager how much there is.
-14. **Draft Cycle After & Backlog** — the first future cycle's theme and main work, then business
-    items deliberately left without a cycle and work the team has asked about that has none. Work
-    committed to the second future cycle goes here too, under its name. **Before anything stays in
-    the backlog, ask whether it's worth doing at all**; if not, recommend closing it as not planned,
-    with a reminder if it should come back — see **Deferring work** in `issue-tracker`.
+13. **Draft This Cycle** — the current cycle's theme and dates, why in one sentence, and a
+    `Work | Issues` table of the main work, carrying anything the backfill already credited. **We
+    finish what we start**: work already `In progress` comes first, and new work waits until it is
+    done — tell the project manager how much there is.
+14. **Draft Cycle After & Backlog** — a `Planned | Issues` table with a row for each future cycle
+    that has committed work, opening with its theme and dates. Then a `Backlog | Issues` table of
+    business items deliberately left without a cycle and work the team has asked about that has
+    none. **Before anything stays in the backlog, ask whether it's worth doing at all**; if not,
+    recommend closing it as not planned, with a reminder if it should come back — see **Deferring
+    work** in `issue-tracker`.
 15. **Draft Next Actions**, last — present but empty, showing the owner-first shape.
 16. **Check before publishing**, and fix the draft rather than note the gap. Settle gaps and
     decisions the draft raises with `grill-me`, one round at a time:
@@ -226,8 +241,8 @@ Actions** blank; both are filled in on the way back.
 
 Read the published body and the project manager's comment from the API by discussion number.
 
-**Resolve references** per **References** in `issue-tracker`: the comment may use bare numbers and
-aliases, and a bare `#<number>` resolves against `clhbid/clhbid.com`, the repo hosting the discussion.
+**Resolve references** per **References** in `issue-tracker`: the comment may use aliases and bare
+numbers, which resolve against the repo hosting the discussion.
 
 1. **Last Cycle** — the discussion is the record and the backfill already set every `Cycle` in
    branch A. Nothing to write.
@@ -272,10 +287,14 @@ aliases, and a bare `#<number>` resolves against `clhbid/clhbid.com`, the repo h
 9. **Draft an issue** for work in the notes that matches nothing on the board — category type
    only, no state, body drawn from the notes. It is new input, so it lands in `Backlog` like
    anything filed from a template.
-10. **Update the discussion** with the decisions integrated — a **Decision** column on the
-    Decisions table, each answered ❓ turned to ✅, and Next Actions filled in — then **re-check
-    for issues closed since the notes were published**: meeting-morning merges land after the cut and would otherwise be credited to
-    the wrong cycle.
+10. **Update the discussion** with the decisions integrated:
+    - a **Decision** column on the Decisions table;
+    - each answered ❓ turned to ✅, Next Review's included;
+    - `(proposed)` dropped from each agreed release;
+    - Next Actions filled in.
+
+    Then **re-check for issues closed since the notes were published**: meeting-morning merges land
+    after the cut and would otherwise be credited to the wrong cycle.
 
 ## Branch C — Adjust
 
@@ -289,81 +308,89 @@ and **Next Actions** filled in. It is also the target branch A drafts toward: th
 the same order, the same prompts, without those. Reproduce this shape.
 
 Notice the register: outcomes in business language, owner first on **Next Actions**, a reference
-closing every item. Field names and `gh` syntax never appear — the team reads this, and branch B
-recognises a tracker action by what it describes.
+closing every item. Everything is in the team's words, since they read it, and branch B recognises
+a tracker action by what it describes.
 
-_Illustrative example. The organisation, people, repositories, issue numbers and titles are
-invented. Nothing here is real work._
+_Illustrative example, with `shop` and `api` as the aliases for `acme/shop` and `acme/api`. The
+organisation, people, repositories, issue numbers and titles are invented. Nothing here is real
+work._
 
 ````markdown
 # Cycle Review — 18 Mar 2026
 
-## Last Cycle: Faster checkout (4 Mar → 17 Mar)
+## ⏭️ Next Review
 
-**Met.** 41 issues opened and 47 closed, leaving 212 open, down from 218 at the last review. 29 of
-the new issues were behind-the-scenes developer work.
+✅ **Agreed: Wed 1 Apr 2026, 10:00 AM MT**, by video call. It sets when this cycle ends, so it
+decides how much fits in it.
 
-- Checkout finishes in under two seconds, even on sale days. (acme/shop#412)
-- Customers can save a card for next time. (acme/shop#418)
-- Gift cards are 5 of 8 steps done; balance lookup went live on 12 Mar. (acme/shop#400)
-- Refund rounding is fixed, after finance flagged it mid-cycle. (acme/shop#430)
+## 🏁 Last Cycle: Faster checkout (4 Mar → 17 Mar)
 
-**Slipped:** moving saved cards to the new payment provider. The provider limits how fast cards can
-be imported, so it runs in batches this cycle. (acme/shop#424)
+🟢 **Met.** Customers can now save a card for next time. 41 issues opened and 47 closed, leaving
+212 open, down from 218 at the last review. 29 of the new issues were behind-the-scenes developer
+work.
 
-## Upcoming Dates
+| Highlight | Issues |
+| --- | --- |
+| **Checkout is fast.** It finishes in under two seconds, even on sale days. | <ul><li>[shop#412](https://github.com/acme/shop/issues/412)</li></ul> |
+| **Gift cards are 5 of 8 steps done.** Balance lookup went live on 12 Mar. | <ul><li>[shop#400](https://github.com/acme/shop/issues/400)</li></ul> |
+| Refund rounding is fixed, after finance flagged it mid-cycle. | <ul><li>[shop#430](https://github.com/acme/shop/issues/430)</li><li>[api#88](https://github.com/acme/api/issues/88)</li></ul> |
 
-| Date                | What                                |
-| ------------------- | ----------------------------------- |
-| **Sat 21 Mar**      | Sale: Spring sale                   |
-| **Tue 24 Mar**      | Release (proposed): better search   |
-| **Tue 24 – 26 Mar** | Jordan out                          |
-| **Sat 28 Mar**      | Sale: Clearance sale                |
-| **Tue 7 Apr**       | Trade show; Priya and Sam attending |
-| **Thu 9 Apr**       | Release (proposed): gift cards      |
-| **Sat 11 Apr**      | Sale: Easter sale                   |
+| ⚠️ Slipped | Issues |
+| --- | --- |
+| **Saved cards on the new provider.** The provider limits how fast cards can be imported, so it runs in batches this cycle. | <ul><li>[shop#424](https://github.com/acme/shop/issues/424)</li></ul> |
 
-Anything missing? Any high-risk sales we should avoid releasing around?
+## 📅 Upcoming Dates
 
-## Next Review
+| Date | What |
+| --- | --- |
+| **Wed&nbsp;18&nbsp;Mar&nbsp;(today)** | 🚀 Release: saved cards, this afternoon |
+| **Sat&nbsp;21&nbsp;Mar** | Sale: Spring sale |
+| **Tue&nbsp;24&nbsp;Mar** | 🚀 Release: better search |
+| **Tue&nbsp;24&nbsp;–&nbsp;Thu&nbsp;26&nbsp;Mar** | Jordan out |
+| **Sat&nbsp;28&nbsp;Mar** | Sale: Clearance sale |
+| **Tue&nbsp;7&nbsp;Apr** | Trade show; Priya and Sam attending |
+| **Thu&nbsp;9&nbsp;Apr** | 🚀 Release (proposed): gift cards |
+| **Sat&nbsp;11&nbsp;Apr** | Sale: Easter sale |
 
-**Wed 1 Apr 2026, 10:00 AM MT**, by video call — link in the calendar invite.
+✅ Nothing missing, and no high-risk sales to avoid.
 
-## Decided by Email
+## ✉️ Decided by Email
 
-| ID  | Description                                                              | Decision         |
-| --- | ------------------------------------------------------------------------ | ---------------- |
-| E1  | **Delivery estimates on product pages.** (acme/shop#441)                 | Yes, this cycle  |
-| E2  | **Coupons that expire mid-checkout show an error.** (acme/shop#447)      | Fix after search |
+| ID | Description | Decision |
+| --- | --- | --- |
+| E1 | **Delivery estimates on product pages.** ([shop#441](https://github.com/acme/shop/issues/441)) | Yes, this cycle |
+| E2 | **Coupons that expire mid-checkout show an error.** ([shop#447](https://github.com/acme/shop/issues/447)) | Fix after search |
 
-## Decisions
+## ⚖️ Decisions
 
-| ID  | Description | Recommendation | Decision |
-| --- | ----------- | -------------- | -------- |
-| ✅ D1 | **Who sees the new prices first?** Switching everyone at once risks confusing regulars mid-order; a staged rollout lets us watch support calls. (acme/shop#433) | Returning customers first, everyone two weeks later. | Agreed. |
-| ✅ D2 | **Pay for a hosted search service?** Our search struggles on sale days, but the service costs about $400 a month and this cycle's work may fix it. (acme/api#96) | Decide after this cycle, with real sale-day numbers. | Agreed; back as a Decision on 1 Apr. |
-| ✅ D3 | **Close the old admin project?** Everything is done except one old web address still pointing at the retired server. (acme/shop#380) | Close it once the address is removed this cycle. | Agreed. |
+| ID | Description | Recommendation | Decision |
+| --- | --- | --- | --- |
+| ✅ D1 | **Who sees the new prices first?** Switching everyone at once risks confusing regulars mid-order; a staged rollout lets us watch support calls. ([shop#433](https://github.com/acme/shop/issues/433)) | Returning customers first, everyone two weeks later. | Agreed. |
+| ✅ D2 | **Pay for a hosted search service?** Our search struggles on sale days, but the service costs about $400 a month and this cycle's work may fix it. ([api#96](https://github.com/acme/api/issues/96)) | Decide after this cycle, with real sale-day numbers. | Agreed; back as a Decision on 1 Apr. |
+| ✅ D3 | **Close the old admin project?** Everything is done except one old web address still pointing at the retired server. ([shop#380](https://github.com/acme/shop/issues/380)) | Close it once the address is removed this cycle. | Agreed. |
 
-## This Cycle: Search that finds things (18 Mar → 31 Mar)
+## 🎯 This Cycle: Search that finds things (18 Mar → 31 Mar)
 
 Empty search results are our biggest source of complaints, and customers give up on sale days.
 
-- Finish moving saved cards to the new provider. (acme/shop#424)
-- Search copes with hyphens and misspellings. (acme/shop#437)
-- Delivery estimates on product pages. (acme/shop#441)
+| Work | Issues |
+| --- | --- |
+| Finish moving saved cards to the new provider. | <ul><li>[shop#424](https://github.com/acme/shop/issues/424)</li></ul> |
+| Search copes with hyphens and misspellings. | <ul><li>[shop#437](https://github.com/acme/shop/issues/437)</li><li>[api#97](https://github.com/acme/api/issues/97)</li></ul> |
+| Delivery estimates on product pages. | <ul><li>[shop#441](https://github.com/acme/shop/issues/441)</li></ul> |
 
-## Cycle After & Backlog
+## 🔭 Cycle After & Backlog
 
-**Gift cards (1 Apr → 14 Apr):** finish gift cards and launch them before the Easter sale.
-(acme/shop#400)
+| Planned | Issues |
+| --- | --- |
+| **Gift cards (1 Apr → 14 Apr):** finish gift cards and launch them before the Easter sale. | <ul><li>[shop#400](https://github.com/acme/shop/issues/400)</li></ul> |
 
-**Backlog:**
+| Backlog | Issues |
+| --- | --- |
+| Loyalty points, asked about by Priya — waits until gift cards have launched. | <ul><li>[shop#450](https://github.com/acme/shop/issues/450)</li></ul> |
+| Dark mode for account pages — nobody has asked since it was filed; close it, and reopen if that changes. | <ul><li>[shop#444](https://github.com/acme/shop/issues/444)</li></ul> |
 
-- Loyalty points, asked about by Priya — waits until gift cards have launched. (acme/shop#450)
-- Dark mode for account pages — nobody has asked since it was filed; close it, and reopen if that
-  changes. (acme/shop#444)
-
-## Next Actions
+## 📌 Next Actions
 
 - **SAM:** Remove the old web address, then close the old admin project.
 - **SAM:** Close dark mode as not planned.

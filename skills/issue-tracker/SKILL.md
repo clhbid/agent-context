@@ -47,7 +47,7 @@ epic. _Avoid_: ticket, story.
 - **Make an issue a sub-issue**: `gh issue edit <child> --parent <parent-url>` after creating it —
   the REST create in [Creating an issue from the org form](#creating-an-issue-from-the-org-form)
   takes no parent. The URL form reaches a parent in another repo, as an epic's children often are.
-- **Refer to an issue** by its full reference — see [References](#references).
+- **Refer to an issue** by its repo's alias, linked — see [References](#references).
 - **Set state**: a project field, not a label — see [Status](#status).
 - **Close**: an issue closes as `completed`, `not planned` or `duplicate`. The reason is the
   record, so pick the one that matches and say why in a closing comment.
@@ -77,17 +77,21 @@ epic. _Avoid_: ticket, story.
 
 ## References
 
-**Write every reference in full, as `<org>/<repo>#<number>`**, in prose and in tables alike. GitHub
-renders it as a link with a hovercard and shortens it to `#<number>` when it is same-repo, so it
-costs nothing to read. A **bare `#<number>` resolves against whichever repo hosts the text it sits
-in** — in an org discussion that is `clhbid/clhbid.com`, not the repo you meant — and links silently
-to the wrong issue.
+**Write every reference as its repo's official alias, linked**:
+`[LA#1300](https://github.com/clhbid/CLHbid-LiveAuction/issues/1300)`. The link carries the repo,
+and the `/issues/` URL redirects to a pull request with that number. A **bare `#<number>` resolves
+against whichever repo hosts the text it sits in** — in an org discussion that is
+`clhbid/clhbid.com`, not the repo you meant — and links silently to the wrong issue.
 
-**Read short references; write full ones.** People use a bare `#<number>` and the aliases below,
-matched regardless of case. Resolve one before acting on it, and say which issue you resolved it to.
-When editing a doc or notes that hold short references, propose replacing them with full ones. Ask
-when an alias is unknown or could mean two issues, and suggest a short alias for any repository the
-table lacks.
+**Write the full `<org>/<repo>#<number>` where a link can't work**: commit messages and code
+comments, which don't render Markdown, and closing keywords, which need a plain reference.
+
+**The official alias is the shortest in its row**; the others are only read. People use a bare
+`#<number>` and any alias below, matched regardless of case. Resolve one before acting on it, and
+say which issue you resolved it to. When editing a doc that holds unlinked or unofficial
+references, propose replacing them. Ask when an alias is unknown or could mean two issues. A
+repository the table lacks, with a name too long to scan, gets a proposed alias, added here once
+agreed.
 
 | Alias               | Repository                           |
 | ------------------- | ------------------------------------ |
@@ -333,10 +337,9 @@ stale-closed recipe re-runnable — it cannot see what it just archived — and 
 
 **Eight weeks is 4838400 seconds**, and it is the definition of _stale_ — an item is stale on the
 board, not in someone's judgement, and staleness is measured on business work. The cycle recipes
-read `CYCLE_TITLE`, `CYCLE_START` and
-`CYCLE_END` from the environment; set them from the iteration's `title`, `startDate` and
-`startDate + duration`. `CYCLE_END` is **exclusive** — an iteration ends the day before the meeting
-that closes it, so a cycle titled `14 Aug → 28 Aug` has `CYCLE_START=2026-08-14` and
+read `CYCLE_TITLE`, `CYCLE_START` and `CYCLE_END` from the environment; set them from the
+iteration's `title`, `startDate` and `startDate + duration`. `CYCLE_END` is **exclusive** — an
+iteration ends the day before the meeting that closes it, so a cycle titled `14 Aug → 28 Aug` has `CYCLE_START=2026-08-14` and
 `CYCLE_END=2026-08-28`.
 
 **Newly stale is derived, never stored.** It compares one `updatedAt` against two thresholds: stale
