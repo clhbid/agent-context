@@ -77,22 +77,21 @@ epic. _Avoid_: ticket, story.
 
 ## References
 
-**Write every reference in full, as `<org>/<repo>#<number>`**, in prose and in tables. GitHub
-renders it as a link with a hovercard and shortens it to `#<number>` when it is same-repo, so it
-costs nothing to read. A **bare `#<number>` resolves against whichever repo hosts the text it sits
-in** — in an org discussion that is `clhbid/clhbid.com`, not the repo you meant — and links silently
-to the wrong issue.
+**Write every reference as its repo's official alias, linked**:
+`[LA#1300](https://github.com/clhbid/CLHbid-LiveAuction/issues/1300)`. The link carries the repo,
+and the `/issues/` URL redirects to a pull request with that number. A **bare `#<number>` resolves
+against whichever repo hosts the text it sits in** — in an org discussion that is
+`clhbid/clhbid.com`, not the repo you meant — and links silently to the wrong issue.
 
-**Meeting notes write the repo's shortest alias instead**, as a link that carries the repo:
-`[LA#1300](https://github.com/clhbid/CLHbid-LiveAuction/issues/1300)`. The `/issues/` URL redirects
-to a pull request with that number. Notes stack references in narrow table columns, where the full
-form wraps and slows the reader.
+**Write the full `<org>/<repo>#<number>` where a link can't work**: commit messages and code
+comments, which don't render Markdown, and closing keywords, which GitHub parses only in that form.
 
-**Read short references; write full or linked ones.** People use a bare `#<number>` and the aliases
-below, matched regardless of case. Resolve one before acting on it, and say which issue you resolved
-it to. When editing a doc or notes that hold unlinked short references, propose replacing them. Ask
-when an alias is unknown or could mean two issues. A repository the table lacks, with a name too
-long to scan, gets a proposed alias, added here once agreed.
+**The official alias is the shortest in its row**; the others are only read. People
+use a bare `#<number>` and any alias below, matched regardless of case. Resolve one before acting on
+it, and say which issue you resolved it to. When editing a doc that holds unlinked or unofficial
+references, propose replacing them. Ask when an alias is unknown or could mean two issues. A
+repository the table lacks, with a name too long to scan, gets a proposed alias, added here once
+agreed.
 
 | Alias               | Repository                           |
 | ------------------- | ------------------------------------ |
