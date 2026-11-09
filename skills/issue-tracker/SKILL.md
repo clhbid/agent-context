@@ -83,7 +83,7 @@ costs nothing to read. A **bare `#<number>` resolves against whichever repo host
 in** — in an org discussion that is `clhbid/clhbid.com`, not the repo you meant — and links silently
 to the wrong issue.
 
-**Meeting notes write the alias instead**, as a link that carries the repo:
+**Meeting notes write the repo's shortest alias instead**, as a link that carries the repo:
 `[LA#1300](https://github.com/clhbid/CLHbid-LiveAuction/issues/1300)`. The `/issues/` URL redirects
 to a pull request with that number. Notes stack references in narrow table columns, where the full
 form wraps and slows the reader.
@@ -93,8 +93,6 @@ below, matched regardless of case. Resolve one before acting on it, and say whic
 it to. When editing a doc or notes that hold unlinked short references, propose replacing them. Ask
 when an alias is unknown or could mean two issues. A repository the table lacks, with a name too
 long to scan, gets a proposed alias, added here once agreed.
-
-The first alias in each row is the one to write.
 
 | Alias               | Repository                           |
 | ------------------- | ------------------------------------ |
