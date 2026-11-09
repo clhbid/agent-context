@@ -76,8 +76,9 @@ Each section heading carries its own emoji, as in [The notes](#the-notes), and s
 branch B reads the meeting date from it.
 
 **Every list of work is a two-column table**: the plain-language text on the left, its references
-as a `<ul><li>` list in an **Issues** column on the right. A reference to the repo hosting the
-discussion is a bare `#<number>`; any other repo keeps `owner/repo#<number>`.
+as a `<ul><li>` list in an **Issues** column on the right. Text longer than one sentence opens
+with a bold summary of a few words, then carries the details in regular weight. A reference to the
+repo hosting the discussion is a bare `#<number>`; any other repo keeps `owner/repo#<number>`.
 
 **Say each fact once**, in the section it belongs to. A release's timing lives only in its 🚀 row
 of Upcoming Dates; the verdict may name what it ships, and the highlights and This Cycle leave it
@@ -335,11 +336,11 @@ work.
 | --- | --- |
 | **Checkout is fast.** It finishes in under two seconds, even on sale days. | <ul><li>#412</li></ul> |
 | **Gift cards are 5 of 8 steps done.** Balance lookup went live on 12 Mar. | <ul><li>#400</li></ul> |
-| **Refund rounding is fixed**, after finance flagged it mid-cycle. | <ul><li>#430</li><li>acme/api#88</li></ul> |
+| Refund rounding is fixed, after finance flagged it mid-cycle. | <ul><li>#430</li><li>acme/api#88</li></ul> |
 
 | ⚠️ Slipped | Issues |
 | --- | --- |
-| Moving saved cards to the new payment provider. The provider limits how fast cards can be imported, so it runs in batches this cycle. | <ul><li>#424</li></ul> |
+| **Saved cards on the new provider.** The provider limits how fast cards can be imported, so it runs in batches this cycle. | <ul><li>#424</li></ul> |
 
 ## 📅 Upcoming Dates
 
