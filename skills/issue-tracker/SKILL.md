@@ -99,7 +99,7 @@ The first alias in each row is the one to write.
 | Alias               | Repository                           |
 | ------------------- | ------------------------------------ |
 | `LA`                | `clhbid/CLHbid-LiveAuction`          |
-| `ccom`, `com`       | `clhbid/clhbid.com`                  |
+| `com`               | `clhbid/clhbid.com`                  |
 | `AC`                | `clhbid/agent-context`               |
 | `infra`             | `clhbid/infrastructure`              |
 | `TZ`, `hotpatch`    | `clhbid/canadian-time-zone-hotpatch` |
