@@ -33,9 +33,9 @@ While they are the only developer, development work is "I" ("I'm building the fi
 
 **The notes are also the email agenda**, sent **two business days before the meeting**, weekends
 excluded — a Tuesday review means Friday — so decisions can be settled by reply and the meeting
-takes only what email couldn't. Create it as an **Outlook draft the project manager sends; never
-send it**. Address it to the meeting invite's invitees, and give it the notes' text, Decisions
-first, GitHub references removed — the business can't open them — and the meeting link last.
+takes only what email couldn't. It is **the project manager's to send: leave it as a draft**.
+Address it to the meeting invite's invitees, and give it the notes' text, Decisions first, GitHub
+references removed — the business can't open them — and the meeting link last.
 
 **Email first.** Business decisions and triage, bugs included, go to the business by email as they
 arrive — see **Ask the business by email** in `issue-tracker`. Developer-only triage never reaches
@@ -229,10 +229,11 @@ are the go-ahead.
 17. **Reconcile against the live board.** Every cycle section must agree with what the board
     actually says, item for item.
 18. **Publish.** When the project manager calls the notes final, create the Discussion from the
-    doc's text, or update it if this cycle's notes already exist, then create the email draft.
-    Delete the doc when the project manager asks. **Branch A is re-runnable**: run it again
-    whenever the board changes and it revises the same discussion. **Read the live body before
-    every update**, and build on it: the project manager edits the notes on GitHub too.
+    doc's text, or update it if this cycle's notes already exist, then draft the email agenda
+    with the `sending-emails-with-outlook` skill. Delete the doc when the project manager asks.
+    **Branch A is re-runnable**: run it again whenever the board changes and it revises the same
+    discussion. **Read the live body before every update**, and build on it: the project
+    manager edits the notes on GitHub too.
 
 See [The notes](#the-notes) for the shape, drafted without the **Decision** column and with **Next
 Actions** blank; both are filled in on the way back.
