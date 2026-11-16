@@ -1,6 +1,6 @@
 ---
 name: issue-tracker
-description: Read and set work state on the CLHbid Delivery board — the delivery language, issues via gh, the Status field, the board query recipes, cycles, epics, issue types, labels, the commit convention and the decomposition rules. Use for any GitHub issue or project-board operation in a clhbid repo, and for what a cycle, epic or slipped issue means.
+description: Provides the issue tracker and triage label vocabulary Matt Pocock's to-spec, to-tickets, triage and wayfinder skills expect. Use for GitHub issue or board operations in a clhbid repo, and for cycle, epic or slipped-issue questions.
 ---
 
 # Issue tracker: GitHub
@@ -43,11 +43,18 @@ epic. _Avoid_: ticket, story.
   [Creating an issue from the org form](#creating-an-issue-from-the-org-form).
 - **Read, list, comment**: `gh issue view <number> --comments`, `gh issue list`,
   `gh issue comment <number> --body "..."`. `--jq` requires `--json`, so filtering a read means
-  dropping `--comments` and naming the fields: `gh issue view <number> --json number,title,labels --jq ...`
+  dropping `--comments` and naming the fields:
+  `gh issue view <number> --json number,title,labels --jq ...`
 - **Make an issue a sub-issue**: `gh issue edit <child> --parent <parent-url>` after creating it —
   the REST create in [Creating an issue from the org form](#creating-an-issue-from-the-org-form)
   takes no parent. The URL form reaches a parent in another repo, as an epic's children often are.
-- **Refer to an issue** by its full reference — see [References](#references).
+- **Block an issue** with GitHub's **native issue dependencies**:
+  `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`,
+  where `<blocker-db-id>` is the blocker's numeric **database id**
+  (`gh api repos/<owner>/<repo>/issues/<n> --jq .id`, _not_ the `#number` or `node_id`).
+  `issue_dependencies_summary.blocked_by` counts open blockers; an issue is unblocked when every
+  blocker is closed.
+- **Refer to an issue** by its repo's alias, linked — see [References](#references).
 - **Set state**: a project field, not a label — see [Status](#status).
 - **Close**: an issue closes as `completed`, `not planned` or `duplicate`. The reason is the
   record, so pick the one that matches and say why in a closing comment.
@@ -77,17 +84,21 @@ epic. _Avoid_: ticket, story.
 
 ## References
 
-**Write every reference in full, as `<org>/<repo>#<number>`**, in prose and in tables alike. GitHub
-renders it as a link with a hovercard and shortens it to `#<number>` when it is same-repo, so it
-costs nothing to read. A **bare `#<number>` resolves against whichever repo hosts the text it sits
-in** — in an org discussion that is `clhbid/clhbid.com`, not the repo you meant — and links silently
-to the wrong issue.
+**Write every reference as its repo's official alias, linked**:
+`[LA#1300](https://github.com/clhbid/CLHbid-LiveAuction/issues/1300)`. The link carries the repo,
+and the `/issues/` URL redirects to a pull request with that number. A **bare `#<number>` resolves
+against whichever repo hosts the text it sits in** — in an org discussion that is
+`clhbid/clhbid.com`, not the repo you meant — and links silently to the wrong issue.
 
-**Read short references; write full ones.** People use a bare `#<number>` and the aliases below,
-matched regardless of case. Resolve one before acting on it, and say which issue you resolved it to.
-When editing a doc or notes that hold short references, propose replacing them with full ones. Ask
-when an alias is unknown or could mean two issues, and suggest a short alias for any repository the
-table lacks.
+**Write the full `<org>/<repo>#<number>` where a link can't work**: commit messages and code
+comments, which don't render Markdown, and closing keywords, which need a plain reference.
+
+**The official alias is the shortest in its row**; the others are only read. People use a bare
+`#<number>` and any alias below, matched regardless of case. Resolve one before acting on it, and
+say which issue you resolved it to. When editing a doc that holds unlinked or unofficial
+references, propose replacing them. Ask when an alias is unknown or could mean two issues. A
+repository the table lacks, with a name too long to scan, gets a proposed alias, added here once
+agreed.
 
 | Alias               | Repository                           |
 | ------------------- | ------------------------------------ |
@@ -136,12 +147,13 @@ business.
 **Prefer `Ready for Agent`**, which needs both halves of its row — fully specified _and_ already
 sliced. Work that cannot be specified until someone decides something is `Waiting on input`: a
 question to answer, not work to schedule. `Ready for Human` is for what no agent can finish. For
-what counts as an agent brief, see [`afk-loop` § The agent brief](../afk-loop/SKILL.md#the-agent-brief).
+what counts as an agent brief, see
+[`afk-loop` § The agent brief](../afk-loop/SKILL.md#the-agent-brief).
 
 **Ask the business by email.** A business decision is emailed as it comes up rather than saved for
 the cycle review, which is for what needs real discussion. The email says what is happening in plain
 language, the decision needed, the options each with its consequence, a recommendation and why, and
-a link to the issue.
+a link to the issue. Draft it with the `sending-emails-with-outlook` skill.
 
 **Claiming is an assignee write.** `gh issue edit <n> --add-assignee @me` is the atomic first
 write that stops two agents taking the same issue; setting `Status` to `In progress` follows it.
@@ -233,9 +245,9 @@ Issue search cannot read project fields: `status:"In progress"` is not a qualifi
 nothing. Every state query therefore runs against the board with
 [`board.graphql`](board.graphql) — one query, filtered per use with `--jq`.
 
-**Find `board.graphql` first.** It sits beside this file, with [`snapshot.graphql`](snapshot.graphql),
-but where that is depends on how the skill was installed. Resolve them once per session and reuse
-them:
+**Find `board.graphql` first.** It sits beside this file, with
+[`snapshot.graphql`](snapshot.graphql), but where that is depends on how the skill was installed.
+Resolve them once per session and reuse them:
 
 ```bash
 for d in ~/.claude/skills/issue-tracker \
@@ -331,11 +343,10 @@ stale-closed recipe re-runnable — it cannot see what it just archived — and 
 
 **Eight weeks is 4838400 seconds**, and it is the definition of _stale_ — an item is stale on the
 board, not in someone's judgement, and staleness is measured on business work. The cycle recipes
-read `CYCLE_TITLE`, `CYCLE_START` and
-`CYCLE_END` from the environment; set them from the iteration's `title`, `startDate` and
-`startDate + duration`. `CYCLE_END` is **exclusive** — an iteration ends the day before the meeting
-that closes it, so a cycle titled `14 Aug → 28 Aug` has `CYCLE_START=2026-08-14` and
-`CYCLE_END=2026-08-28`.
+read `CYCLE_TITLE`, `CYCLE_START` and `CYCLE_END` from the environment; set them from the
+iteration's `title`, `startDate` and `startDate + duration`. `CYCLE_END` is **exclusive** — an
+iteration ends the day before the meeting that closes it, so a cycle titled `14 Aug → 28 Aug` has
+`CYCLE_START=2026-08-14` and `CYCLE_END=2026-08-28`.
 
 **Newly stale is derived, never stored.** It compares one `updatedAt` against two thresholds: stale
 against today, and not-yet-stale against `CYCLE_START`. There is no baseline to snapshot at the end
@@ -501,6 +512,7 @@ Labels carry neither state nor category — state is [`Status`](#status), catego
   `gh issue edit <n> --add-label security`, or `-f 'labels[]=security'` on the create call in
   [Creating an issue from the org form](#creating-an-issue-from-the-org-form). It is a label, not a
   type, because an issue has one type and a security finding can be a `Bug` or an `Enhancement`.
+- **`source:simplification-review`** — provenance for issues filed by the simplification review.
 
 Any other label, `bug` and `enhancement` included, is decoration — read it if you like, but nothing
 keys off it.
@@ -532,7 +544,8 @@ This rule applies to any agent-authored body, including later edits.
 
 Anything beyond the form's fields — acceptance criteria, interface notes, verification steps, or
 scope boundaries outside the form itself — belongs in the issue's agent-brief comment (or a
-triage-notes comment), not as extra body headings. See [`afk-loop` § The agent brief](../afk-loop/SKILL.md#the-agent-brief).
+triage-notes comment), not as extra body headings. See
+[`afk-loop` § The agent brief](../afk-loop/SKILL.md#the-agent-brief).
 
 Create it through the REST endpoint, which sets the type in the same call — `gh issue create` has no
 `--type` flag. The type matches the form: `Bug` for `bug.yml`, `Enhancement` for `enhancement.yml`.
@@ -548,12 +561,14 @@ That is one type, no state, and then confirming the issue landed on `Backlog` �
 ## Templates apply a category, never a state
 
 Issue forms come from the org defaults in `clhbid/.github` under `.github/ISSUE_TEMPLATE/`. **A
-person filing an issue should use one** — they collect fields a triager otherwise has to ask for.
+person filing a general issue should use one** — they collect fields a triager otherwise has to ask
+for. A skill-specific template takes precedence where [When a skill says…](#when-a-skill-says)
+specifies one.
 
 A form applies exactly one **category** type (`Bug` or `Enhancement`) and **no state**. Category
 says what kind of thing an issue is; `Status` says where it has got to — nothing about the category
 implies a state.
-When an agent creates an issue without the browser form, use
+When an agent creates a general issue without the browser form, use
 [Creating an issue from the org form](#creating-an-issue-from-the-org-form).
 
 ## Commit convention
@@ -588,10 +603,21 @@ anything else, then split. There is no CI gate for this.
 
 ## Pull requests as a triage surface
 
-**PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `triage` reads this flag.)_ While it is `no`, external PRs are not triaged and no `gh pr` state handling applies.
+**PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature
+requests; `triage` reads this flag.)_ While it is `no`, external PRs are not triaged and no `gh pr`
+state handling applies.
 
 ## When a skill says…
 
+- **"`to-spec` or `to-tickets` creates an issue"** — use that skill's template as the issue body,
+  not the org form.
+- **"`to-spec` writes a spec"** — set its type to `Bug` or `Enhancement` as appropriate and leave
+  it in `Backlog` until triage. Once `to-tickets` has created its child issues, move the spec to
+  `Ready for Human`, as with an epic.
+- **"`to-tickets` creates tickets"** — give each ticket its parent spec's issue type. Its
+  `ready-for-agent` means `Ready for Agent`; the ticket's body is its agent brief.
+- **"`implement-spec` implements a spec"** — implement one ticket at a time, with one pull request
+  per ticket; do not use an integration branch for the whole spec.
 - **"publish to the issue tracker"** — create a GitHub issue via
   [Creating an issue from the org form](#creating-an-issue-from-the-org-form).
 - **"fetch the relevant ticket"** — `gh issue view <number> --comments`.
@@ -600,12 +626,18 @@ anything else, then split. There is no CI gate for this.
 
 Used by `wayfinder`. The **map** is a single issue with **child** issues as tickets.
 
-- **Map**: a single issue labelled `wayfinder:map`, holding the Notes / Decisions-so-far / Fog body. `gh issue create --label wayfinder:map`.
-- **Child ticket**: an issue linked to the map as a GitHub sub-issue; see [Conventions](#conventions). Labels: `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving dev.
-- **Blocking**: GitHub's **native issue dependencies**. Add an edge with `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`, where `<blocker-db-id>` is the blocker's numeric **database id** (`gh api repos/<owner>/<repo>/issues/<n> --jq .id`, _not_ the `#number` or `node_id`). GitHub reports `issue_dependencies_summary.blocked_by` (open blockers only — the live gate). A ticket is unblocked when every blocker is closed.
-- **Frontier query**: list the map's open children, drop any with an open blocker or an assignee; first in map order wins.
+- **Map**: a single issue labelled `wayfinder:map`, holding the Notes / Decisions-so-far / Fog body.
+  `gh issue create --label wayfinder:map`.
+- **Child ticket**: an issue linked to the map as a GitHub sub-issue; see
+  [Conventions](#conventions). Labels: `wayfinder:<type>`
+  (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving
+  dev.
+- **Blocking**: use [Conventions](#conventions) to link native issue dependencies.
+- **Frontier query**: list the map's open children, drop any with an open blocker or an assignee;
+  first in map order wins.
 - **Claim**: `gh issue edit <n> --add-assignee @me` — the session's first write.
-- **Resolve**: `gh issue comment <n> --body "<answer>"`, then `gh issue close <n>`, then append a context pointer (gist + link) to the map's Decisions-so-far.
+- **Resolve**: `gh issue comment <n> --body "<answer>"`, then `gh issue close <n>`, then append a
+  context pointer (gist + link) to the map's Decisions-so-far.
 
 ## Traps
 

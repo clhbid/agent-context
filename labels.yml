@@ -3,7 +3,7 @@
 # Labels carry neither state nor category — state is the `Status` field on the
 # CLHbid Delivery project, and category is the issue type. See the
 # `issue-tracker` skill. Only what carries meaning is listed: the wayfinder
-# ticket types and `security`.
+# ticket types, `security`, and simplification-review provenance.
 
 - name: wayfinder:map
   color: "5319E7"
@@ -28,3 +28,7 @@
 - name: security
   color: "B60205"
   description: Security finding or hardening
+
+- name: source:simplification-review
+  color: "1D76DB"
+  description: Issue filed by the simplification review
