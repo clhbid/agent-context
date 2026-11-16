@@ -41,8 +41,8 @@ Lists keep their own margin in every case, so they need no spacer.
 ## Changing a draft
 
 An update replaces the whole body, and the connector rejects the attributes Outlook writes, so
-text carried through loses its formatting. Read the draft first: a `class` attribute in the body
-means the user has saved it in Outlook.
+text carried through loses its formatting. Read the draft first: treat Outlook-added `class` or
+`style` attributes in the editable body, outside the quoted thread, as a user-saved draft.
 
 - **New message, not saved by the user**: update it in place.
 - **Reply or reply-all, not saved by the user**: create a new reply draft, since an update drops
