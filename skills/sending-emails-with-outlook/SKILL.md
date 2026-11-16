@@ -28,9 +28,9 @@ Set `bodyType` to `html`. The connector's allowlist rejects attributes, so write
 Outlook restyles every `<p>` when it saves the message, and how depends on whether the message
 starts a thread:
 
-| Message            | Outlook gives each `<p>` | Write                                                                                     |
-| ------------------ | ------------------------ | ----------------------------------------------------------------------------------------- |
-| New                | a 1em margin             | One `<p>` per paragraph, with nothing between them. A spacer doubles the gap              |
+| Message            | Outlook gives each `<p>` | Write                                                                                    |
+| ------------------ | ------------------------ | ---------------------------------------------------------------------------------------- |
+| New                | a 1em margin             | One `<p>` per paragraph, with nothing between them. A spacer doubles the gap             |
 | Reply or reply-all | no margin                | `<p>&nbsp;</p>` between paragraphs, before and after each table, and before the sign-off |
 
 Lists keep their own margin in both, so they need no spacer.
