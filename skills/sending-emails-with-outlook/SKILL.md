@@ -21,17 +21,22 @@ this skill and send that.
 
 ## Paragraph spacing
 
-Write bare `<p>`, `<ul>`, `<ol>`, `<li>`, `<b>` and `<table>` tags: the connector's allowlist
-rejects attributes, except a link's `<a href="…">`, which it names. Spacing then comes from how
-Outlook restyles every `<p>` when it saves the message, which depends on whether the message starts
-a thread:
+Write bare `<p>`, `<ul>`, `<ol>`, `<li>`, `<b>` and `<table>` tags. The connector rejects the
+whole call if any tag carries an attribute, except a link's `<a href="…">`. It stores and sends the
+body exactly as written, so spacing depends on who sends the draft:
 
-| Message            | Outlook gives each `<p>` | Write                                                                                    |
-| ------------------ | ------------------------ | ---------------------------------------------------------------------------------------- |
-| New                | a 1em margin             | One `<p>` per paragraph, with nothing between them. A spacer doubles the gap             |
-| Reply or reply-all | no margin                | `<p>&nbsp;</p>` between paragraphs, before and after each table, and before the sign-off |
+- **The user sends it from Outlook**: Outlook's editor restyles every `<p>` on send, by whether
+  the message starts a thread:
 
-Lists keep their own margin in both, so they need no spacer.
+  | Message            | Outlook gives each `<p>` | Write                                                                                    |
+  | ------------------ | ------------------------ | ---------------------------------------------------------------------------------------- |
+  | New                | a 1em margin             | One `<p>` per paragraph, with nothing between them. A spacer doubles the gap             |
+  | Reply or reply-all | no margin                | `<p>&nbsp;</p>` between paragraphs, before and after each table, and before the sign-off |
+
+- **You send it with the connector**: the reader's mail app gives each bare `<p>` its default
+  margin, so write one `<p>` per paragraph with nothing between them, new message or reply.
+
+Lists keep their own margin in every case, so they need no spacer.
 
 ## Changing a draft
 
