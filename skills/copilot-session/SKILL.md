@@ -12,7 +12,8 @@ board, reads issues, and edits pull requests.
 Run these with `GH_TOKEN="$COPILOT_PROJECT_TOKEN"`:
 
 - **Board commands:** **Setting Status** and **Querying the board** in `issue-tracker`.
-- **Editing a pull request description:** `gh pr edit --body-file <body-file>`.
+- **Editing a pull request description or title:** `gh pr edit --body-file <body-file>` and
+  `gh pr edit --title "<title>"`.
 
 **When one fails,** comment on the pull request with what failed, the exact error, and the steps
 that would fix it.
