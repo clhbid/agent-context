@@ -40,8 +40,16 @@ Lists keep their own margin in every case, so they need no spacer.
 
 ## Changing a draft
 
-Update a new message's draft in place. To change a reply or reply-all draft, create a new one and
-delete the old, which keeps the quoted thread intact.
+An update replaces the whole body, and the connector rejects the attributes Outlook writes, so
+text carried through loses its formatting. Read the draft first: a `class` attribute in the body
+means the user has saved it in Outlook.
+
+- **New message, not saved by the user**: update it in place.
+- **Reply or reply-all, not saved by the user**: create a new reply draft, since an update drops
+  the quoted thread.
+- **Saved by the user**: tell them what to change, so their edits keep their formatting.
+
+Delete a draft you replace, or, when the task forbids deleting mail, name it for the user to delete.
 
 ## Without the connector
 
