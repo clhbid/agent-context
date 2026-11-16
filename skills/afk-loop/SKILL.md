@@ -34,9 +34,9 @@ Copilot candidate by definition. See **Triage roles** in the `issue-tracker` ski
 ## The agent brief
 
 A structured comment posted on the issue when it moves to `Ready for Agent`, written by `triage`
-with `writing-lean`.
-**The issue body and discussion are context; the brief is the contract** — it is what the agent
-works from.
+with `writing-lean`. A ticket created by `to-tickets` is briefed through its body instead; it needs
+no separate comment.
+**The brief is the contract** — it is what the agent works from.
 
 A brief is complete when it has all of:
 

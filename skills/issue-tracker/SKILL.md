@@ -1,6 +1,6 @@
 ---
 name: issue-tracker
-description: Read and set work state on the CLHbid Delivery board — the delivery language, issues via gh, the Status field, the board query recipes, cycles, epics, issue types, labels, the commit convention and the decomposition rules. Use for any GitHub issue or project-board operation in a clhbid repo, and for what a cycle, epic or slipped issue means.
+description: Provides the issue tracker and triage label vocabulary Matt Pocock's to-spec, to-tickets, triage and wayfinder skills expect. Use for GitHub issue or board operations in a clhbid repo, and for cycle, epic or slipped-issue questions.
 ---
 
 # Issue tracker: GitHub
@@ -48,6 +48,12 @@ epic. _Avoid_: ticket, story.
 - **Make an issue a sub-issue**: `gh issue edit <child> --parent <parent-url>` after creating it —
   the REST create in [Creating an issue from the org form](#creating-an-issue-from-the-org-form)
   takes no parent. The URL form reaches a parent in another repo, as an epic's children often are.
+- **Block an issue** with GitHub's **native issue dependencies**:
+  `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`,
+  where `<blocker-db-id>` is the blocker's numeric **database id**
+  (`gh api repos/<owner>/<repo>/issues/<n> --jq .id`, _not_ the `#number` or `node_id`).
+  `issue_dependencies_summary.blocked_by` counts open blockers; an issue is unblocked when every
+  blocker is closed.
 - **Refer to an issue** by its repo's alias, linked — see [References](#references).
 - **Set state**: a project field, not a label — see [Status](#status).
 - **Close**: an issue closes as `completed`, `not planned` or `duplicate`. The reason is the
@@ -508,6 +514,7 @@ Labels carry neither state nor category — state is [`Status`](#status), catego
   `gh issue edit <n> --add-label security`, or `-f 'labels[]=security'` on the create call in
   [Creating an issue from the org form](#creating-an-issue-from-the-org-form). It is a label, not a
   type, because an issue has one type and a security finding can be a `Bug` or an `Enhancement`.
+- **`source:simplification-review`** — provenance for issues filed by the simplification review.
 
 Any other label, `bug` and `enhancement` included, is decoration — read it if you like, but nothing
 keys off it.
@@ -556,12 +563,14 @@ That is one type, no state, and then confirming the issue landed on `Backlog` �
 ## Templates apply a category, never a state
 
 Issue forms come from the org defaults in `clhbid/.github` under `.github/ISSUE_TEMPLATE/`. **A
-person filing an issue should use one** — they collect fields a triager otherwise has to ask for.
+person filing a general issue should use one** — they collect fields a triager otherwise has to ask
+for. A skill-specific template takes precedence where [When a skill says…](#when-a-skill-says)
+specifies one.
 
 A form applies exactly one **category** type (`Bug` or `Enhancement`) and **no state**. Category
 says what kind of thing an issue is; `Status` says where it has got to — nothing about the category
 implies a state.
-When an agent creates an issue without the browser form, use
+When an agent creates a general issue without the browser form, use
 [Creating an issue from the org form](#creating-an-issue-from-the-org-form).
 
 ## Commit convention
@@ -602,6 +611,15 @@ state handling applies.
 
 ## When a skill says…
 
+- **"`to-spec` or `to-tickets` creates an issue"** — use that skill's template as the issue body,
+  not the org form.
+- **"`to-spec` writes a spec"** — set its type to `Bug` or `Enhancement` as appropriate and leave
+  it in `Backlog` until triage. Once `to-tickets` has created its child issues, move the spec to
+  `Ready for Human`, as with an epic.
+- **"`to-tickets` creates tickets"** — give each ticket its parent spec's issue type. Its
+  `ready-for-agent` means `Ready for Agent`; the ticket's body is its agent brief.
+- **"`implement-spec` implements a spec"** — implement one ticket at a time, with one pull request
+  per ticket; do not use an integration branch for the whole spec.
 - **"publish to the issue tracker"** — create a GitHub issue via
   [Creating an issue from the org form](#creating-an-issue-from-the-org-form).
 - **"fetch the relevant ticket"** — `gh issue view <number> --comments`.
@@ -616,12 +634,7 @@ Used by `wayfinder`. The **map** is a single issue with **child** issues as tick
   [Conventions](#conventions). Labels: `wayfinder:<type>`
   (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving
   dev.
-- **Blocking**: GitHub's **native issue dependencies**. Add an edge with
-  `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`,
-  where `<blocker-db-id>` is the blocker's numeric **database id**
-  (`gh api repos/<owner>/<repo>/issues/<n> --jq .id`, _not_ the `#number` or `node_id`). GitHub
-  reports `issue_dependencies_summary.blocked_by` (open blockers only — the live gate). A ticket is
-  unblocked when every blocker is closed.
+- **Blocking**: use [Conventions](#conventions) to link native issue dependencies.
 - **Frontier query**: list the map's open children, drop any with an open blocker or an assignee;
   first in map order wins.
 - **Claim**: `gh issue edit <n> --add-assignee @me` — the session's first write.

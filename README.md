@@ -64,8 +64,8 @@ Concretely, each repo keeps its own:
 - **`GLOSSARY.md` and `docs/adr/`** — domain vocabulary and decisions.
 
 Matt Pocock's skills are **installed alongside** these rather than vendored, so upstream fixes keep
-flowing and we maintain only our own. We don't use `implement-spec` for now: it lands a whole spec
-as one pull request.
+flowing and we maintain only our own. `implement-spec` works ticket by ticket, with one pull request
+per ticket; see the `issue-tracker` skill.
 
 ## Changing a skill
 
