@@ -17,7 +17,7 @@ this skill and send that.
 - Settle every open choice with the user first, so the draft is sent as written.
 - Show the text in chat as plain text, with a blank line between paragraphs and tables as tables,
   so the user can read it there or paste it into Outlook.
-- End with the user's sign-off, taken from their recent sent mail.
+- Unless the caller specifies a fixed body, end with the user's sign-off, taken from their recent sent mail.
 
 ## Paragraph spacing
 
