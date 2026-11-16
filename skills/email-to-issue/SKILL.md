@@ -116,7 +116,7 @@ It marks a thread processed and links it to its issue.
 
 1. Take the user's address from the connector's signed-in profile. Ask when it is missing or
    ambiguous.
-2. Write the body, marker first:
+2. Write the body as a reply with the `sending-emails-with-outlook` skill, marker first:
 
    ```text
    Filed by /email-to-issue: clhbid/<repo>#<number>
@@ -124,8 +124,8 @@ It marks a thread processed and links it to its issue.
    ```
 
 3. **Replace the recipients**: `To` the user alone, `Cc` and `Bcc` empty.
-4. **Read every recipient field back** from the built message. Send only when the user is the one
-   recipient.
+4. **Read every recipient field back** from the built message. Send it, as
+   [Mail permissions](#mail-permissions) allow, only when the user is the one recipient.
 5. **On any doubt, skip** the reply and put the link in the sweep summary. Name any draft left
    behind so the user can remove it.
 

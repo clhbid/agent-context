@@ -9,7 +9,8 @@ How to write the body of an email made with the Microsoft 365 connector's mail t
 by capability (create draft, reply-all draft, delete draft, send), since their names change between
 connector versions.
 
-**Leave a draft for the user to send** unless the task says to send it.
+**Leave a draft for the user to send** unless the task says to send it; then build the draft by
+this skill and send that.
 
 ## Before drafting
 
@@ -21,8 +22,9 @@ connector versions.
 ## Paragraph spacing
 
 Write bare `<p>`, `<ul>`, `<ol>`, `<li>`, `<b>` and `<table>` tags: the connector's allowlist
-rejects attributes. Spacing then comes from how Outlook restyles every `<p>` when it saves the
-message, which depends on whether the message starts a thread:
+rejects attributes, except a link's `<a href="…">`, which it names. Spacing then comes from how
+Outlook restyles every `<p>` when it saves the message, which depends on whether the message starts
+a thread:
 
 | Message            | Outlook gives each `<p>` | Write                                                                                    |
 | ------------------ | ------------------------ | ---------------------------------------------------------------------------------------- |

@@ -147,7 +147,7 @@ what counts as an agent brief, see
 **Ask the business by email.** A business decision is emailed as it comes up rather than saved for
 the cycle review, which is for what needs real discussion. The email says what is happening in plain
 language, the decision needed, the options each with its consequence, a recommendation and why, and
-a link to the issue.
+a link to the issue. Draft it with the `sending-emails-with-outlook` skill.
 
 **Claiming is an assignee write.** `gh issue edit <n> --add-assignee @me` is the atomic first
 write that stops two agents taking the same issue; setting `Status` to `In progress` follows it.
