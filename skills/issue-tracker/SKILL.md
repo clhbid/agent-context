@@ -48,6 +48,9 @@ epic. _Avoid_: ticket, story.
 - **Make an issue a sub-issue**: `gh issue edit <child> --parent <parent-url>` after creating it —
   the REST create in [Creating an issue from the org form](#creating-an-issue-from-the-org-form)
   takes no parent. The URL form reaches a parent in another repo, as an epic's children often are.
+  It also reaches across owners: an issue in a repo outside the org, such as a personal one, can be
+  a child of an org epic, blocked by an org issue, and added to the board with
+  `addProjectV2ItemById`. Keep work where its code lives rather than filing it in an org repo.
 - **Block an issue** with GitHub's **native issue dependencies**:
   `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`,
   where `<blocker-db-id>` is the blocker's numeric **database id**
@@ -655,6 +658,14 @@ for a top-level issue. GraphQL's `Issue.parent` answers truthfully, which is wha
 [`board.graphql`](board.graphql) selects. Checking issue by issue costs a request each and gets
 skipped under pressure, so **put `no:parent-issue` (or `.content.parent == null`) in the query
 itself**.
+
+**An issue outside the org can't see the board.** For an issue in a repo the org doesn't own,
+`Issue.projectItems` comes back empty even while it sits on the board with a `Status`. Read its
+state from the board side, with [`board.graphql`](board.graphql), never from the issue.
+
+**A transfer drops labels the target repo lacks.** `gh issue transfer` keeps the type, the thread
+and the board item, but silently loses any label the target repo doesn't have. Create the missing
+labels per [Labels](#labels) and re-apply them. The target repo also needs issues enabled first.
 
 **Adding an item unarchives it.** `addProjectV2ItemById` on an already-archived item silently
 returns it to the live board. Archived items are invisible to a live-only read, so a **reopened**
