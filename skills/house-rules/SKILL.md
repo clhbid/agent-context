@@ -19,7 +19,8 @@ Write the code, and everything that describes it, with the `writing-lean` skill.
   opening each section with an `Arrange`, `Act` or `Assert` comment, and assert the whole result,
   so an extra item fails the test.
 - **Fake the clock** whenever a spec depends on the time, so it passes at any hour and in any time
-  zone.
+  zone. Code reads the time only through a clock a spec can fake: `TimeProvider` in .NET, not
+  `DateTime.UtcNow`.
 - **Write for the reviewer.** Review is our bottleneck; reviewer time is our most precious asset.
   Keep each pull request to one change, separate refactors from the behaviour they enable, and make
   code, tests and snapshots quick to follow. Before finishing, review your diff as a reviewer would

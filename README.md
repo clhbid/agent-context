@@ -60,8 +60,8 @@ pull request alongside the code it constrains.
 
 Concretely, each repo keeps its own:
 
-- **`AGENTS.md`** — build, test and lint commands, and the **How a run ends** contract. Copilot
-  reads this and nothing else, so it has to be self-sufficient.
+- **`AGENTS.md`** — build, test and lint commands, and the **How a run ends** contract. Every run
+  reads it, while a skill loads only when its description matches, so it has to be self-sufficient.
 - **`GLOSSARY.md` and `docs/adr/`** — domain vocabulary and decisions.
 
 Matt Pocock's skills are **installed alongside** these rather than vendored, so upstream fixes keep

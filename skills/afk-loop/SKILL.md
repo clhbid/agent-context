@@ -50,8 +50,7 @@ A brief is complete when it has all of:
 
 The full reference, with worked good and bad examples, is
 [`AGENT-BRIEF.md`](https://github.com/mattpocock/skills/blob/main/skills/engineering/triage/AGENT-BRIEF.md)
-in Matt's `triage` skill. It ships with the skills rather than this repo, so it is absent from a
-Copilot container — which is why the checklist above is inlined, and why that link points at
+in Matt's `triage` skill. It ships with Matt's skills rather than this repo, so the link points at
 GitHub rather than a local path.
 
 It is written in label vocabulary (`ready-for-agent`), which we no longer use. Read that as
