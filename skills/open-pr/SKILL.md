@@ -61,6 +61,7 @@ the author says ship it, ship it.
 
 Write it with the `pr` skill, then:
 
+- Tell the reviewer where to start and what needs their judgement; leave out what the diff already shows.
 - Put any task to do before or after merging ("add env var X before merging", "run migration Y
   after") in Merge Danger's optional description.
 - End with the closing line: `Closes #<issue_number>`, or `Part of #<issue_number>` when the pull

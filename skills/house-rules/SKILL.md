@@ -10,7 +10,8 @@ Write the code, and everything that describes it, with the `writing-lean` skill.
 - **Test our code, not the dependency.** Test the behaviour our code adds, and take the package as
   given: import its values rather than copying its tables, and leave its behaviour to its own tests.
 - **Single source of truth.** Take each value from where it is defined: the Tailwind scale
-  (`max-w-7xl`, not `max-w-[1468px]`), a shared constant, or the package's own types.
+  (`max-w-7xl`, not `max-w-[1468px]`), a shared constant, or the package's own types. Reuse
+  existing helpers before adding one.
 - **Domain terms from the glossary.** `GLOSSARY.md` in clhbid/CLHbid-LiveAuction are the app's
   single source of truth: read it with the `domain-modeling` skill, use its terms, not those marked
   _Avoid_, and propose a missing term there rather than coining one.
@@ -19,3 +20,7 @@ Write the code, and everything that describes it, with the `writing-lean` skill.
   so an extra item fails the test.
 - **Fake the clock** whenever a spec depends on the time, so it passes at any hour and in any time
   zone.
+- **Write for the reviewer.** Review is our bottleneck; reviewer time is our most precious asset.
+  Keep each pull request to one change, separate refactors from the behaviour they enable, and make
+  code, tests and snapshots quick to follow. Before finishing, review your diff as a reviewer would
+  and fix anything that slows them down.
