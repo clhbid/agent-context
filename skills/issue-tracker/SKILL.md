@@ -113,6 +113,7 @@ agreed.
 | `E2I`               | `clhbid/email-to-issue`              |
 | `SFET`              | `clhbid/salesforce-email-templates`  |
 | `template`          | `clhbid/repository-template`         |
+| `SA`                | `clhbid/security-audits`             |
 
 Issues and pull requests share one number space, so resolve a number with `gh pr view <n>`, falling
 back to `gh issue view <n>`.
