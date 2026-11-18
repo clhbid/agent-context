@@ -199,6 +199,15 @@ gh api graphql -f query='
   --jq '.data.repository.issue.projectItems.nodes[] | select(.project.number == 4) | .id'
 ```
 
+**For an issue in a repo outside the org**, that lookup returns nothing. Take the item id from the
+board instead, matching the issue's URL, with `$BOARD_QUERY` found as in
+[Querying the board](#querying-the-board):
+
+```bash
+gh api graphql --paginate -F query=@"$BOARD_QUERY" \
+  --jq '.data.organization.projectV2.items.nodes[] | select(.content.url == "<issue-url>") | .id'
+```
+
 **Take the repo from the checkout, never a literal.** The board spans every clhbid repo and issue
 numbers are per-repo, so a pinned `repo=` resolves the wrong issue somewhere else — usually a
 `NOT_FOUND`, but a number that exists in both repos returns a real item id for the wrong issue, and
@@ -661,7 +670,8 @@ itself**.
 
 **An issue outside the org can't see the board.** For an issue in a repo the org doesn't own,
 `Issue.projectItems` comes back empty even while it sits on the board with a `Status`. Read its
-state from the board side, with [`board.graphql`](board.graphql), never from the issue.
+state and its item id from the board side, with [`board.graphql`](board.graphql), never from the
+issue — see [Setting Status](#setting-status).
 
 **A transfer drops labels the target repo lacks.** `gh issue transfer` keeps the type, the thread
 and the board item, but silently loses any label the target repo doesn't have. Create the missing
