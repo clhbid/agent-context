@@ -18,4 +18,5 @@ Write the code, and everything that describes it, with the `writing-lean` skill.
   opening each section with an `Arrange`, `Act` or `Assert` comment, and assert the whole result,
   so an extra item fails the test.
 - **Fake the clock** whenever a spec depends on the time, so it passes at any hour and in any time
-  zone.
+  zone. Code reads the time only through a clock a spec can fake: `TimeProvider` in .NET, not
+  `DateTime.UtcNow`.
