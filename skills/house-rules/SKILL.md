@@ -25,3 +25,8 @@ Write the code, and everything that describes it, with the `writing-lean` skill.
   Keep each pull request to one change, separate refactors from the behaviour they enable, and make
   code, tests and snapshots quick to follow. Before finishing, review your diff as a reviewer would
   and fix anything that slows them down.
+- **Collect lessons before adding rules.** When a code review or triage turns up a lesson that might
+  become a house rule, suggest running `/retro`, and comment what it finds on
+  [AC#128](https://github.com/clhbid/agent-context/issues/128) with the finding that prompted it,
+  rather than editing this skill. A rule is added once the collected evidence shows the problem
+  recurs.
